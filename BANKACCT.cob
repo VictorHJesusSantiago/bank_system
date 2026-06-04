@@ -367,15 +367,16 @@
                    WHEN 'A'
                        MOVE 'B' TO WS-CONTA-STATUS
                        DISPLAY 'CONTA BLOQUEADA!'
+                       PERFORM 4200-GRAVAR-ATUALIZACAO
                    WHEN 'B'
                        MOVE 'A' TO WS-CONTA-STATUS
                        DISPLAY 'CONTA DESBLOQUEADA!'
+                       PERFORM 4200-GRAVAR-ATUALIZACAO
                    WHEN 'E'
-                        DISPLAY 'CONTA ENCERRADA - SEM REATIVACAO'
+                       DISPLAY 'CONTA ENCERRADA - SEM REATIVACAO'
                    WHEN OTHER
-                       DISPLAY 'STATUS INVALIDO'
+                       DISPLAY 'STATUS INVALIDO - SEM ALTERACAO'
                END-EVALUATE
-               PERFORM 4200-GRAVAR-ATUALIZACAO
            END-IF.
 
       *================================================================

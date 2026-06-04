@@ -92,6 +92,11 @@
            05  WS-PIX-TIPO           PIC X(1).
            05  WS-ACHOU-DEST         PIC X VALUE 'N'.
 
+       01  WS-ID-CTRL.
+           05  WS-ID-BASE-DT         PIC 9(8).
+           05  WS-ID-BASE-HR         PIC 9(6).
+           05  WS-ID-SEQ             PIC 9(1) VALUE 0.
+
        01  WS-SCAN.
            05  WS-SCAN-EMAIL         PIC X(80).
            05  WS-SCAN-TEL           PIC X(15).
@@ -104,6 +109,12 @@
        PROCEDURE DIVISION USING LS-RETORNO.
        0000-PRINCIPAL.
            OPEN I-O ARQCONTAS ARQTRANS
+      *    ID baseado em timestamp evita colisao entre sessoes
+           MOVE FUNCTION CURRENT-DATE(1:8) TO WS-ID-BASE-DT
+           MOVE FUNCTION CURRENT-DATE(9:6) TO WS-ID-BASE-HR
+           COMPUTE WS-ID =
+               FUNCTION NUMVAL(WS-ID-BASE-DT) * 10000000 +
+               FUNCTION NUMVAL(WS-ID-BASE-HR) * 10
            PERFORM 1000-MENU UNTIL PARAR
            CLOSE ARQCONTAS ARQTRANS
            MOVE 0 TO LS-CODIGO
@@ -227,7 +238,12 @@
            REWRITE REG-CONTA.
 
        2500-GRAVAR-TRANS.
-           MOVE FUNCTION CURRENT-DATE(1:15) TO WS-ID
+      *    Incrementa sequencial dentro do timestamp base (evita colisao)
+           ADD 1 TO WS-ID-SEQ
+           IF WS-ID-SEQ > 9
+               MOVE 0 TO WS-ID-SEQ
+           END-IF
+           COMPUTE WS-ID = WS-ID + 1
            MOVE WS-ID TO TRF-TRANS-ID
            MOVE WS-ORG-NUM TO TRF-TRANS-CONTA-ORG
            MOVE WS-DES-NUM TO TRF-TRANS-CONTA-DEST

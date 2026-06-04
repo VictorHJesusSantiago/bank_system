@@ -524,13 +524,35 @@
            IF LS-CODIGO = 0
                DISPLAY 'Valor: R$ '
                ACCEPT WS-VALOR-SOLICITADO
-               IF WS-VALOR-SOLICITADO <=
+               IF WS-VALOR-SOLICITADO <= ZEROS
+                   DISPLAY 'VALOR INVALIDO'
+                   MOVE 0003 TO LS-CODIGO
+               ELSE IF WS-VALOR-SOLICITADO <=
                   (WS-CONTA-ORIGEM-SALDO + WS-CONTA-ORIGEM-LIMITE)
                    SUBTRACT WS-VALOR-SOLICITADO
                        FROM WS-CONTA-ORIGEM-SALDO
                    PERFORM 2200-ATUALIZAR-CONTA-ORIGEM
-                   DISPLAY 'BOLETO PAGO COM SUCESSO!'
-                   MOVE 0 TO LS-CODIGO
+                   IF LS-CODIGO = 0
+      *                Registrar transacao de pagamento no audit
+                       ADD 1 TO WS-PROXIMO-ID
+                       MOVE WS-PROXIMO-ID    TO WS-TRANS-ID
+                       MOVE WS-CONTA-ORIGEM-NUM TO WS-TRANS-CONTA-ORG
+                       MOVE ZEROS            TO WS-TRANS-CONTA-DEST
+                       MOVE 'PAG'            TO WS-TRANS-TIPO
+                       MOVE WS-VALOR-SOLICITADO TO WS-TRANS-VALOR
+                       MOVE FUNCTION CURRENT-DATE(1:8) TO WS-TRANS-DATA
+                       MOVE FUNCTION CURRENT-DATE(9:6) TO WS-TRANS-HORA
+                       MOVE 'E'              TO WS-TRANS-STATUS
+                       MOVE 'AGENCIA'        TO WS-TRANS-CANAL
+                       MOVE WS-TRANSACAO     TO REG-TRANS
+                       WRITE REG-TRANS
+                       IF NOT FS-TRANS-OK
+                           DISPLAY 'AVISO: FALHA AUDIT BOLETO: '
+                                   FS-TRANS
+                       END-IF
+                       DISPLAY 'BOLETO PAGO COM SUCESSO!'
+                       MOVE 0 TO LS-CODIGO
+                   END-IF
                ELSE
                    DISPLAY 'SALDO INSUFICIENTE'
                    MOVE 0001 TO LS-CODIGO
@@ -596,7 +618,8 @@
        9000-INICIO.
            DISPLAY 'ID da Transacao para Estorno: '
            ACCEPT WS-TRANS-ID
-           READ ARQTRANS KEY IS WS-TRANS-ID
+           MOVE WS-TRANS-ID TO REG-TRANS-ID
+           READ ARQTRANS KEY IS REG-TRANS-ID
            IF FS-TRANS-OK
                MOVE REG-TRANS TO WS-TRANSACAO
                IF WS-TRANS-STATUS = 'E'
@@ -619,17 +642,35 @@
        9100-REVERTER-VALORES.
            EVALUATE WS-TRANS-TIPO
                WHEN 'DEP'
-                   READ ARQCONTAS KEY IS WS-TRANS-CONTA-ORG
-                   MOVE REG-CONTA TO WS-CONTA
-                   SUBTRACT WS-TRANS-VALOR FROM WS-CONTA-SALDO
-                   MOVE WS-CONTA TO REG-CONTA
-                   REWRITE REG-CONTA
+      *            Estorno de deposito: subtrair o valor creditado
+                   MOVE WS-TRANS-CONTA-ORG TO REG-CONTA-NUM
+                   READ ARQCONTAS KEY IS REG-CONTA-NUM
+                   IF FS-CONTA-OK
+                       MOVE REG-CONTA TO WS-CONTA
+                       SUBTRACT WS-TRANS-VALOR FROM WS-CONTA-SALDO
+                       MOVE WS-CONTA TO REG-CONTA
+                       REWRITE REG-CONTA
+                       IF NOT FS-CONTA-OK
+                           DISPLAY 'ERRO ESTORNO DEP: ' FS-CONTAS
+                       END-IF
+                   ELSE
+                       DISPLAY 'CONTA NAO LOCALIZADA PARA ESTORNO'
+                   END-IF
                WHEN 'SAQ'
-                   READ ARQCONTAS KEY IS WS-TRANS-CONTA-ORG
-                   MOVE REG-CONTA TO WS-CONTA
-                   ADD WS-TRANS-VALOR TO WS-CONTA-SALDO
-                   MOVE WS-CONTA TO REG-CONTA
-                   REWRITE REG-CONTA
+      *            Estorno de saque: devolver o valor debitado
+                   MOVE WS-TRANS-CONTA-ORG TO REG-CONTA-NUM
+                   READ ARQCONTAS KEY IS REG-CONTA-NUM
+                   IF FS-CONTA-OK
+                       MOVE REG-CONTA TO WS-CONTA
+                       ADD WS-TRANS-VALOR TO WS-CONTA-SALDO
+                       MOVE WS-CONTA TO REG-CONTA
+                       REWRITE REG-CONTA
+                       IF NOT FS-CONTA-OK
+                           DISPLAY 'ERRO ESTORNO SAQ: ' FS-CONTAS
+                       END-IF
+                   ELSE
+                       DISPLAY 'CONTA NAO LOCALIZADA PARA ESTORNO'
+                   END-IF
                WHEN OTHER
                    DISPLAY 'ESTORNO MANUAL NECESSARIO'
            END-EVALUATE.

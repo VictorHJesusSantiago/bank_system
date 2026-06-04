@@ -77,6 +77,11 @@
            05  WS-VALOR-DISPLAY      PIC ZZZ.ZZZ.ZZZ.ZZ9,99-.
            05  WS-QTD-LINHAS         PIC 9(4) VALUE ZEROS.
 
+       01  WS-EXTRATO-CTRL.
+           05  WS-DATA-HOJE          PIC 9(8).
+           05  WS-DATA-CORTE         PIC 9(8).
+           05  WS-DT-INT             PIC 9(7) COMP-5.
+
        LINKAGE SECTION.
        01  LS-RETORNO.
            05  LS-CODIGO             PIC 9(4).
@@ -156,14 +161,23 @@
        4000-EXTRATO-RAPIDO.
            DISPLAY 'Numero da conta: '
            ACCEPT WS-CONS-CONTA
+      *    Calcular data de corte: hoje - 30 dias
+           MOVE FUNCTION CURRENT-DATE(1:8) TO WS-DATA-HOJE
+           COMPUTE WS-DT-INT =
+               FUNCTION INTEGER-OF-DATE(WS-DATA-HOJE) - 30
+           COMPUTE WS-DATA-CORTE =
+               FUNCTION DATE-OF-INTEGER(WS-DT-INT)
+           DISPLAY '--- EXTRATO ULTIMOS 30 DIAS ---'
+           DISPLAY 'De: ' WS-DATA-CORTE ' Ate: ' WS-DATA-HOJE
            MOVE ZEROS TO WS-QTD-LINHAS
            MOVE ZEROS TO QRY-TRANS-ID
            START ARQTRANS KEY >= QRY-TRANS-ID
            PERFORM UNTIL FS-EOF-TRANS
                READ ARQTRANS NEXT
                IF NOT FS-EOF-TRANS
-                   IF QRY-TRANS-CONTA-ORG = WS-CONS-CONTA
-                      OR QRY-TRANS-CONTA-DEST = WS-CONS-CONTA
+                   IF (QRY-TRANS-CONTA-ORG = WS-CONS-CONTA
+                      OR QRY-TRANS-CONTA-DEST = WS-CONS-CONTA)
+                      AND QRY-TRANS-DATA >= WS-DATA-CORTE
                        ADD 1 TO WS-QTD-LINHAS
                        MOVE QRY-TRANS-VALOR TO WS-VALOR-DISPLAY
                        DISPLAY QRY-TRANS-DATA SPACE
