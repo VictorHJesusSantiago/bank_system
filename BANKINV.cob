@@ -125,10 +125,11 @@
 
        2100-CALC-RENTABILIDADE-CDB.
       *    Taxa diaria = (1 + taxa_anual)^(1/252) - 1
+      *    Usando EXP(LOG(1+r)/252) pois COBOL nao tem expoente fracionario
            COMPUTE WS-TAXA-ANUAL =
                (WS-CDI-ATUAL * WS-PROD-CDB-PERC-CDI / 100) / 100
            COMPUTE WS-TAXA-DIARIA =
-               FUNCTION SQRT(1 + WS-TAXA-ANUAL) - 1
+               FUNCTION EXP(FUNCTION LOG(1 + WS-TAXA-ANUAL) / 252) - 1
       *    Valor bruto
            COMPUTE WS-FATOR-ACRESC =
                (1 + WS-TAXA-DIARIA) ** WS-PRAZO-DIAS

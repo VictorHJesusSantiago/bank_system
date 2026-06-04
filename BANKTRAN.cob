@@ -117,6 +117,8 @@
            05  WS-VALOR-DISPLAY     PIC ZZZ.ZZZ.ZZZ.ZZ9,99-.
            05  WS-SENHA-DIGITADA    PIC X(64).
            05  WS-CONFIRMACAO       PIC X.
+           05  WS-TIPO-OPERACAO     PIC X(3) VALUE 'TED'.
+           05  WS-TAXA-CORRENTE     PIC S9(5)V99 COMP-3 VALUE ZEROS.
 
        01  WS-LIMITES.
            05  WS-LIM-SAQUE-DIARIO  PIC S9(9)V99 COMP-3 VALUE 5000,00.
@@ -128,6 +130,13 @@
 
        01  WS-TRANS-COUNTER.
            05  WS-PROXIMO-ID        PIC 9(15) VALUE ZEROS.
+           05  WS-TRAN-INIT-DT      PIC 9(8).
+           05  WS-TRAN-INIT-HR      PIC 9(6).
+
+       01  WS-EXTRATO-CTRL.
+           05  WS-DATA-HOJE         PIC 9(8).
+           05  WS-DATA-CORTE        PIC 9(8).
+           05  WS-DT-INT            PIC 9(7) COMP-5.
 
        01  WS-TAXAS.
            05  WS-TAXA-TED          PIC S9(5)V99 COMP-3 VALUE 14,90.
@@ -148,6 +157,13 @@
       *================================================================
        0000-INICIO.
            OPEN I-O ARQCONTAS ARQTRANS
+      *    Inicializa ID de transacao com timestamp para evitar colisao
+      *    entre sessoes. Formato: YYYYMMDDHHMMSS * 10 (= 15 digitos)
+           MOVE FUNCTION CURRENT-DATE(1:8) TO WS-TRAN-INIT-DT
+           MOVE FUNCTION CURRENT-DATE(9:6) TO WS-TRAN-INIT-HR
+           COMPUTE WS-PROXIMO-ID =
+               FUNCTION NUMVAL(WS-TRAN-INIT-DT) * 10000000 +
+               FUNCTION NUMVAL(WS-TRAN-INIT-HR) * 10
            PERFORM 1000-MENU-TRANSACOES UNTIL TRAN-PARAR
            CLOSE ARQCONTAS ARQTRANS
            MOVE 0 TO LS-CODIGO
@@ -250,7 +266,10 @@
            MOVE 'E' TO WS-TRANS-STATUS
            MOVE 'AGENCIA' TO WS-TRANS-CANAL
            MOVE WS-TRANSACAO TO REG-TRANS
-           WRITE REG-TRANS.
+           WRITE REG-TRANS
+           IF NOT FS-TRANS-OK
+               DISPLAY 'AVISO: FALHA AO REGISTRAR AUDIT DEP: ' FS-TRANS
+           END-IF.
 
       *================================================================
        3000-SAQUE SECTION.
@@ -307,12 +326,17 @@
            MOVE 'Saque em conta' TO WS-TRANS-DESCRICAO
            MOVE 'E' TO WS-TRANS-STATUS
            MOVE WS-TRANSACAO TO REG-TRANS
-           WRITE REG-TRANS.
+           WRITE REG-TRANS
+           IF NOT FS-TRANS-OK
+               DISPLAY 'AVISO: FALHA AO REGISTRAR AUDIT SAQ: ' FS-TRANS
+           END-IF.
 
       *================================================================
        4000-TRANSFERENCIA-TED SECTION.
       *================================================================
        4000-INICIO.
+           MOVE 'TED' TO WS-TIPO-OPERACAO
+           MOVE WS-TAXA-TED TO WS-TAXA-CORRENTE
            DISPLAY '--- TRANSFERENCIA TED ---'
            DISPLAY 'Taxa: R$ ' WS-TAXA-TED
            PERFORM 4100-COLETAR-DADOS-TRF
@@ -322,7 +346,7 @@
                ACCEPT WS-CONFIRMACAO
                IF WS-CONFIRMACAO = 'S'
                    PERFORM 4300-EXECUTAR-TRANSFERENCIA
-                   DISPLAY 'TED REALIZADO COM SUCESSO!'
+                   DISPLAY WS-TIPO-OPERACAO ' REALIZADO COM SUCESSO!'
                ELSE
                    DISPLAY 'OPERACAO CANCELADA'
                END-IF
@@ -351,50 +375,99 @@
 
        4200-VALIDAR-TRANSFERENCIA.
            COMPUTE WS-VALOR-COM-TAXA =
-               WS-VALOR-SOLICITADO + WS-TAXA-TED
+               WS-VALOR-SOLICITADO + WS-TAXA-CORRENTE
            IF WS-VALOR-COM-TAXA >
               (WS-CONTA-ORIGEM-SALDO + WS-CONTA-ORIGEM-LIMITE)
-               DISPLAY 'SALDO INSUFICIENTE PARA TED + TAXA'
+               DISPLAY 'SALDO INSUFICIENTE PARA ' WS-TIPO-OPERACAO
+                       ' + TAXA'
                MOVE 0001 TO LS-CODIGO
            ELSE
                MOVE 0 TO LS-CODIGO
            END-IF.
 
        4300-EXECUTAR-TRANSFERENCIA.
-      *    Debitar origem
+      *    Debitar origem (valor + taxa da operacao corrente)
            SUBTRACT WS-VALOR-SOLICITADO FROM WS-CONTA-ORIGEM-SALDO
-           SUBTRACT WS-TAXA-TED FROM WS-CONTA-ORIGEM-SALDO
+           SUBTRACT WS-TAXA-CORRENTE FROM WS-CONTA-ORIGEM-SALDO
            MOVE WS-CONTA-ORIGEM TO REG-CONTA
            REWRITE REG-CONTA
-      *    Creditar destino
-           ADD WS-VALOR-SOLICITADO TO WS-CONTA-DESTINO-SALDO
-           MOVE WS-CONTA-DESTINO TO REG-CONTA
-           REWRITE REG-CONTA
-      *    Registrar transacao
-           ADD 1 TO WS-PROXIMO-ID
-           MOVE 'TED' TO WS-TRANS-TIPO
-           MOVE WS-PROXIMO-ID TO WS-TRANS-ID
-           MOVE WS-CONTA-ORIGEM-NUM TO WS-TRANS-CONTA-ORG
-           MOVE WS-CONTA-DESTINO-NUM TO WS-TRANS-CONTA-DEST
-           MOVE WS-VALOR-SOLICITADO TO WS-TRANS-VALOR
-           MOVE 'E' TO WS-TRANS-STATUS
-           MOVE WS-TRANSACAO TO REG-TRANS
-           WRITE REG-TRANS.
+           IF NOT FS-CONTA-OK
+               DISPLAY 'ERRO AO DEBITAR CONTA ORIGEM: ' FS-CONTAS
+               MOVE 9999 TO LS-CODIGO
+           ELSE
+      *        Creditar destino
+               ADD WS-VALOR-SOLICITADO TO WS-CONTA-DESTINO-SALDO
+               MOVE WS-CONTA-DESTINO TO REG-CONTA
+               REWRITE REG-CONTA
+               IF NOT FS-CONTA-OK
+                   DISPLAY 'ERRO AO CREDITAR DESTINO: ' FS-CONTAS
+                   MOVE 9999 TO LS-CODIGO
+               ELSE
+      *            Registrar transacao com tipo correto da operacao
+                   ADD 1 TO WS-PROXIMO-ID
+                   MOVE WS-TIPO-OPERACAO TO WS-TRANS-TIPO
+                   MOVE WS-PROXIMO-ID TO WS-TRANS-ID
+                   MOVE WS-CONTA-ORIGEM-NUM TO WS-TRANS-CONTA-ORG
+                   MOVE WS-CONTA-DESTINO-NUM TO WS-TRANS-CONTA-DEST
+                   MOVE WS-VALOR-SOLICITADO TO WS-TRANS-VALOR
+                   MOVE FUNCTION CURRENT-DATE(1:8) TO WS-TRANS-DATA
+                   MOVE FUNCTION CURRENT-DATE(9:6) TO WS-TRANS-HORA
+                   MOVE 'E' TO WS-TRANS-STATUS
+                   MOVE WS-TRANSACAO TO REG-TRANS
+                   WRITE REG-TRANS
+                   IF NOT FS-TRANS-OK
+                       DISPLAY 'AVISO: FALHA AUDIT: ' FS-TRANS
+                   ELSE
+                       MOVE 0 TO LS-CODIGO
+                   END-IF
+               END-IF
+           END-IF.
 
-       4500-TRANSFERENCIA-DOC.
-           MOVE WS-TAXA-DOC TO WS-TAXA-TED
-           PERFORM 4000-TRANSFERENCIA-TED.
+       4500-TRANSFERENCIA-DOC SECTION.
+       4500-INICIO.
+           MOVE 'DOC' TO WS-TIPO-OPERACAO
+           MOVE WS-TAXA-DOC TO WS-TAXA-CORRENTE
+           DISPLAY '--- TRANSFERENCIA DOC ---'
+           DISPLAY 'Taxa: R$ ' WS-TAXA-DOC
+           PERFORM 4100-COLETAR-DADOS-TRF
+           PERFORM 4200-VALIDAR-TRANSFERENCIA
+           IF LS-CODIGO = 0
+               DISPLAY 'Confirmar? (S/N): '
+               ACCEPT WS-CONFIRMACAO
+               IF WS-CONFIRMACAO = 'S'
+                   PERFORM 4300-EXECUTAR-TRANSFERENCIA
+                   IF LS-CODIGO = 0
+                       DISPLAY 'DOC REALIZADO COM SUCESSO!'
+                   END-IF
+               ELSE
+                   DISPLAY 'OPERACAO CANCELADA'
+               END-IF
+           END-IF.
 
       *================================================================
        5000-PIX SECTION.
       *================================================================
        5000-INICIO.
            DISPLAY '--- PIX ---'
-           DISPLAY 'Chave PIX (CPF/Email/Tel/Aleatoria): '
+      *    1. Identificar e validar conta de origem
+           DISPLAY 'Conta Origem: '
+           ACCEPT WS-CONTA-ORIGEM-NUM
+           PERFORM 2100-BUSCAR-CONTA-ORIGEM
+           IF LS-CODIGO NOT = 0
+               EXIT SECTION
+           END-IF
+      *    2. Coletar chave e valor
+           DISPLAY 'CPF de destino (11 digitos): '
            ACCEPT WS-CONTA-DESTINO-CPF
            DISPLAY 'Valor: R$ '
            ACCEPT WS-VALOR-SOLICITADO
-      *    Verificar horario (PIX noturno limitado)
+      *    3. Validar valor positivo
+           IF WS-VALOR-SOLICITADO <= ZEROS
+               DISPLAY 'VALOR INVALIDO'
+               MOVE 0003 TO LS-CODIGO
+               EXIT SECTION
+           END-IF
+      *    4. Verificar horario (PIX noturno limitado)
            MOVE FUNCTION CURRENT-DATE(9:4) TO WS-HORA-CORRENTE
            IF WS-HORA-CORRENTE >= 2200 OR WS-HORA-CORRENTE < 0600
                IF WS-VALOR-SOLICITADO > WS-LIM-PIX-NOTURNO
@@ -403,18 +476,39 @@
                    EXIT SECTION
                END-IF
            END-IF
-      *    Buscar por chave
-         MOVE WS-CONTA-DESTINO-CPF TO REG-CONTA-CPF
-         READ ARQCONTAS KEY IS REG-CONTA-CPF
-           IF FS-CONTA-OK
-               MOVE REG-CONTA TO WS-CONTA-DESTINO
-               PERFORM 4300-EXECUTAR-TRANSFERENCIA
-               MOVE 'PIX' TO WS-TRANS-TIPO
-               DISPLAY 'PIX ENVIADO COM SUCESSO!'
-               MOVE 0 TO LS-CODIGO
-           ELSE
-               DISPLAY 'CHAVE PIX NAO ENCONTRADA'
+      *    5. Validar saldo disponivel (PIX sem taxa)
+           COMPUTE WS-CONTA-ORIGEM-SALDO-DISPONIVEL =
+               WS-CONTA-ORIGEM-SALDO + WS-CONTA-ORIGEM-LIMITE
+           IF WS-VALOR-SOLICITADO > WS-CONTA-ORIGEM-SALDO-DISPONIVEL
+               DISPLAY 'SALDO INSUFICIENTE PARA PIX'
+               MOVE 0001 TO LS-CODIGO
+               EXIT SECTION
+           END-IF
+      *    6. Buscar conta destino por CPF
+           MOVE WS-CONTA-DESTINO-CPF TO REG-CONTA-CPF
+           READ ARQCONTAS KEY IS REG-CONTA-CPF
+           IF FS-CONTA-NFD
+               DISPLAY 'CPF DESTINO NAO ENCONTRADO'
                MOVE 0002 TO LS-CODIGO
+               EXIT SECTION
+           END-IF
+           IF NOT FS-CONTA-OK
+               DISPLAY 'ERRO DE LEITURA: ' FS-CONTAS
+               MOVE 9999 TO LS-CODIGO
+               EXIT SECTION
+           END-IF
+           MOVE REG-CONTA TO WS-CONTA-DESTINO
+           IF WS-CONTA-DESTINO-STATUS NOT = 'A'
+               DISPLAY 'CONTA DESTINO INATIVA OU BLOQUEADA'
+               MOVE 0004 TO LS-CODIGO
+               EXIT SECTION
+           END-IF
+      *    7. Executar PIX: sem taxa, tipo correto antes do WRITE
+           MOVE 'PIX' TO WS-TIPO-OPERACAO
+           MOVE ZEROS TO WS-TAXA-CORRENTE
+           PERFORM 4300-EXECUTAR-TRANSFERENCIA
+           IF LS-CODIGO = 0
+               DISPLAY 'PIX ENVIADO COM SUCESSO!'
            END-IF.
 
       *================================================================
@@ -469,15 +563,23 @@
        8000-INICIO.
            DISPLAY 'Numero da Conta: '
            ACCEPT WS-CONTA-ORIGEM-NUM
+      *    Calcular data de corte: hoje - 30 dias (usando inteiro de data)
+           MOVE FUNCTION CURRENT-DATE(1:8) TO WS-DATA-HOJE
+           COMPUTE WS-DT-INT =
+               FUNCTION INTEGER-OF-DATE(WS-DATA-HOJE) - 30
+           COMPUTE WS-DATA-CORTE =
+               FUNCTION DATE-OF-INTEGER(WS-DT-INT)
            DISPLAY '--- EXTRATO ULTIMOS 30 DIAS ---'
+           DISPLAY 'De: ' WS-DATA-CORTE ' Ate: ' WS-DATA-HOJE
            MOVE ZEROS TO REG-TRANS-ID
            START ARQTRANS KEY >= REG-TRANS-ID
            PERFORM UNTIL FS-TRANS-EOF
                READ ARQTRANS NEXT
                IF NOT FS-TRANS-EOF
                    MOVE REG-TRANS TO WS-TRANSACAO
-                   IF WS-TRANS-CONTA-ORG = WS-CONTA-ORIGEM-NUM OR
-                      WS-TRANS-CONTA-DEST = WS-CONTA-ORIGEM-NUM
+                   IF (WS-TRANS-CONTA-ORG = WS-CONTA-ORIGEM-NUM OR
+                       WS-TRANS-CONTA-DEST = WS-CONTA-ORIGEM-NUM)
+                      AND WS-TRANS-DATA >= WS-DATA-CORTE
                        MOVE WS-TRANS-VALOR TO WS-VALOR-DISPLAY
                        DISPLAY WS-TRANS-DATA SPACE
                                WS-TRANS-TIPO SPACE

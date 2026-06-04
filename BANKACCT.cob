@@ -58,6 +58,7 @@
                88  ACCT-CONTINUAR   VALUE 'S'.
                88  ACCT-PARAR       VALUE 'N'.
            05  WS-CTR-CONTAS        PIC 9(8) VALUE ZEROS.
+           05  WS-CTR-LISTA         PIC 9(8) VALUE ZEROS.
            05  WS-TOTAL-SALDOS      PIC S9(15)V99 COMP-3 VALUE ZEROS.
            05  WS-DATA-ATUAL        PIC 9(8).
 
@@ -143,7 +144,9 @@
                PERFORM 2300-VERIFICAR-DUPLICIDADE
                PERFORM 2400-GERAR-NUMERO-CONTA
                PERFORM 2500-GRAVAR-CONTA
-               PERFORM 2600-EXIBIR-CONFIRMACAO
+               IF LS-CODIGO = 0
+                   PERFORM 2600-EXIBIR-CONFIRMACAO
+               END-IF
            ELSE
                DISPLAY 'CPF INVALIDO - OPERACAO CANCELADA'
                MOVE 0001 TO LS-CODIGO
@@ -169,25 +172,61 @@
            PERFORM 2220-VALIDAR-TIPO-CONTA.
 
        2210-VALIDAR-CPF.
-      *    Algoritmo de validacao de CPF
+      *    Algoritmo de validacao de CPF (ambos os digitos verificadores)
            MOVE 'S' TO WS-CPF-VALIDO
-           MOVE ZEROS TO WS-SOMA-CPF
+
+      *    Rejeita sequencias invalidas (todos digitos iguais)
+           IF WS-CONTA-CPF = '00000000000' OR
+              WS-CONTA-CPF = '11111111111' OR
+              WS-CONTA-CPF = '22222222222' OR
+              WS-CONTA-CPF = '33333333333' OR
+              WS-CONTA-CPF = '44444444444' OR
+              WS-CONTA-CPF = '55555555555' OR
+              WS-CONTA-CPF = '66666666666' OR
+              WS-CONTA-CPF = '77777777777' OR
+              WS-CONTA-CPF = '88888888888' OR
+              WS-CONTA-CPF = '99999999999'
+               MOVE 'N' TO WS-CPF-VALIDO
+           END-IF
 
       *    Calcula primeiro digito verificador
-           MOVE 0 TO WS-SOMA-CPF
-           PERFORM VARYING WS-IDX FROM 1 BY 1 UNTIL WS-IDX > 9
-               COMPUTE WS-SOMA-CPF = WS-SOMA-CPF +
-                   (FUNCTION NUMVAL(WS-CONTA-CPF(WS-IDX:1)) *
-                   (11 - WS-IDX))
-           END-PERFORM
-           COMPUTE WS-RESTO = FUNCTION MOD(WS-SOMA-CPF 11)
-           IF WS-RESTO < 2
-               MOVE 0 TO WS-DIGITO-CALC
-           ELSE
-               COMPUTE WS-DIGITO-CALC = 11 - WS-RESTO
+           IF WS-CPF-VALIDO = 'S'
+               MOVE 0 TO WS-SOMA-CPF
+               PERFORM VARYING WS-IDX FROM 1 BY 1 UNTIL WS-IDX > 9
+                   COMPUTE WS-SOMA-CPF = WS-SOMA-CPF +
+                       (FUNCTION NUMVAL(WS-CONTA-CPF(WS-IDX:1)) *
+                       (11 - WS-IDX))
+               END-PERFORM
+               COMPUTE WS-RESTO = FUNCTION MOD(WS-SOMA-CPF 11)
+               IF WS-RESTO < 2
+                   MOVE 0 TO WS-DIGITO-CALC
+               ELSE
+                   COMPUTE WS-DIGITO-CALC = 11 - WS-RESTO
+               END-IF
+               IF WS-DIGITO-CALC NOT =
+                  FUNCTION NUMVAL(WS-CONTA-CPF(10:1))
+                   MOVE 'N' TO WS-CPF-VALIDO
+               END-IF
            END-IF
-           IF WS-DIGITO-CALC NOT = FUNCTION NUMVAL(WS-CONTA-CPF(10:1))
-               MOVE 'N' TO WS-CPF-VALIDO
+
+      *    Calcula segundo digito verificador
+           IF WS-CPF-VALIDO = 'S'
+               MOVE 0 TO WS-SOMA-CPF
+               PERFORM VARYING WS-IDX FROM 1 BY 1 UNTIL WS-IDX > 10
+                   COMPUTE WS-SOMA-CPF = WS-SOMA-CPF +
+                       (FUNCTION NUMVAL(WS-CONTA-CPF(WS-IDX:1)) *
+                       (12 - WS-IDX))
+               END-PERFORM
+               COMPUTE WS-RESTO = FUNCTION MOD(WS-SOMA-CPF 11)
+               IF WS-RESTO < 2
+                   MOVE 0 TO WS-DIGITO-CALC
+               ELSE
+                   COMPUTE WS-DIGITO-CALC = 11 - WS-RESTO
+               END-IF
+               IF WS-DIGITO-CALC NOT =
+                  FUNCTION NUMVAL(WS-CONTA-CPF(11:1))
+                   MOVE 'N' TO WS-CPF-VALIDO
+               END-IF
            END-IF.
 
        2220-VALIDAR-TIPO-CONTA.
@@ -364,7 +403,7 @@
        7000-LISTAR-CONTAS SECTION.
       *================================================================
        7000-INICIO.
-           MOVE ZEROS TO WS-CTR-CONTAS
+           MOVE ZEROS TO WS-CTR-LISTA
            MOVE ZEROS TO WS-TOTAL-SALDOS
            MOVE ZEROS TO REG-CONTA-NUM
            START ARQCONTAS KEY >= REG-CONTA-NUM
@@ -379,11 +418,11 @@
                            WS-CONTA-TIPO SPACE
                            WS-CONTA-STATUS SPACE
                            WS-SALDO-DISPLAY
-                   ADD 1 TO WS-CTR-CONTAS
+                   ADD 1 TO WS-CTR-LISTA
                    ADD WS-CONTA-SALDO TO WS-TOTAL-SALDOS
                END-IF
            END-PERFORM
-           DISPLAY 'Total de Contas: ' WS-CTR-CONTAS
+           DISPLAY 'Total de Contas: ' WS-CTR-LISTA
            MOVE WS-TOTAL-SALDOS TO WS-SALDO-DISPLAY
            DISPLAY 'Saldo Total: R$ ' WS-SALDO-DISPLAY.
 
@@ -413,10 +452,14 @@
                IF NOT FS-EOF
                    MOVE REG-CONTA TO WS-CONTA
                    IF CONTA-ATIVA AND CONTA-CORRENTE
-                       SUBTRACT WS-TAXA-MANUT
-                               FROM WS-CONTA-SALDO
-                       MOVE WS-CONTA TO REG-CONTA
-                       REWRITE REG-CONTA
+      *                Aplica tarifa somente se nao ultrapassar o limite
+                       IF (WS-CONTA-SALDO - WS-TAXA-MANUT) >=
+                          WS-CONTA-LIMITE
+                           SUBTRACT WS-TAXA-MANUT
+                                   FROM WS-CONTA-SALDO
+                           MOVE WS-CONTA TO REG-CONTA
+                           REWRITE REG-CONTA
+                       END-IF
                    END-IF
                END-IF
            END-PERFORM

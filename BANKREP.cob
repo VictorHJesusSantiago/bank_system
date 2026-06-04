@@ -123,7 +123,13 @@
       *================================================================
        0000-INICIO.
            OPEN INPUT ARQCONTAS ARQTRANS
-           OPEN OUTPUT ARQRELATORIO
+      *    EXTEND preserva relatorio anterior; fallback OUTPUT se nao existe
+           OPEN EXTEND ARQRELATORIO
+           IF FS-REL = '35'
+               OPEN OUTPUT ARQRELATORIO
+               CLOSE ARQRELATORIO
+               OPEN EXTEND ARQRELATORIO
+           END-IF
            PERFORM 1000-MENU-REP UNTIL REP-PARAR
            CLOSE ARQCONTAS ARQTRANS ARQRELATORIO
            MOVE 0 TO LS-CODIGO
