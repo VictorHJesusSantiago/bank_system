@@ -52,6 +52,9 @@
                88  TRANS-PARCELA    VALUE 'PMT'.
                88  TRANS-FATURA     VALUE 'FAT'.
                88  TRANS-AGEND      VALUE 'AGN'.
+               88  TRANS-DEBITO     VALUE 'DEB'.
+               88  TRANS-CREDITO    VALUE 'CRT'.
+               88  TRANS-BOLETO-EM  VALUE 'BLT'.
            05  WS-TRANS-VALOR       PIC S9(13)V99 COMP-3.
            05  WS-TRANS-DATA        PIC 9(8).
            05  WS-TRANS-HORA        PIC 9(6).
@@ -206,3 +209,21 @@
                88  AGEND-UNICO      VALUE 'U'.
                88  AGEND-MENSAL     VALUE 'M'.
                88  AGEND-SEMANAL    VALUE 'S'.
+
+      *----------------------------------------------------------------
+      * ESTRUTURA DE BOLETO EMITIDO
+      *----------------------------------------------------------------
+       01  WS-BOLETO.
+           05  WS-BOL-ID            PIC 9(10).
+           05  WS-BOL-CONTA         PIC 9(10).
+           05  WS-BOL-VALOR         PIC S9(13)V99 COMP-3.
+           05  WS-BOL-DT-EMISSAO    PIC 9(8).
+           05  WS-BOL-DT-VENCTO     PIC 9(8).
+           05  WS-BOL-BENEFICIARIO  PIC X(60).
+           05  WS-BOL-DESCRICAO     PIC X(100).
+           05  WS-BOL-COD-BARRAS    PIC X(44).
+           05  WS-BOL-STATUS        PIC X(1).
+               88  BOL-ABERTO       VALUE 'A'.
+               88  BOL-PAGO         VALUE 'P'.
+               88  BOL-VENCIDO      VALUE 'V'.
+               88  BOL-CANCELADO    VALUE 'C'.

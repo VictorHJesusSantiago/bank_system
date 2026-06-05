@@ -123,6 +123,22 @@
            05  WS-TRANS-ID           PIC 9(15).
            05  WS-CART-GERADO        PIC 9(16).
 
+       01  WS-VIRTUAL.
+           05  WS-VIRT-NUMERO        PIC 9(16).
+           05  WS-VIRT-CVV           PIC 9(3).
+           05  WS-VIRT-EXPIRY        PIC X(7).
+           05  WS-VIRT-EXIB          PIC 9999B9999B9999B9999.
+           05  WS-VIRT-AUX           PIC 9(10).
+
+       01  WS-COMPRA.
+           05  WS-COMP-VALOR         PIC S9(13)V99 COMP-3.
+           05  WS-COMP-DESCR         PIC X(60).
+           05  WS-COMP-PARC          PIC 9(2).
+           05  WS-COMP-PARC-VAL      PIC S9(13)V99 COMP-3.
+           05  WS-COMP-IDX           PIC 9(2).
+           05  WS-COMP-EXIB          PIC ZZZ.ZZZ.ZZZ.ZZ9,99-.
+           05  WS-COMP-PARC-EXIB     PIC ZZZ.ZZZ.ZZZ.ZZ9,99-.
+
        LINKAGE SECTION.
        01  LS-RETORNO.
            05  LS-CODIGO             PIC 9(4).
@@ -159,6 +175,10 @@
            DISPLAY ' 06. Consultar Fatura'
            DISPLAY ' 07. Pagar Fatura'
            DISPLAY ' 08. Listar Cartoes da Conta'
+           DISPLAY ' 09. Cartao Virtual (fixo por conta)'
+           DISPLAY ' 10. Compra no Debito'
+           DISPLAY ' 11. Compra no Credito'
+           DISPLAY ' 12. Compra Parcelada'
            DISPLAY ' 00. Voltar'
            ACCEPT WS-OPCAO
            EVALUATE WS-OPCAO
@@ -170,6 +190,10 @@
                WHEN '06'  PERFORM 7000-FATURA
                WHEN '07'  PERFORM 8000-PAGAR-FATURA
                WHEN '08'  PERFORM 9000-LISTAR
+               WHEN '09'  PERFORM A000-CARTAO-VIRTUAL
+               WHEN '10'  PERFORM B000-COMPRA-DEBITO
+               WHEN '11'  PERFORM C000-COMPRA-CREDITO
+               WHEN '12'  PERFORM D000-COMPRA-PARCELADA
                WHEN '00'  MOVE 'N' TO WS-CONTINUAR
                WHEN OTHER DISPLAY 'OPCAO INVALIDA'
            END-EVALUATE.
@@ -474,4 +498,273 @@
                    END-IF
                END-IF
            END-PERFORM
+           MOVE 0 TO LS-CODIGO.
+
+      *================================================================
+      * A000 — CARTAO VIRTUAL FIXO
+      * Numero derivado deterministicamente da conta — inalteravel.
+      * Prefixo 4567 (identificador virtual) + 12 digitos da conta
+      * com transformacao modular. CVV = conta MOD 900 + 100.
+      * Validade fixa: 12/2030.
+      *================================================================
+       A000-CARTAO-VIRTUAL.
+           DISPLAY 'Conta: '
+           ACCEPT WS-CONTA-NUM
+           PERFORM 2100-BUSCAR-CONTA
+           IF LS-CODIGO NOT = 0
+               EXIT PARAGRAPH
+           END-IF
+      *    Numero virtual: 4567 || MOD(conta * 9999991, 10^12)
+           COMPUTE WS-VIRT-AUX =
+               FUNCTION MOD(WS-CONTA-NUM * 9999991 99999999999)
+           COMPUTE WS-VIRT-NUMERO =
+               4567000000000000 + WS-VIRT-AUX * 10000 +
+               FUNCTION MOD(WS-CONTA-NUM 10000)
+           COMPUTE WS-VIRT-CVV =
+               FUNCTION MOD(WS-CONTA-NUM 900) + 100
+           MOVE WS-VIRT-NUMERO TO WS-VIRT-EXIB
+           MOVE '12/2030' TO WS-VIRT-EXPIRY
+           DISPLAY '========================================'
+           DISPLAY '   CARTAO VIRTUAL — BANCO COBOL'
+           DISPLAY '========================================'
+           DISPLAY 'Titular : ' WS-CONTA-TITULAR
+           DISPLAY 'Numero  : ' WS-VIRT-EXIB
+           DISPLAY 'Validade: ' WS-VIRT-EXPIRY
+           DISPLAY 'CVV     : ' WS-VIRT-CVV
+           DISPLAY 'Bandeira: ELO VIRTUAL'
+           DISPLAY '----------------------------------------'
+           DISPLAY 'CARTAO VIRTUAL — uso online exclusivo'
+           DISPLAY 'Numero FIXO e INALTERAVEL por conta'
+           DISPLAY '========================================'
+           MOVE 0 TO LS-CODIGO.
+
+      *================================================================
+      * B000 — COMPRA NO DEBITO
+      * Debita diretamente do saldo da conta vinculada ao cartao.
+      *================================================================
+       B000-COMPRA-DEBITO.
+           DISPLAY 'Numero do Cartao Debito: '
+           ACCEPT WS-CART-NUM-SEL
+           MOVE WS-CART-NUM-SEL TO CART-NUMERO
+           READ ARQCARTAO KEY IS CART-NUMERO
+           IF FS-NFD-CART
+               DISPLAY 'CARTAO NAO ENCONTRADO'
+               MOVE 2 TO LS-CODIGO
+               EXIT PARAGRAPH
+           END-IF
+           IF CART-TIPO NOT = 'D'
+               DISPLAY 'OPERACAO VALIDA APENAS PARA CARTAO DEBITO'
+               MOVE 4 TO LS-CODIGO
+               EXIT PARAGRAPH
+           END-IF
+           IF CART-STATUS NOT = 'A'
+               DISPLAY 'CARTAO INATIVO/BLOQUEADO'
+               MOVE 4 TO LS-CODIGO
+               EXIT PARAGRAPH
+           END-IF
+           MOVE CART-CONTA TO WS-CONTA-NUM
+           PERFORM 2100-BUSCAR-CONTA
+           IF LS-CODIGO NOT = 0
+               EXIT PARAGRAPH
+           END-IF
+           DISPLAY 'Descricao da compra: '
+           ACCEPT WS-COMP-DESCR
+           DISPLAY 'Valor: '
+           ACCEPT WS-COMP-VALOR
+           IF WS-COMP-VALOR <= ZEROS
+               DISPLAY 'VALOR INVALIDO'
+               MOVE 3 TO LS-CODIGO
+               EXIT PARAGRAPH
+           END-IF
+           IF (WS-CONTA-SALDO + WS-CONTA-LIMITE) < WS-COMP-VALOR
+               DISPLAY 'SALDO INSUFICIENTE'
+               MOVE 1 TO LS-CODIGO
+               EXIT PARAGRAPH
+           END-IF
+           MOVE WS-CONTA-BUF TO REG-CONTA-CARD
+           SUBTRACT WS-COMP-VALOR FROM CARD-CONTA-SALDO
+           MOVE FUNCTION CURRENT-DATE(1:8) TO CARD-CONTA-DT-ATUA
+           REWRITE REG-CONTA-CARD
+           IF NOT FS-OK-CONTAS
+               DISPLAY 'ERRO AO DEBITAR CONTA: ' FS-CONTAS
+               MOVE 9 TO LS-CODIGO
+               EXIT PARAGRAPH
+           END-IF
+           ADD 1 TO WS-TRANS-ID
+           MOVE WS-TRANS-ID    TO CARD-TRANS-ID
+           MOVE WS-CONTA-NUM   TO CARD-TRANS-ORIG
+           MOVE ZEROS          TO CARD-TRANS-DEST
+           MOVE 'DEB'          TO CARD-TRANS-TIPO
+           MOVE WS-COMP-VALOR  TO CARD-TRANS-VALOR
+           MOVE FUNCTION CURRENT-DATE(1:8) TO CARD-TRANS-DATA
+           MOVE FUNCTION CURRENT-DATE(9:6) TO CARD-TRANS-HORA
+           MOVE WS-COMP-DESCR  TO CARD-TRANS-DESCR
+           MOVE 'E'            TO CARD-TRANS-STATUS
+           MOVE ZEROS          TO CARD-TRANS-NSU
+           MOVE 'MODCARD'      TO CARD-TRANS-CANAL
+           WRITE REG-TRANS-CARD
+           MOVE WS-COMP-VALOR TO WS-COMP-EXIB
+           DISPLAY 'COMPRA DEBITO APROVADA: R$ ' WS-COMP-EXIB
+           MOVE 0 TO LS-CODIGO.
+
+      *================================================================
+      * C000 — COMPRA NO CREDITO
+      * Debita do limite disponivel e adiciona a fatura atual.
+      *================================================================
+       C000-COMPRA-CREDITO.
+           DISPLAY 'Numero do Cartao Credito: '
+           ACCEPT WS-CART-NUM-SEL
+           MOVE WS-CART-NUM-SEL TO CART-NUMERO
+           READ ARQCARTAO KEY IS CART-NUMERO
+           IF FS-NFD-CART
+               DISPLAY 'CARTAO NAO ENCONTRADO'
+               MOVE 2 TO LS-CODIGO
+               EXIT PARAGRAPH
+           END-IF
+           IF CART-TIPO NOT = 'C'
+               DISPLAY 'OPERACAO VALIDA APENAS PARA CARTAO CREDITO'
+               MOVE 4 TO LS-CODIGO
+               EXIT PARAGRAPH
+           END-IF
+           IF CART-STATUS NOT = 'A'
+               DISPLAY 'CARTAO INATIVO/BLOQUEADO'
+               MOVE 4 TO LS-CODIGO
+               EXIT PARAGRAPH
+           END-IF
+           DISPLAY 'Descricao da compra: '
+           ACCEPT WS-COMP-DESCR
+           DISPLAY 'Valor: '
+           ACCEPT WS-COMP-VALOR
+           IF WS-COMP-VALOR <= ZEROS
+               DISPLAY 'VALOR INVALIDO'
+               MOVE 3 TO LS-CODIGO
+               EXIT PARAGRAPH
+           END-IF
+           IF WS-COMP-VALOR > CART-LIMITE-DISP
+               MOVE CART-LIMITE-DISP TO WS-LIM-EXIB
+               DISPLAY 'LIMITE DISPONIVEL INSUFICIENTE: R$ ' WS-LIM-EXIB
+               MOVE 1 TO LS-CODIGO
+               EXIT PARAGRAPH
+           END-IF
+           SUBTRACT WS-COMP-VALOR FROM CART-LIMITE-DISP
+           ADD WS-COMP-VALOR TO CART-FATURA-ATU
+           REWRITE REG-CARTAO
+           IF NOT FS-OK-CART
+               DISPLAY 'ERRO AO GRAVAR CARTAO: ' FS-CARTAO
+               MOVE 9 TO LS-CODIGO
+               EXIT PARAGRAPH
+           END-IF
+           ADD 1 TO WS-TRANS-ID
+           MOVE WS-TRANS-ID    TO CARD-TRANS-ID
+           MOVE CART-CONTA     TO CARD-TRANS-ORIG
+           MOVE ZEROS          TO CARD-TRANS-DEST
+           MOVE 'CRT'          TO CARD-TRANS-TIPO
+           MOVE WS-COMP-VALOR  TO CARD-TRANS-VALOR
+           MOVE FUNCTION CURRENT-DATE(1:8) TO CARD-TRANS-DATA
+           MOVE FUNCTION CURRENT-DATE(9:6) TO CARD-TRANS-HORA
+           MOVE WS-COMP-DESCR  TO CARD-TRANS-DESCR
+           MOVE 'E'            TO CARD-TRANS-STATUS
+           MOVE ZEROS          TO CARD-TRANS-NSU
+           MOVE 'MODCARD'      TO CARD-TRANS-CANAL
+           WRITE REG-TRANS-CARD
+           MOVE WS-COMP-VALOR TO WS-COMP-EXIB
+           MOVE CART-FATURA-ATU TO WS-FAT-EXIB
+           DISPLAY 'COMPRA CREDITO APROVADA: R$ ' WS-COMP-EXIB
+           DISPLAY 'Fatura atual  : R$ ' WS-FAT-EXIB
+           MOVE 0 TO LS-CODIGO.
+
+      *================================================================
+      * D000 — COMPRA PARCELADA
+      * Divide o valor em N parcelas e adiciona cada parcela a fatura.
+      * Limite bloqueado pelo valor total no ato da compra.
+      *================================================================
+       D000-COMPRA-PARCELADA.
+           DISPLAY 'Numero do Cartao Credito: '
+           ACCEPT WS-CART-NUM-SEL
+           MOVE WS-CART-NUM-SEL TO CART-NUMERO
+           READ ARQCARTAO KEY IS CART-NUMERO
+           IF FS-NFD-CART
+               DISPLAY 'CARTAO NAO ENCONTRADO'
+               MOVE 2 TO LS-CODIGO
+               EXIT PARAGRAPH
+           END-IF
+           IF CART-TIPO NOT = 'C'
+               DISPLAY 'PARCELAMENTO APENAS PARA CARTAO CREDITO'
+               MOVE 4 TO LS-CODIGO
+               EXIT PARAGRAPH
+           END-IF
+           IF CART-STATUS NOT = 'A'
+               DISPLAY 'CARTAO INATIVO/BLOQUEADO'
+               MOVE 4 TO LS-CODIGO
+               EXIT PARAGRAPH
+           END-IF
+           DISPLAY 'Descricao da compra: '
+           ACCEPT WS-COMP-DESCR
+           DISPLAY 'Valor total: '
+           ACCEPT WS-COMP-VALOR
+           IF WS-COMP-VALOR <= ZEROS
+               DISPLAY 'VALOR INVALIDO'
+               MOVE 3 TO LS-CODIGO
+               EXIT PARAGRAPH
+           END-IF
+           DISPLAY 'Numero de parcelas (2-24): '
+           ACCEPT WS-COMP-PARC
+           IF WS-COMP-PARC < 2 OR WS-COMP-PARC > 24
+               DISPLAY 'PARCELAS INVALIDAS (2-24)'
+               MOVE 3 TO LS-CODIGO
+               EXIT PARAGRAPH
+           END-IF
+           IF WS-COMP-VALOR > CART-LIMITE-DISP
+               MOVE CART-LIMITE-DISP TO WS-LIM-EXIB
+               DISPLAY 'LIMITE DISPONIVEL INSUFICIENTE: R$ ' WS-LIM-EXIB
+               MOVE 1 TO LS-CODIGO
+               EXIT PARAGRAPH
+           END-IF
+           COMPUTE WS-COMP-PARC-VAL ROUNDED =
+               WS-COMP-VALOR / WS-COMP-PARC
+           MOVE WS-COMP-VALOR     TO WS-COMP-EXIB
+           MOVE WS-COMP-PARC-VAL  TO WS-COMP-PARC-EXIB
+           DISPLAY 'Plano de parcelamento:'
+           DISPLAY '  Total     : R$ ' WS-COMP-EXIB
+           DISPLAY '  Parcelas  : ' WS-COMP-PARC 'x R$ '
+                   WS-COMP-PARC-EXIB ' (sem juros)'
+           DISPLAY 'Confirmar? (S/N): '
+           ACCEPT WS-OPCAO
+           IF WS-OPCAO(1:1) NOT = 'S'
+               DISPLAY 'CANCELADO'
+               MOVE 0 TO LS-CODIGO
+               EXIT PARAGRAPH
+           END-IF
+      *    Bloqueia o limite total e adiciona 1a parcela a fatura
+           SUBTRACT WS-COMP-VALOR FROM CART-LIMITE-DISP
+           ADD WS-COMP-PARC-VAL TO CART-FATURA-ATU
+           REWRITE REG-CARTAO
+           IF NOT FS-OK-CART
+               DISPLAY 'ERRO AO GRAVAR CARTAO: ' FS-CARTAO
+               MOVE 9 TO LS-CODIGO
+               EXIT PARAGRAPH
+           END-IF
+      *    Registra a compra parcelada como transacao
+           ADD 1 TO WS-TRANS-ID
+           MOVE WS-TRANS-ID    TO CARD-TRANS-ID
+           MOVE CART-CONTA     TO CARD-TRANS-ORIG
+           MOVE ZEROS          TO CARD-TRANS-DEST
+           MOVE 'CRT'          TO CARD-TRANS-TIPO
+           MOVE WS-COMP-VALOR  TO CARD-TRANS-VALOR
+           MOVE FUNCTION CURRENT-DATE(1:8) TO CARD-TRANS-DATA
+           MOVE FUNCTION CURRENT-DATE(9:6) TO CARD-TRANS-HORA
+           STRING WS-COMP-DESCR DELIMITED SIZE
+                  ' (' DELIMITED SIZE
+                  WS-COMP-PARC DELIMITED SIZE
+                  'x)' DELIMITED SIZE
+                  INTO CARD-TRANS-DESCR
+           MOVE 'E'            TO CARD-TRANS-STATUS
+           MOVE WS-COMP-PARC   TO CARD-TRANS-NSU
+           MOVE 'MODCARD'      TO CARD-TRANS-CANAL
+           WRITE REG-TRANS-CARD
+           MOVE WS-COMP-PARC-VAL TO WS-COMP-PARC-EXIB
+           DISPLAY 'PARCELAMENTO APROVADO!'
+           DISPLAY 'Fatura este mes: R$ ' WS-COMP-PARC-EXIB
+           DISPLAY 'Proximas parcelas: ' WS-COMP-PARC - 1
+                   ' x R$ ' WS-COMP-PARC-EXIB
            MOVE 0 TO LS-CODIGO.

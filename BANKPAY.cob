@@ -23,6 +23,13 @@
                RECORD KEY IS PAY-TRANS-ID
                FILE STATUS IS FS-TRANS.
 
+           SELECT ARQBOLETO ASSIGN TO 'BANKBOL.DAT'
+               ORGANIZATION IS INDEXED
+               ACCESS MODE IS DYNAMIC
+               RECORD KEY IS BOL-ID
+               ALTERNATE RECORD KEY IS BOL-CONTA WITH DUPLICATES
+               FILE STATUS IS FS-BOL.
+
        DATA DIVISION.
        FILE SECTION.
        FD  ARQCONTAS.
@@ -41,6 +48,19 @@
            05  PAY-CONTA-DT-ABERTURA PIC 9(8).
            05  PAY-CONTA-DT-ATUALIZACAO PIC 9(8).
            05  PAY-CONTA-SENHA-HASH  PIC X(64).
+
+       FD  ARQBOLETO.
+       01  REG-BOLETO.
+           05  BOL-ID                PIC 9(10).
+           05  BOL-CONTA             PIC 9(10).
+           05  BOL-VALOR             PIC S9(13)V99 COMP-3.
+           05  BOL-DT-EMISSAO        PIC 9(8).
+           05  BOL-DT-VENCTO         PIC 9(8).
+           05  BOL-BENEFICIARIO      PIC X(60).
+           05  BOL-DESCRICAO         PIC X(100).
+           05  BOL-COD-BARRAS        PIC X(44).
+           05  BOL-STATUS            PIC X(1).
+           05  BOL-FILLER            PIC X(50).
 
        FD  ARQTRANS.
        01  REG-TRANS.
@@ -62,6 +82,10 @@
                88  FS-OK             VALUE '00'.
                88  FS-NFD            VALUE '23'.
            05  FS-TRANS              PIC XX.
+           05  FS-BOL                PIC XX.
+               88  FS-BOL-OK         VALUE '00'.
+               88  FS-BOL-EOF        VALUE '10'.
+               88  FS-BOL-NFD        VALUE '23'.
            05  WS-OPCAO              PIC X(2).
            05  WS-CONTINUAR          PIC X VALUE 'S'.
                88  CONTINUAR         VALUE 'S'.
@@ -86,6 +110,19 @@
            05  WS-ID                 PIC 9(15).
            05  WS-DISP               PIC ZZZ.ZZZ.ZZZ.ZZ9,99-.
 
+       01  WS-BOL.
+           05  WS-BOL-BENEFIC        PIC X(60).
+           05  WS-BOL-DESCR          PIC X(100).
+           05  WS-BOL-VENCTO         PIC 9(8).
+           05  WS-BOL-ID-NOVO        PIC 9(10).
+           05  WS-BOL-ID-SEL         PIC 9(10).
+           05  WS-BOL-BARRAS         PIC X(44).
+           05  WS-BOL-IDX            PIC 9(2).
+           05  WS-BOL-SOMA-DV        PIC 9(9).
+           05  WS-BOL-DIG            PIC 9.
+           05  WS-BOL-PESO           PIC 9.
+           05  WS-BOL-DV             PIC 9.
+
        LINKAGE SECTION.
        01  LS-RETORNO.
            05  LS-CODIGO             PIC 9(4).
@@ -94,21 +131,37 @@
        PROCEDURE DIVISION USING LS-RETORNO.
        0000-PRINCIPAL.
            OPEN I-O ARQCONTAS ARQTRANS
+           OPEN I-O ARQBOLETO
+           IF FS-BOL = '35'
+               OPEN OUTPUT ARQBOLETO
+               CLOSE ARQBOLETO
+               OPEN I-O ARQBOLETO
+           END-IF
+           MOVE FUNCTION CURRENT-DATE(1:8) TO WS-ID
+           COMPUTE WS-BOL-ID-NOVO =
+               FUNCTION NUMVAL(WS-ID) * 1000 +
+               FUNCTION NUMVAL(FUNCTION CURRENT-DATE(9:3))
            PERFORM 1000-MENU UNTIL PARAR
-           CLOSE ARQCONTAS ARQTRANS
+           CLOSE ARQCONTAS ARQTRANS ARQBOLETO
            MOVE 0 TO LS-CODIGO
            GOBACK.
 
        1000-MENU.
            DISPLAY '----------------------------------------'
-           DISPLAY ' PAGAMENTOS'
+           DISPLAY ' PAGAMENTOS E BOLETOS'
            DISPLAY '----------------------------------------'
-           DISPLAY ' 01. Pagamento de boleto'
+           DISPLAY ' 01. Pagar Boleto'
+           DISPLAY ' 02. Emitir Boleto'
+           DISPLAY ' 03. Consultar Boletos da Conta'
            DISPLAY ' 00. Voltar'
            ACCEPT WS-OPCAO
            EVALUATE WS-OPCAO
                WHEN '01'
                    PERFORM 2000-PAGAR-BOLETO
+               WHEN '02'
+                   PERFORM 3000-EMITIR-BOLETO
+               WHEN '03'
+                   PERFORM 4000-CONSULTAR-BOLETOS
                WHEN '00'
                    MOVE 'N' TO WS-CONTINUAR
                WHEN OTHER
@@ -225,3 +278,135 @@
                MOVE WS-COD-LIMPO TO WS-COD-BARRAS
                MOVE 0 TO LS-CODIGO
            END-IF.
+
+      *================================================================
+      * 3000 — EMITIR BOLETO
+      * Gera um boleto com codigo de barras Modulo-10 valido.
+      * Estrutura: 4 digitos banco + 14 dados + 1 DV calculado +
+      *            25 digitos livres (conta+valor+seq) = 44 total.
+      *================================================================
+       3000-EMITIR-BOLETO.
+           DISPLAY 'Conta emitente: '
+           ACCEPT WS-CONTA
+           MOVE WS-CONTA TO PAY-CONTA-NUM
+           READ ARQCONTAS KEY IS PAY-CONTA-NUM
+           IF FS-NFD
+               DISPLAY 'CONTA NAO ENCONTRADA'
+               MOVE 2 TO LS-CODIGO
+               EXIT PARAGRAPH
+           END-IF
+           IF PAY-CONTA-STATUS NOT = 'A'
+               DISPLAY 'CONTA INATIVA'
+               MOVE 4 TO LS-CODIGO
+               EXIT PARAGRAPH
+           END-IF
+           DISPLAY 'Beneficiario/Descricao: '
+           ACCEPT WS-BOL-BENEFIC
+           DISPLAY 'Descricao adicional: '
+           ACCEPT WS-BOL-DESCR
+           DISPLAY 'Valor: '
+           ACCEPT WS-VALOR
+           IF WS-VALOR <= ZEROS
+               DISPLAY 'VALOR INVALIDO'
+               MOVE 3 TO LS-CODIGO
+               EXIT PARAGRAPH
+           END-IF
+           DISPLAY 'Vencimento (AAAAMMDD): '
+           ACCEPT WS-BOL-VENCTO
+      *    Gera codigo de barras: banco(4) + conta(10) + valor(13) +
+      *    sequencial(16) = 43 digitos + 1 DV = 44
+           STRING '0001'                 DELIMITED SIZE
+                  WS-CONTA              DELIMITED SIZE
+                  INTO WS-BOL-BARRAS
+           MOVE FUNCTION CURRENT-DATE(1:8) TO WS-BOL-BARRAS(15:8)
+           COMPUTE WS-BOL-IDX =
+               FUNCTION MOD(WS-BOL-ID-NOVO 99999999) + 1
+           MOVE WS-BOL-IDX TO WS-BOL-BARRAS(23:8)
+      *    Preenche zeros restantes ate posicao 43
+           PERFORM VARYING WS-BOL-IDX FROM 31 BY 1
+                   UNTIL WS-BOL-IDX > 43
+               IF WS-BOL-BARRAS(WS-BOL-IDX:1) = SPACES
+                   MOVE '0' TO WS-BOL-BARRAS(WS-BOL-IDX:1)
+               END-IF
+           END-PERFORM
+      *    Calcula DV Modulo-10 dos 43 primeiros digitos
+           MOVE ZEROS TO WS-BOL-SOMA-DV
+           MOVE 2     TO WS-BOL-PESO
+           PERFORM VARYING WS-BOL-IDX FROM 43 BY -1
+                   UNTIL WS-BOL-IDX < 1
+               MOVE FUNCTION NUMVAL(WS-BOL-BARRAS(WS-BOL-IDX:1))
+                   TO WS-BOL-DIG
+               COMPUTE WS-BOL-DIG = WS-BOL-DIG * WS-BOL-PESO
+               IF WS-BOL-DIG > 9
+                   SUBTRACT 9 FROM WS-BOL-DIG
+               END-IF
+               ADD WS-BOL-DIG TO WS-BOL-SOMA-DV
+               IF WS-BOL-PESO = 2
+                   MOVE 1 TO WS-BOL-PESO
+               ELSE
+                   MOVE 2 TO WS-BOL-PESO
+               END-IF
+           END-PERFORM
+           COMPUTE WS-BOL-DV =
+               FUNCTION MOD(10 - FUNCTION MOD(WS-BOL-SOMA-DV 10) 10)
+           MOVE WS-BOL-DV TO WS-BOL-BARRAS(44:1)
+      *    Persiste o boleto
+           ADD 1 TO WS-BOL-ID-NOVO
+           MOVE WS-BOL-ID-NOVO   TO BOL-ID
+           MOVE WS-CONTA         TO BOL-CONTA
+           MOVE WS-VALOR         TO BOL-VALOR
+           MOVE FUNCTION CURRENT-DATE(1:8) TO BOL-DT-EMISSAO
+           MOVE WS-BOL-VENCTO    TO BOL-DT-VENCTO
+           MOVE WS-BOL-BENEFIC   TO BOL-BENEFICIARIO
+           MOVE WS-BOL-DESCR     TO BOL-DESCRICAO
+           MOVE WS-BOL-BARRAS    TO BOL-COD-BARRAS
+           MOVE 'A'              TO BOL-STATUS
+           WRITE REG-BOLETO
+           IF NOT FS-BOL-OK
+               DISPLAY 'ERRO AO GRAVAR BOLETO: ' FS-BOL
+               MOVE 9 TO LS-CODIGO
+               EXIT PARAGRAPH
+           END-IF
+           MOVE WS-VALOR TO WS-DISP
+           DISPLAY '========================================'
+           DISPLAY 'BOLETO EMITIDO COM SUCESSO'
+           DISPLAY '========================================'
+           DISPLAY 'ID        : ' WS-BOL-ID-NOVO
+           DISPLAY 'Benefic.  : ' WS-BOL-BENEFIC
+           DISPLAY 'Valor     : R$ ' WS-DISP
+           DISPLAY 'Emissao   : ' FUNCTION CURRENT-DATE(1:8)
+           DISPLAY 'Vencimento: ' WS-BOL-VENCTO
+           DISPLAY 'Cod.Barras: ' WS-BOL-BARRAS
+           DISPLAY '========================================'
+           MOVE 0 TO LS-CODIGO.
+
+      *================================================================
+      * 4000 — CONSULTAR BOLETOS DA CONTA
+      *================================================================
+       4000-CONSULTAR-BOLETOS.
+           DISPLAY 'Conta: '
+           ACCEPT WS-CONTA
+           MOVE WS-CONTA TO BOL-CONTA
+           START ARQBOLETO KEY = BOL-CONTA
+           IF FS-BOL-NFD
+               DISPLAY 'NENHUM BOLETO ENCONTRADO'
+               MOVE 0 TO LS-CODIGO
+               EXIT PARAGRAPH
+           END-IF
+           DISPLAY '--- BOLETOS DA CONTA ' WS-CONTA ' ---'
+           PERFORM UNTIL FS-BOL-EOF
+               READ ARQBOLETO NEXT
+               IF FS-BOL-OK
+                   IF BOL-CONTA = WS-CONTA
+                       MOVE BOL-VALOR TO WS-DISP
+                       DISPLAY BOL-ID
+                               ' | Venc: ' BOL-DT-VENCTO
+                               ' | R$ '    WS-DISP
+                               ' | '       BOL-STATUS
+                               ' | '       BOL-BENEFICIARIO
+                   ELSE
+                       MOVE '10' TO FS-BOL
+                   END-IF
+               END-IF
+           END-PERFORM
+           MOVE 0 TO LS-CODIGO.
