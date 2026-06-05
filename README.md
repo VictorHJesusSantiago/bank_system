@@ -1,8 +1,14 @@
 <div align="center">
 
-<!-- ═══════════════════════════════════════════════════════════════════════════ -->
-<!--                              HEADER BANNER                                -->
-<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+**🌐 Choose Language / Selecione o Idioma / Elija el Idioma**
+
+[![🇺🇸 English](https://img.shields.io/badge/🇺🇸%20English-Current-005CA5?style=for-the-badge)](README.md)&nbsp;&nbsp;&nbsp;[![🇧🇷 Português](https://img.shields.io/badge/🇧🇷%20Português-README__PT.md-009C3B?style=for-the-badge)](README_PT.md)&nbsp;&nbsp;&nbsp;[![🇪🇸 Español](https://img.shields.io/badge/🇪🇸%20Español-README__ES.md-C60B1E?style=for-the-badge)](README_ES.md)
+
+</div>
+
+---
+
+<div align="center">
 
 ```
 ██████╗  █████╗ ███╗   ██╗ ██████╗ ██████╗      ██████╗ ██████╗ ██████╗  ██████╗ ██╗
@@ -11,7 +17,7 @@
 ██╔══██╗██╔══██║██║╚██╗██║██║     ██║   ██║    ██║     ██║   ██║██╔══██╗██║   ██║██║
 ██████╔╝██║  ██║██║ ╚████║╚██████╗╚██████╔╝    ╚██████╗╚██████╔╝██████╔╝╚██████╔╝███████╗
 ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚═════╝      ╚═════╝ ╚═════╝ ╚═════╝  ╚═════╝ ╚══════╝
-                         Sistema Bancário Enterprise em GnuCOBOL
+                      Enterprise Banking System in GnuCOBOL
 ```
 
 ---
@@ -21,72 +27,72 @@
 [![tkinter](https://img.shields.io/badge/GUI-tkinter-FF6B35?style=for-the-badge&logo=python&logoColor=white)](https://docs.python.org/3/library/tkinter.html)
 [![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20WSL2-FCC624?style=for-the-badge&logo=linux&logoColor=black)](https://ubuntu.com/)
 [![ISAM](https://img.shields.io/badge/Storage-ISAM%20Indexed-6DB33F?style=for-the-badge&logo=databricks&logoColor=white)]()
-[![License](https://img.shields.io/badge/Licença-Educacional-8B5CF6?style=for-the-badge)]()
+[![License](https://img.shields.io/badge/License-Educational-8B5CF6?style=for-the-badge)]()
 [![Status](https://img.shields.io/badge/Status-Production%20Ready-10B981?style=for-the-badge&logo=checkmarx&logoColor=white)]()
 
 <br/>
 
-> **Um sistema bancário completo, robusto e de nível enterprise**
-> desenvolvido em COBOL legado moderno com interface gráfica Python e suíte de testes automatizados.
+> **A complete, robust, enterprise-grade banking system**
+> built in modern legacy COBOL with a Python GUI and a full automated test suite.
 
 <br/>
 
-![Módulos](https://img.shields.io/badge/Módulos-10-005CA5?style=flat-square)
-![Operações](https://img.shields.io/badge/Operações-35%2B-10B981?style=flat-square)
-![Arquivos ISAM](https://img.shields.io/badge/Arquivos%20ISAM-3-FF6B35?style=flat-square)
-![Testes E2E](https://img.shields.io/badge/Testes%20E2E-Automatizados-8B5CF6?style=flat-square)
-![Linhas COBOL](https://img.shields.io/badge/Linhas%20COBOL-3500%2B-FCC624?style=flat-square)
+![Modules](https://img.shields.io/badge/Modules-10-005CA5?style=flat-square)
+![Operations](https://img.shields.io/badge/Operations-35%2B-10B981?style=flat-square)
+![ISAM Files](https://img.shields.io/badge/ISAM%20Files-3-FF6B35?style=flat-square)
+![E2E Tests](https://img.shields.io/badge/E2E%20Tests-Automated-8B5CF6?style=flat-square)
+![COBOL Lines](https://img.shields.io/badge/COBOL%20Lines-3500%2B-FCC624?style=flat-square)
 
 </div>
 
 ---
 
-## 📑 Sumário
+## 📑 Table of Contents
 
 <table>
 <tr>
 <td valign="top" width="50%">
 
-**🏗️ Sistema**
-- [Visão Geral](#-visão-geral)
-- [Arquitetura do Sistema](#-arquitetura-do-sistema)
-- [Stack Tecnológico](#-stack-tecnológico)
-- [Padrões de Projeto](#-padrões-de-projeto-aplicados)
-- [Estrutura do Projeto](#-estrutura-do-projeto)
+**🏗️ System**
+- [Overview](#-overview)
+- [System Architecture](#-system-architecture)
+- [Technology Stack](#-technology-stack)
+- [Design Patterns](#-design-patterns-applied)
+- [Project Structure](#-project-structure)
 
-**📦 Módulos**
-- [BANKMAIN — Orquestrador](#-bankmain--orquestrador-principal)
-- [BANKACCT — Contas](#-bankacct--gestão-de-contas)
-- [BANKTRAN — Transações](#-banktran--processamento-de-transações)
-- [BANKTRF — Transferências](#-banktrf--módulo-de-transferências)
-- [BANKPAY — Pagamentos](#-bankpay--módulo-de-pagamentos)
-- [BANKINV — Investimentos](#-bankinv--módulo-de-investimentos)
-- [BANKCRM — Clientes](#-bankcrm--gestão-de-clientes)
-- [BANKQRY — Consultas](#-bankqry--consultas-e-extratos)
-- [BANKREP — Relatórios](#-bankrep--relatórios)
-- [BANKADM — Administração](#-bankadm--administração)
+**📦 Modules**
+- [BANKMAIN — Orchestrator](#-bankmain--main-orchestrator)
+- [BANKACCT — Accounts](#-bankacct--account-management)
+- [BANKTRAN — Transactions](#-banktran--transaction-processing)
+- [BANKTRF — Transfers](#-banktrf--transfer-module)
+- [BANKPAY — Payments](#-bankpay--payment-module)
+- [BANKINV — Investments](#-bankinv--investment-module)
+- [BANKCRM — Customers](#-bankcrm--customer-management)
+- [BANKQRY — Queries](#-bankqry--queries-and-statements)
+- [BANKREP — Reports](#-bankrep--reports)
+- [BANKADM — Administration](#-bankadm--administration)
 
 </td>
 <td valign="top" width="50%">
 
-**💼 Negócio**
-- [Regras de Negócio](#-regras-de-negócio)
-- [Requisitos Funcionais](#-requisitos-funcionais)
-- [Requisitos Não-Funcionais](#-requisitos-não-funcionais)
+**💼 Business**
+- [Business Rules](#-business-rules)
+- [Functional Requirements](#-functional-requirements)
+- [Non-Functional Requirements](#-non-functional-requirements)
 
 **📐 Design**
-- [Modelo de Dados](#-modelo-de-dados)
-- [Fluxos do Sistema](#-fluxos-do-sistema)
-- [Ciclo de Vida da Conta](#ciclo-de-vida-da-conta)
-- [Fluxo de Transações](#fluxo-transações-tedpix)
-- [Validação de CPF](#fluxo-de-validação-de-cpf)
+- [Data Model](#-data-model)
+- [System Flows](#-system-flows)
+- [Account Lifecycle](#account-lifecycle)
+- [Transaction Flow](#tedpix-transaction-flow)
+- [CPF Validation](#cpf-validation-flow)
 
-**🔐 Segurança e Ops**
-- [Segurança](#-segurança)
-- [Instalação e Execução](#-instalação-e-execução)
-- [Testes Automatizados](#-testes-automatizados)
-- [Métricas e Monitoramento](#-métricas-e-monitoramento)
-- [Limitações Conhecidas](#-limitações-conhecidas)
+**🔐 Security & Ops**
+- [Security](#-security)
+- [Installation & Execution](#-installation--execution)
+- [Automated Tests](#-automated-tests)
+- [Metrics & Monitoring](#-metrics--monitoring)
+- [Known Limitations](#-known-limitations)
 
 </td>
 </tr>
@@ -94,65 +100,65 @@
 
 ---
 
-## 🌟 Visão Geral
+## 🌟 Overview
 
-O **Banco COBOL S/A** é um sistema bancário completo e funcional implementado em **GnuCOBOL** (COBOL de código aberto moderno), demonstrando que linguagens legadas podem oferecer robustez, precisão financeira e arquitetura limpa comparáveis a sistemas modernos.
+**Banco COBOL S/A** is a complete, functional banking system implemented in **GnuCOBOL** (modern open-source COBOL), proving that legacy languages can deliver robustness, financial precision, and clean architecture on par with modern systems.
 
-O sistema processa **depósitos, saques, transferências TED/DOC/PIX, pagamentos de boleto, investimentos e relatórios regulatórios**, tudo com persistência via arquivos **ISAM indexados** — o mesmo modelo usado em mainframes IBM por décadas.
+The system processes **deposits, withdrawals, TED/DOC/PIX transfers, bill payments, investments, and regulatory reports**, all persisted via **indexed ISAM files** — the same model used on IBM mainframes for decades.
 
-### 🎯 Objetivos do Sistema
+### 🎯 System Objectives
 
-| Objetivo | Descrição |
-|----------|-----------|
-| 🏦 **Core Banking** | Ciclo completo de vida de contas correntes, poupança, salário e investimento |
-| 💸 **Transações** | Processamento de débitos e créditos com trilha de auditoria completa |
-| 📊 **Relatórios** | Balancetes, movimentação diária, relatórios regulatórios BCB |
-| 🔐 **Segurança** | Validação CPF algoritmo real, bloqueio de contas, controle de status |
-| 📈 **Investimentos** | CDB, LCI, LCA, Tesouro Direto e Fundos com cálculo real de IR |
-| 🖥️ **GUI** | Interface gráfica moderna Python/tkinter com fluxos guiados |
-| 🧪 **Qualidade** | Testes de regressão de aceitação E2E automatizados com pseudo-terminal |
+| Objective | Description |
+|-----------|-------------|
+| 🏦 **Core Banking** | Full lifecycle management of checking, savings, salary, and investment accounts |
+| 💸 **Transactions** | Debit/credit processing with complete audit trail |
+| 📊 **Reports** | Trial balances, daily movement, BCB regulatory reports |
+| 🔐 **Security** | Real CPF validation algorithm, account locking, status control |
+| 📈 **Investments** | CDB, LCI, LCA, Treasury Direct and Funds with real withholding-tax calculation |
+| 🖥️ **GUI** | Modern Python/tkinter graphical interface with guided flows |
+| 🧪 **Quality** | Automated E2E acceptance regression tests via pseudo-terminal |
 
 ---
 
-## 🏗️ Arquitetura do Sistema
+## 🏗️ System Architecture
 
-### Diagrama de Módulos
+### Module Diagram
 
 ```mermaid
 flowchart TB
-    subgraph UI["🖥️  CAMADA DE INTERFACE"]
+    subgraph UI["🖥️  INTERFACE LAYER"]
         direction LR
-        GUI["🪟 GUI Python\nbank_gui.py\n─────────────\ntkinter | threading\nQueue | subprocess"]
-        CLI["⌨️ CLI Direto\n./bin/bankmain\n─────────────\nCOBOL DISPLAY\nCOBOL ACCEPT"]
+        GUI["🪟 Python GUI\nbank_gui.py\n─────────────\ntkinter | threading\nQueue | subprocess"]
+        CLI["⌨️ Direct CLI\n./bin/bankmain\n─────────────\nCOBOL DISPLAY\nCOBOL ACCEPT"]
     end
 
-    subgraph ORCH["🏛️  ORQUESTRADOR"]
-        MAIN["BANKMAIN.cob\n─────────────────────\n• Sessão e autenticação\n• Roteamento de módulos\n• Log de auditoria\n• Métricas de sessão"]
+    subgraph ORCH["🏛️  ORCHESTRATOR"]
+        MAIN["BANKMAIN.cob\n─────────────────────\n• Session management\n• Module routing\n• Audit logging\n• Session metrics"]
     end
 
-    subgraph CORE["⚙️  MÓDULOS DE NEGÓCIO  (Dynamic CALL)"]
+    subgraph CORE["⚙️  BUSINESS MODULES  (Dynamic CALL)"]
         direction TB
-        ACCT["🏦 BANKACCT\nGestão de Contas\n────────────\nAbrir · Consultar\nBloquear · Encerrar\nTarifa Manutenção"]
-        TRAN["💸 BANKTRAN\nTransações\n────────────\nDep · Saque · TED\nDOC · PIX · Boleto\nExtrato · Estorno"]
-        TRF["↔️ BANKTRF\nTransferências\n────────────\nTED · DOC · PIX\nBusca CPF/Email/Tel"]
-        PAY["💳 BANKPAY\nPagamentos\n────────────\nBoleto c/ DV\nMódulo 10"]
-        INV["📈 BANKINV\nInvestimentos\n────────────\nCDB · LCI · LCA\nTesouro · Fundos\nSimulador · IR"]
-        CRM["👥 BANKCRM\nClientes\n────────────\nCadastro completo\nPerfil de risco\nScore de crédito"]
-        QRY["🔍 BANKQRY\nConsultas\n────────────\nExtrato 30 dias\nBusca por CPF\nBusca por número"]
-        REP["📊 BANKREP\nRelatórios\n────────────\nBalancete · DRE\nMov. Diária · BCB\nTop Saldos"]
-        ADM["⚙️ BANKADM\nAdministração\n────────────\nEstatísticas\nGestão de Log"]
+        ACCT["🏦 BANKACCT\nAccount Mgmt\n────────────\nOpen · Query\nLock · Close\nMaint. Fee"]
+        TRAN["💸 BANKTRAN\nTransactions\n────────────\nDep · Wdrw · TED\nDOC · PIX · Bill\nStatement · Reversal"]
+        TRF["↔️ BANKTRF\nTransfers\n────────────\nTED · DOC · PIX\nCPF/Email/Phone key"]
+        PAY["💳 BANKPAY\nPayments\n────────────\nBill w/ check digit\nModulo 10"]
+        INV["📈 BANKINV\nInvestments\n────────────\nCDB · LCI · LCA\nTreasury · Funds\nSimulator · Tax"]
+        CRM["👥 BANKCRM\nCustomers\n────────────\nFull registration\nRisk profile\nCredit score"]
+        QRY["🔍 BANKQRY\nQueries\n────────────\n30-day statement\nSearch by CPF\nSearch by number"]
+        REP["📊 BANKREP\nReports\n────────────\nTrial Balance · P&L\nDaily Move · BCB\nTop Balances"]
+        ADM["⚙️ BANKADM\nAdministration\n────────────\nStatistics\nLog Management"]
     end
 
-    subgraph DATA["💾  CAMADA DE DADOS  (ISAM / Sequential)"]
+    subgraph DATA["💾  DATA LAYER  (ISAM / Sequential)"]
         direction LR
-        ACCTDAT[("📋 BANKACCT.DAT\nContas\n─────────────\nOrg: INDEXED\nChave: NUM_CONTA\nAlt: CPF")]
-        TRANDAT[("📋 BANKTRAN.DAT\nTransações\n─────────────\nOrg: INDEXED\nChave: TRANS_ID\ntimestamp-based")]
-        CUSTDAT[("📋 BANKCUST.DAT\nClientes\n─────────────\nOrg: INDEXED\nChave: CLI_ID\nAlt: CPF")]
+        ACCTDAT[("📋 BANKACCT.DAT\nAccounts\n─────────────\nOrg: INDEXED\nKey: ACCT_NUM\nAlt: CPF")]
+        TRANDAT[("📋 BANKTRAN.DAT\nTransactions\n─────────────\nOrg: INDEXED\nKey: TRANS_ID\ntimestamp-based")]
+        CUSTDAT[("📋 BANKCUST.DAT\nCustomers\n─────────────\nOrg: INDEXED\nKey: CUST_ID\nAlt: CPF")]
         LOG[("📜 BANKAUDT.LOG\nAudit Trail\n─────────────\nOrg: SEQUENTIAL\nAppend-only")]
-        RPT[("📄 BANKREP.TXT\nRelatórios\n─────────────\nOrg: SEQUENTIAL\nExtend mode")]
+        RPT[("📄 BANKREP.TXT\nReports\n─────────────\nOrg: SEQUENTIAL\nExtend mode")]
     end
 
-    subgraph COPY["📎  COPYBOOK COMPARTILHADO"]
+    subgraph COPY["📎  SHARED COPYBOOK"]
         BANKDATA["BANKDATA.cpy\n──────────────────────────────\nWS-CONTA · WS-TRANSACAO · WS-CLIENTE\nWS-RETORNO · WS-INVESTIMENTO"]
     end
 
@@ -180,21 +186,21 @@ flowchart TB
     style COPY fill:#2a1a3a,color:#fff,stroke:#ce93d8
 ```
 
-### Camadas da Arquitetura
+### Architecture Layers
 
 ```mermaid
 flowchart LR
-    subgraph L1["🖥️ Apresentação"]
+    subgraph L1["🖥️ Presentation"]
         A1["tkinter GUI"]
         A2["COBOL DISPLAY/ACCEPT"]
     end
-    subgraph L2["🏛️ Aplicação"]
+    subgraph L2["🏛️ Application"]
         B1["Service Orchestrator\nBANKMAIN"]
     end
-    subgraph L3["⚙️ Domínio"]
-        C1["Business Rules Layer\n9 módulos especializados"]
+    subgraph L3["⚙️ Domain"]
+        C1["Business Rules Layer\n9 specialized modules"]
     end
-    subgraph L4["💾 Infraestrutura"]
+    subgraph L4["💾 Infrastructure"]
         D1["ISAM Files\n(BDB/VBISAM)"]
         D2["Sequential Files\n(LOG/TXT)"]
     end
@@ -209,15 +215,15 @@ flowchart LR
 
 ---
 
-## 🛠️ Stack Tecnológico
+## 🛠️ Technology Stack
 
 <table>
 <thead>
 <tr>
-<th>Camada</th>
-<th>Tecnologia</th>
-<th>Versão</th>
-<th>Propósito</th>
+<th>Layer</th>
+<th>Technology</th>
+<th>Version</th>
+<th>Purpose</th>
 </tr>
 </thead>
 <tbody>
@@ -225,37 +231,37 @@ flowchart LR
 <td>🔧 <strong>Runtime</strong></td>
 <td>GnuCOBOL</td>
 <td>3.x</td>
-<td>Compilação e execução dos módulos COBOL como shared objects</td>
+<td>Compilation and execution of COBOL modules as shared objects</td>
 </tr>
 <tr>
 <td>🖥️ <strong>GUI</strong></td>
 <td>Python 3 + tkinter</td>
 <td>3.8+</td>
-<td>Interface gráfica nativa multiplataforma com fluxos guiados</td>
+<td>Native cross-platform graphical interface with guided flows</td>
 </tr>
 <tr>
 <td>💾 <strong>Storage</strong></td>
 <td>ISAM / BDB / VBISAM</td>
 <td>—</td>
-<td>Arquivos indexados para acesso sequencial e randômico por chave</td>
+<td>Indexed files for sequential and random keyed access</td>
 </tr>
 <tr>
 <td>🔗 <strong>IPC</strong></td>
 <td>subprocess + pty</td>
 <td>—</td>
-<td>Comunicação GUI↔COBOL via stdin/stdout e pseudo-terminal para testes</td>
+<td>GUI↔COBOL communication via stdin/stdout and pseudo-terminal for tests</td>
 </tr>
 <tr>
 <td>🏗️ <strong>Build</strong></td>
 <td>GNU Make</td>
 <td>—</td>
-<td>Compilação incremental dos módulos .so e executável principal</td>
+<td>Incremental compilation of .so modules and the main executable</td>
 </tr>
 <tr>
 <td>🧪 <strong>Testing</strong></td>
 <td>Python + pty</td>
 <td>—</td>
-<td>Testes E2E via pseudo-terminal — sem mocks, binário real</td>
+<td>E2E tests via pseudo-terminal — no mocks, real binary</td>
 </tr>
 <tr>
 <td>⚙️ <strong>Flags</strong></td>
@@ -267,66 +273,66 @@ flowchart LR
 <td>🐧 <strong>Platform</strong></td>
 <td>Linux / WSL2</td>
 <td>Ubuntu 20+</td>
-<td>Ambiente de compilação e execução; GUI suporta Windows via WSL</td>
+<td>Compilation and execution environment; GUI supports Windows via WSL</td>
 </tr>
 </tbody>
 </table>
 
 ---
 
-## 🎨 Padrões de Projeto Aplicados
+## 🎨 Design Patterns Applied
 
-| Padrão | Módulo | Implementação |
-|--------|--------|---------------|
-| 🏛️ **Service Orchestrator** | BANKMAIN | Roteia CALL dinâmico para módulos via EVALUATE sobre opção do menu |
-| 🗄️ **Repository Pattern** | BANKACCT | Encapsula toda I/O de contas em paragraphs com nomes semânticos |
-| ⚡ **Command Pattern** | BANKTRAN | Cada tipo de transação é um comando independente com validação própria |
-| 📦 **Unit of Work** | BANKTRAN/BANKTRF | Agrupa débito + crédito + audit record como unidade lógica de operação |
-| 🎯 **Strategy Pattern** | BANKINV | Cada produto financeiro tem sua estratégia de cálculo de rentabilidade |
-| 📋 **Report Generator** | BANKREP | Separa coleta de dados, processamento e formatação de relatórios |
-| 🔌 **Shared Kernel** | BANKDATA.cpy | Copybook com estruturas de dados compartilhadas sem duplicação |
-| 🏭 **Facade** | BANKMAIN | Interface unificada para todos os subsistemas bancários |
+| Pattern | Module | Implementation |
+|---------|--------|----------------|
+| 🏛️ **Service Orchestrator** | BANKMAIN | Routes dynamic CALL to modules via EVALUATE on menu option |
+| 🗄️ **Repository Pattern** | BANKACCT | Encapsulates all account I/O in semantically named paragraphs |
+| ⚡ **Command Pattern** | BANKTRAN | Each transaction type is an independent command with its own validation |
+| 📦 **Unit of Work** | BANKTRAN/BANKTRF | Groups debit + credit + audit record as one logical unit |
+| 🎯 **Strategy Pattern** | BANKINV | Each financial product has its own yield-calculation strategy |
+| 📋 **Report Generator** | BANKREP | Separates data gathering, processing, and report formatting |
+| 🔌 **Shared Kernel** | BANKDATA.cpy | Copybook with shared data structures — no duplication |
+| 🏭 **Facade** | BANKMAIN | Unified interface to all banking subsystems |
 
 ---
 
-## 📁 Estrutura do Projeto
+## 📁 Project Structure
 
 ```
 bank_system/
 │
-├── 📋 COBOL Sources (Módulos de Negócio)
-│   ├── BANKMAIN.cob          # Orquestrador principal (entry point)
-│   ├── BANKACCT.cob          # Gestão de contas bancárias
-│   ├── BANKTRAN.cob          # Processamento de transações
-│   ├── BANKTRF.cob           # Transferências avançadas (TED/DOC/PIX multi-chave)
-│   ├── BANKPAY.cob           # Pagamentos e boletos com validação Módulo 10
-│   ├── BANKINV.cob           # Investimentos e simulações financeiras
-│   ├── BANKCRM.cob           # Gestão de clientes (CRM)
-│   ├── BANKQRY.cob           # Consultas e extratos (read-only)
-│   ├── BANKREP.cob           # Relatórios gerenciais e regulatórios
-│   └── BANKADM.cob           # Módulo administrativo
+├── 📋 COBOL Sources (Business Modules)
+│   ├── BANKMAIN.cob          # Main orchestrator (entry point)
+│   ├── BANKACCT.cob          # Account management
+│   ├── BANKTRAN.cob          # Transaction processing
+│   ├── BANKTRF.cob           # Advanced transfers (TED/DOC/multi-key PIX)
+│   ├── BANKPAY.cob           # Payments and bills with Modulo-10 validation
+│   ├── BANKINV.cob           # Investments and financial simulations
+│   ├── BANKCRM.cob           # Customer management (CRM)
+│   ├── BANKQRY.cob           # Queries and statements (read-only)
+│   ├── BANKREP.cob           # Managerial and regulatory reports
+│   └── BANKADM.cob           # Administration module
 │
 ├── 📎 COBOL Copybooks
-│   └── BANKDATA.cpy          # Estruturas de dados compartilhadas
+│   └── BANKDATA.cpy          # Shared data structures
 │
 ├── 💾 Data Files (ISAM/Sequential)
-│   ├── BANKACCT.DAT          # Arquivo de contas (indexed)
-│   ├── BANKTRAN.DAT          # Arquivo de transações (indexed)
-│   ├── BANKCUST.DAT          # Arquivo de clientes (indexed)
-│   ├── BANKAUDT.LOG          # Trilha de auditoria (sequential append)
-│   └── BANKREP.TXT           # Relatórios gerados (sequential extend)
+│   ├── BANKACCT.DAT          # Account file (indexed)
+│   ├── BANKTRAN.DAT          # Transaction file (indexed)
+│   ├── BANKCUST.DAT          # Customer file (indexed)
+│   ├── BANKAUDT.LOG          # Audit trail (sequential append)
+│   └── BANKREP.TXT           # Generated reports (sequential extend)
 │
 ├── 🐍 Python Frontend
-│   ├── bank_gui.py               # Interface gráfica tkinter
-│   ├── acceptance_regression.py  # Testes E2E automatizados via pty
-│   └── finance_regression.py     # Testes de regressão financeira
+│   ├── bank_gui.py               # tkinter graphical interface
+│   ├── acceptance_regression.py  # Automated E2E tests via pty
+│   └── finance_regression.py     # Financial regression tests
 │
 ├── 🔨 Build
-│   └── Makefile              # Compilação GnuCOBOL com flags de hardening
+│   └── Makefile              # GnuCOBOL compilation with hardening flags
 │
-└── 📦 Binaries (gerados pelo make)
+└── 📦 Binaries (generated by make)
     └── bin/
-        ├── bankmain          # Executável principal
+        ├── bankmain          # Main executable
         ├── BANKACCT.so       # Dynamic module
         ├── BANKTRAN.so
         ├── BANKTRF.so
@@ -340,353 +346,353 @@ bank_system/
 
 ---
 
-## 📦 Módulos do Sistema
+## 📦 System Modules
 
-### 🏛️ BANKMAIN — Orquestrador Principal
+### 🏛️ BANKMAIN — Main Orchestrator
 
-**Papel:** Ponto de entrada da aplicação. Gerencia sessão, controla o arquivo de log e roteia chamadas CALL dinâmicas para os módulos especializados.
+**Role:** Application entry point. Manages the session, controls the audit log file, and routes dynamic CALL instructions to specialized modules.
 
-**Responsabilidades:**
-- Inicialização de sessão com ID baseado em timestamp
-- Abertura e controle do arquivo de auditoria (`BANKAUDT.LOG` em modo EXTEND)
-- Menu principal com 9 opções de navegação
-- Registro de cada operação no log de auditoria com data, hora, opção e código de retorno
-- Contadores de sessão: operações realizadas e erros encontrados
-- Exibição de sumário de sessão no encerramento
+**Responsibilities:**
+- Session initialization with timestamp-based ID
+- Opening and controlling the audit file (`BANKAUDT.LOG` in EXTEND mode)
+- Main menu with 9 navigation options
+- Recording every operation in the audit log (date, time, option, return code)
+- Session counters: operations completed and errors found
+- Session summary display on exit
 
 ```
 ╔══════════════════════════════════════╗
-║    SISTEMA BANCARIO COBOL v2.0.0     ║
-║    Sessao: [ID timestamp]            ║
+║    COBOL BANKING SYSTEM v2.0.0       ║
+║    Session: [timestamp ID]           ║
 ╠══════════════════════════════════════╣
-║  1. Gestao de Contas                 ║
-║  2. Transacoes                       ║
-║  3. Consultas e Extratos             ║
-║  4. Transferencias                   ║
-║  5. Pagamentos                       ║
-║  6. Investimentos                    ║
-║  7. Gestao de Clientes               ║
-║  8. Relatorios                       ║
-║  9. Administracao                    ║
-║  0. Sair                             ║
+║  1. Account Management               ║
+║  2. Transactions                     ║
+║  3. Queries & Statements             ║
+║  4. Transfers                        ║
+║  5. Payments                         ║
+║  6. Investments                      ║
+║  7. Customer Management              ║
+║  8. Reports                          ║
+║  9. Administration                   ║
+║  0. Exit                             ║
 ╚══════════════════════════════════════╝
 ```
 
 ---
 
-### 🏦 BANKACCT — Gestão de Contas
+### 🏦 BANKACCT — Account Management
 
-**Papel:** Repository Pattern completo para o ciclo de vida de contas bancárias.
+**Role:** Full Repository Pattern for the bank account lifecycle.
 
-| Operação | Código | Descrição |
-|----------|--------|-----------|
-| Abrir Nova Conta | `01` | Coleta dados, valida CPF (algoritmo completo com 2 dígitos), gera número único, grava registro |
-| Consultar Conta | `02` | Busca por número via chave primária, exibe dados completos com saldo formatado |
-| Atualizar Dados | `03` | Atualiza email/telefone com timestamp de atualização automático |
-| Bloquear/Desbloquear | `04` | Toggle de status A↔B — REWRITE somente quando há mudança efetiva |
-| Encerrar Conta | `05` | Encerra conta se saldo = zero; marca status `'E'` permanentemente |
-| Listar Contas | `06` | Full scan com total de contas e saldo global (usa contador próprio) |
-| Buscar por CPF | `07` | Acesso via chave alternativa indexada |
-| Aplicar Tarifas | `08` | Tarifa de manutenção para CC ativas — verifica limite antes de debitar |
-| Relatório de Contas | `09` | Delega ao módulo BANKREP |
-| Voltar | `00` | Fecha arquivo e retorna ao BANKMAIN |
+| Operation | Code | Description |
+|-----------|------|-------------|
+| Open New Account | `01` | Collect data, validate CPF (full algorithm, 2 digits), generate unique number, write record |
+| Query Account | `02` | Lookup by number via primary key, display full data with formatted balance |
+| Update Data | `03` | Update email/phone with automatic update timestamp |
+| Lock/Unlock | `04` | Toggle status A↔B — REWRITE only when status actually changes |
+| Close Account | `05` | Closes if balance = zero; marks status `'E'` permanently |
+| List Accounts | `06` | Full scan with account count and global balance (uses dedicated counter) |
+| Search by CPF | `07` | Access via indexed alternate key |
+| Apply Fees | `08` | Maintenance fee for active checking accounts — checks limit before debiting |
+| Account Report | `09` | Delegates to BANKREP module |
+| Back | `00` | Closes file and returns to BANKMAIN |
 
-**Geração de número de conta:** `DATA_ATUAL (YYYYMMDD) × 100 + CTR_SESSAO`
-**Dígito verificador:** `MOD(numero_conta, 10)`
-
----
-
-### 💸 BANKTRAN — Processamento de Transações
-
-**Papel:** Command Pattern + Unit of Work. Módulo central de movimentação financeira com trilha de auditoria completa e IDs únicos por sessão.
-
-| Operação | Código | Validações | Audit |
-|----------|--------|-----------|-------|
-| Depósito | `01` | Valor > 0, conta ativa | ✅ Tipo `DEP` |
-| Saque | `02` | Saldo + limite suficiente, limite diário R$ 5.000, valor > 0 | ✅ Tipo `SAQ` |
-| TED | `03` | Saldo+limite ≥ valor+taxa, destino ativo, confirmação | ✅ Tipo `TED` |
-| DOC | `04` | Mesmas do TED com taxa própria R$ 5,80 | ✅ Tipo `DOC` |
-| PIX | `05` | Origem ativa, saldo disponível, limite noturno, destino ativo, taxa zero | ✅ Tipo `PIX` |
-| Pagamento Boleto | `06` | Saldo + limite suficiente, valor > 0 | ✅ Tipo `PAG` |
-| Consultar Saldo | `07` | Conta ativa | — |
-| Extrato 30 dias | `08` | Filtro real por data via `INTEGER-OF-DATE / DATE-OF-INTEGER` | — |
-| Estornar Transação | `09` | Somente status `'E'`, chave correta `REG-TRANS-ID`, reversão por tipo | ✅ Status `'X'` |
-
-**ID de Transação:** `YYYYMMDDHHMMSS × 10 + incremento_sessao` — elimina colisão entre sessões.
+**Account number generation:** `CURRENT_DATE (YYYYMMDD) × 100 + SESSION_CTR`
+**Check digit:** `MOD(account_number, 10)`
 
 ---
 
-### ↔️ BANKTRF — Módulo de Transferências
+### 💸 BANKTRAN — Transaction Processing
 
-**Papel:** Implementação alternativa e mais completa de transferências com suporte a busca PIX por múltiplas chaves.
+**Role:** Command Pattern + Unit of Work. Central financial movement module with full audit trail and session-unique IDs.
 
-| Tipo | Taxa | Busca de Destino |
-|------|------|-----------------|
-| TED | R$ 14,90 | Por número de conta |
-| DOC | R$ 5,80 | Por número de conta |
-| PIX | R$ 0,00 | Full-scan por CPF (`'C'`), Email (`'E'`) ou Telefone (`'T'`) |
+| Operation | Code | Validations | Audit |
+|-----------|------|-------------|-------|
+| Deposit | `01` | Amount > 0, active account | ✅ Type `DEP` |
+| Withdrawal | `02` | Balance + limit sufficient, daily limit R$ 5,000, amount > 0 | ✅ Type `SAQ` |
+| TED Transfer | `03` | Balance+limit ≥ amount+fee, active destination, confirmation | ✅ Type `TED` |
+| DOC Transfer | `04` | Same as TED with its own fee R$ 5.80 | ✅ Type `DOC` |
+| PIX | `05` | Origin active, sufficient balance, night limit, destination active, zero fee | ✅ Type `PIX` |
+| Bill Payment | `06` | Balance + limit sufficient, amount > 0 | ✅ Type `PAG` |
+| Balance Query | `07` | Active account | — |
+| 30-day Statement | `08` | Real date filter via `INTEGER-OF-DATE / DATE-OF-INTEGER` | — |
+| Reverse Transaction | `09` | Only status `'E'`, correct key `REG-TRANS-ID`, reversal by type | ✅ Status `'X'` |
 
-**PIX com múltiplas chaves:** o módulo percorre todos os registros do arquivo de contas comparando o campo informado — mais completo que o PIX de BANKTRAN (que usa somente chave alternativa CPF via índice).
+**Transaction ID:** `YYYYMMDDHHMMSS × 10 + session_increment` — eliminates collision across sessions.
 
 ---
 
-### 💳 BANKPAY — Módulo de Pagamentos
+### ↔️ BANKTRF — Transfer Module
 
-**Papel:** Pagamento de boletos bancários com validação rigorosa do dígito verificador por Módulo 10.
+**Role:** Alternative and more complete transfer implementation supporting PIX lookup by multiple key types.
 
-**Algoritmo de Validação (Módulo 10):**
-1. Extrai exatamente 44 dígitos numéricos do código de barras
-2. Percorre posições 43→1 com pesos 2–9 em ciclo crescente
-3. Calcula: `DV = 11 - MOD(soma, 11)` — se resultado > 9, DV = 1
-4. Compara DV calculado com dígito na posição 44
-5. Rejeita o boleto antes de qualquer operação financeira se DV inválido
+| Type | Fee | Destination Lookup |
+|------|-----|-------------------|
+| TED | R$ 14.90 | By account number |
+| DOC | R$ 5.80 | By account number |
+| PIX | R$ 0.00 | Full-scan by CPF (`'C'`), Email (`'E'`), or Phone (`'T'`) |
 
-**Sequência de operação:**
+**PIX with multiple keys:** the module scans all account records comparing the informed field — more complete than BANKTRAN PIX (which uses only the CPF alternate index).
+
+---
+
+### 💳 BANKPAY — Payment Module
+
+**Role:** Bank bill payments with rigorous check-digit validation via Modulo 10.
+
+**Validation Algorithm (Modulo 10):**
+1. Extracts exactly 44 numeric digits from the barcode
+2. Traverses positions 43→1 with weights 2–9 in ascending cycle
+3. Computes: `DV = 11 - MOD(sum, 11)` — if result > 9, DV = 1
+4. Compares computed DV with digit at position 44
+5. Rejects the bill before any financial operation if DV is invalid
+
+**Operation sequence:**
 ```
-Conta → Código de barras → Validar DV → Valor
-→ Verificar saldo → Debitar → WRITE audit PAG → Confirmar
+Account → Barcode → Validate DV → Amount
+→ Check balance → Debit → WRITE audit PAG → Confirm
 ```
 
 ---
 
-### 📈 BANKINV — Módulo de Investimentos
+### 📈 BANKINV — Investment Module
 
-**Papel:** Strategy Pattern para produtos financeiros com simulador e cálculo real de rentabilidade e IR.
+**Role:** Strategy Pattern for financial products with a simulator and real yield/withholding-tax calculation.
 
-#### Produtos Disponíveis
+#### Available Products
 
-| Produto | Taxa | Mínimo | IR | Liquidez |
-|---------|------|--------|-----|---------|
-| 🏆 **CDB** | 105% CDI | R$ 1.000 | Regressivo | No vencimento |
-| 🏠 **LCI** | 95% CDI | R$ 5.000 | **Isento** | 90 dias |
-| 🌾 **LCA** | 93% CDI | — | **Isento** | 90 dias |
-| 🇧🇷 **Tesouro Selic** | 100% SELIC | R$ 30 | Regressivo | D+1 |
-| 🇧🇷 **Tesouro IPCA+** | IPCA + spread | R$ 30 | Regressivo | No vencimento |
-| 🇧🇷 **Tesouro Prefixado** | 11,87% a.a. | R$ 30 | Regressivo | No vencimento |
-| 📊 **Fundo RF DI** | Varia | — | Regressivo | D+1 |
-| 📊 **Fundo Multimercado** | Varia | — | Regressivo | D+1 a D+30 |
-| 📊 **Fundo Ações** | Varia | — | 15% fixo | D+3 |
+| Product | Rate | Minimum | Tax | Liquidity |
+|---------|------|---------|-----|-----------|
+| 🏆 **CDB** | 105% CDI | R$ 1,000 | Regressive | At maturity |
+| 🏠 **LCI** | 95% CDI | R$ 5,000 | **Tax-free** | 90 days |
+| 🌾 **LCA** | 93% CDI | — | **Tax-free** | 90 days |
+| 🇧🇷 **Treasury Selic** | 100% SELIC | R$ 30 | Regressive | D+1 |
+| 🇧🇷 **Treasury IPCA+** | IPCA + spread | R$ 30 | Regressive | At maturity |
+| 🇧🇷 **Fixed-rate Treasury** | 11.87% p.a. | R$ 30 | Regressive | At maturity |
+| 📊 **Fixed Income Fund** | Varies | — | Regressive | D+1 |
+| 📊 **Multi-strategy Fund** | Varies | — | Regressive | D+1 to D+30 |
+| 📊 **Equity Fund** | Varies | — | 15% fixed | D+3 |
 
-#### Tabela de IR Regressivo
+#### Regressive Withholding Tax Table
 
-| Prazo | Alíquota IR |
+| Term | Tax Rate |
+|------|----------|
+| ≤ 180 days | 🔴 22.5% |
+| 181 – 360 days | 🟠 20.0% |
+| 361 – 720 days | 🟡 17.5% |
+| > 720 days | 🟢 15.0% |
+
+#### CDB Calculation Formula — ANBIMA Standard (252 business days)
+
+```
+annual_rate  = CDI × CDI_percentage / 100 / 100
+daily_rate   = EXP(LOG(1 + annual_rate) / 252) - 1
+gross_value  = principal × (1 + daily_rate) ^ term_days
+yield        = gross_value - principal
+tax          = yield × tax_rate
+net_value    = gross_value - tax
+```
+
+#### Configured Market Rates
+
+| Index | Annual Rate |
 |-------|-------------|
-| ≤ 180 dias | 🔴 22,5% |
-| 181 – 360 dias | 🟠 20,0% |
-| 361 – 720 dias | 🟡 17,5% |
-| > 720 dias | 🟢 15,0% |
-
-#### Fórmula de Cálculo CDB — Padrão ANBIMA (252 dias úteis)
-
-```
-taxa_anual  = CDI × percentual_CDI / 100 / 100
-taxa_diaria = EXP(LOG(1 + taxa_anual) / 252)  - 1
-valor_bruto = aporte × (1 + taxa_diaria) ^ prazo_dias
-rendimento  = valor_bruto - aporte
-imposto     = rendimento × aliquota_IR
-valor_liq   = valor_bruto - imposto
-```
-
-#### Taxas de Mercado Configuradas
-
-| Índice | Taxa a.a. |
-|--------|-----------|
-| 📊 CDI | 10,5000% |
-| 🏛️ SELIC | 10,5000% |
-| 📈 IPCA | 4,6200% |
-| 📉 IGPM | 3,8900% |
+| 📊 CDI | 10.5000% |
+| 🏛️ SELIC | 10.5000% |
+| 📈 IPCA | 4.6200% |
+| 📉 IGPM | 3.8900% |
 
 ---
 
-### 👥 BANKCRM — Gestão de Clientes
+### 👥 BANKCRM — Customer Management
 
-**Papel:** Cadastro e manutenção do perfil completo de clientes com score de crédito e perfil de risco.
+**Role:** Full customer profile registration and maintenance with credit score and risk profile.
 
-**Dados Cadastrais:**
+**Registration Data:**
 
-| Campo | PIC | Descrição |
-|-------|-----|-----------|
-| ID do Cliente | `9(10)` | Chave primária — informada pelo operador |
-| Nome | `X(60)` | Nome completo |
-| CPF | `X(14)` | Chave alternativa com formatação |
-| RG | `X(15)` | Documento de identidade |
-| Data de Nascimento | `9(8)` | Formato AAAAMMDD |
-| Sexo | `X(1)` | `M` / `F` / `O` |
-| Estado Civil | `X(2)` | Código de 2 caracteres |
-| Profissão | `X(40)` | — |
-| Renda | `S9(11)V99 COMP-3` | Renda mensal em R$ |
-| Perfil de Risco | `X(1)` | `C` / `M` / `A` |
-| Endereço | Grupo `X(190)` | Logradouro, número, complemento, bairro, cidade, UF, CEP |
-| Status | `X(1)` | `A`=Ativo `I`=Inativo `B`=Bloqueado |
-| Score de Crédito | `9(4)` | 0–1000 pontos (inicial: 500) |
+| Field | PIC | Description |
+|-------|-----|-------------|
+| Customer ID | `9(10)` | Primary key — entered by operator |
+| Name | `X(60)` | Full name |
+| CPF | `X(14)` | Alternate key with formatting |
+| RG | `X(15)` | Identity document |
+| Date of Birth | `9(8)` | Format YYYYMMDD |
+| Gender | `X(1)` | `M` / `F` / `O` |
+| Marital Status | `X(2)` | 2-character code |
+| Occupation | `X(40)` | — |
+| Income | `S9(11)V99 COMP-3` | Monthly income |
+| Risk Profile | `X(1)` | `C` / `M` / `A` |
+| Address | Group `X(190)` | Street, number, complement, district, city, state, ZIP |
+| Status | `X(1)` | `A`=Active `I`=Inactive `B`=Blocked |
+| Credit Score | `9(4)` | 0–1000 (initial: 500) |
 
-**Perfis de Risco:**
+**Risk Profiles:**
 
-| Código | Perfil | Característica |
-|--------|--------|---------------|
-| 🟢 `C` | Conservador | Preferência por renda fixa, baixa volatilidade |
-| 🟡 `M` | Moderado | Mix entre renda fixa e variável |
-| 🔴 `A` | Arrojado | Aceita alta volatilidade, busca retorno máximo |
-
----
-
-### 🔍 BANKQRY — Consultas e Extratos
-
-**Papel:** Interface read-only (`OPEN INPUT`) para consultas sem risco de modificação de dados.
-
-| Operação | Código | Chave de Busca | Filtro |
-|----------|--------|----------------|--------|
-| Consultar por número | `01` | Chave primária (PIC 9(10)) | — |
-| Consultar por CPF | `02` | Chave alternativa indexada (PIC X(11)) | — |
-| Extrato rápido 30 dias | `03` | Número da conta (full-scan transações) | `DATA >= (HOJE - 30)` |
-
-**Filtro temporal:** `INTEGER-OF-DATE(HOJE) - 30 → DATE-OF-INTEGER(resultado)` — respeita meses com 28/29/30/31 dias corretamente.
+| Code | Profile | Characteristic |
+|------|---------|---------------|
+| 🟢 `C` | Conservative | Prefers fixed income, low volatility |
+| 🟡 `M` | Moderate | Mix of fixed income and equities |
+| 🔴 `A` | Aggressive | Accepts high volatility, seeks maximum return |
 
 ---
 
-### 📊 BANKREP — Relatórios
+### 🔍 BANKQRY — Queries and Statements
 
-**Papel:** Report Generator Pattern. Gera relatórios persistidos em `BANKREP.TXT` com `OPEN EXTEND` — sem destruir conteúdo anterior.
+**Role:** Read-only interface (`OPEN INPUT`) for queries with no risk of data modification.
 
-| Relatório | Código | Conteúdo |
-|-----------|--------|---------|
-| Balancete Geral | `01` | Todas as contas com saldos; totais CC/CP; ativas/bloqueadas |
-| Resumo por Tipo | `02` | Contagem de contas por categoria |
-| Movimentação Diária | `03` | Total DEP/SAQ/TRF do dia atual com filtro por `DATA_TRANS = HOJE` |
-| Saldos Negativos | `04` | Contas com `saldo < 0` (overdraft) |
-| Top 10 Saldos | `05` | Estrutura para algoritmo de ordenação |
-| Inadimplência | `06` | Contas com limite utilizado > 80% |
-| DRE Simplificado | `07` | Receitas de tarifas e juros vs despesas operacionais |
-| Relatório BCB | `08` | Formato SCR — Sistema de Informações de Crédito do Banco Central |
+| Operation | Code | Search Key | Filter |
+|-----------|------|------------|--------|
+| Query by number | `01` | Primary key (PIC 9(10)) | — |
+| Query by CPF | `02` | Indexed alternate key (PIC X(11)) | — |
+| 30-day quick statement | `03` | Account number (full-scan transactions) | `DATE >= (TODAY - 30)` |
+
+**Date filter:** `INTEGER-OF-DATE(TODAY) - 30 → DATE-OF-INTEGER(result)` — correctly handles months with 28/29/30/31 days.
 
 ---
 
-### ⚙️ BANKADM — Administração
+### 📊 BANKREP — Reports
 
-**Papel:** Operações administrativas e de manutenção do sistema.
+**Role:** Report Generator Pattern. Generates reports persisted in `BANKREP.TXT` with `OPEN EXTEND` — without destroying prior content.
 
-| Operação | Código | Descrição |
-|----------|--------|-----------|
-| Estatísticas Gerais | `01` | Contagem total de registros em CONTAS, TRANS e CLIENTES via full-scan |
-| Limpar Log | `02` | Trunca `BANKAUDT.LOG` (OPEN OUTPUT → fecha) |
+| Report | Code | Content |
+|--------|------|---------|
+| General Trial Balance | `01` | All accounts with balances; totals by type (CC/CP); active/blocked counts |
+| Summary by Type | `02` | Account count by category |
+| Daily Movement | `03` | Total DEP/WDR/TRF for current day filtered by `TRANS_DATE = TODAY` |
+| Negative Balances | `04` | Accounts with `balance < 0` (overdraft) |
+| Top 10 Balances | `05` | Structure for sorting algorithm |
+| Delinquency | `06` | Accounts with credit limit utilized > 80% |
+| Simplified P&L | `07` | Fee and interest revenue vs operating expenses |
+| BCB Report | `08` | SCR format — Brazilian Central Bank Credit Information System |
+
+---
+
+### ⚙️ BANKADM — Administration
+
+**Role:** Administrative and maintenance operations.
+
+| Operation | Code | Description |
+|-----------|------|-------------|
+| General Statistics | `01` | Full-scan count of records in ACCOUNTS, TRANSACTIONS and CUSTOMERS |
+| Clear Log | `02` | Truncates `BANKAUDT.LOG` (OPEN OUTPUT → close) |
 
 > [!WARNING]
-> A operação **Limpar Log** apaga permanentemente a trilha de auditoria. Em produção real, o log deve ser imutável e arquivado externamente.
+> The **Clear Log** operation permanently erases the audit trail. In a real production environment, the audit log must be immutable and archived externally.
 
 ---
 
-## 💼 Regras de Negócio
+## 💼 Business Rules
 
-### 🏦 Contas Bancárias
+### 🏦 Bank Accounts
 
-#### Tipos de Conta
+#### Account Types
 
-| Código | Nome | Limite de Crédito | Tarifa Manutenção |
-|--------|------|-------------------|-------------------|
-| `CC` | Conta Corrente | R$ 500,00 (negativo) | R$ 12,90/mês |
-| `CP` | Conta Poupança | Sem limite | Isenta |
-| `CS` | Conta Salário | Sem limite | Isenta |
-| `CI` | Conta Investimento | Sem limite | Isenta |
+| Code | Name | Credit Limit | Maintenance Fee |
+|------|------|-------------|----------------|
+| `CC` | Checking Account | R$ 500.00 (overdraft) | R$ 12.90/month |
+| `CP` | Savings Account | No limit | Free |
+| `CS` | Salary Account | No limit | Free |
+| `CI` | Investment Account | No limit | Free |
 
-#### Ciclo de Vida da Conta
+#### Account Lifecycle
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Pendente : Abertura iniciada
-    Pendente --> Ativa : Documentação aprovada
-    Ativa --> Bloqueada : Bloqueio manual\nou suspeita de fraude
-    Bloqueada --> Ativa : Desbloqueio manual\npelo operador
-    Ativa --> Encerrada : Saldo = 0\n+ solicitação formal
-    Bloqueada --> Encerrada : Encerramento\nforçado
-    Encerrada --> [*] : Estado final\nsem reativação
+    [*] --> Pending : Account opening initiated
+    Pending --> Active : Documentation approved
+    Active --> Blocked : Manual block\nor fraud suspicion
+    Blocked --> Active : Manual unblock\nby operator
+    Active --> Closed : Balance = 0\n+ formal request
+    Blocked --> Closed : Forced\nclosure
+    Closed --> [*] : Final state\nno reactivation
 
-    note right of Ativa : Código 'A'\nTodas as operações liberadas
-    note right of Bloqueada : Código 'B'\nSomente consultas
-    note right of Encerrada : Código 'E'\nPermanente — sem reativação
-    note left of Pendente : Código 'P'\nAguardando aprovação
+    note right of Active : Code 'A'\nAll operations enabled
+    note right of Blocked : Code 'B'\nQuery only
+    note right of Closed : Code 'E'\nPermanent — no reactivation
+    note left of Pending : Code 'P'\nAwaiting approval
 ```
 
-#### Regras de Negócio — Contas
+#### Account Business Rules
 
-- ✅ CPF validado pelo **algoritmo completo** (dois dígitos verificadores + rejeição de 10 sequências inválidas)
-- ✅ Alerta emitido quando CPF já possui conta cadastrada (múltiplas contas permitidas por CPF)
-- ✅ Número de conta gerado como `YYYYMMDD × 100 + sequencial_sessão`
-- ✅ Dígito verificador calculado como `MOD(numero_conta, 10)`
-- ✅ Tarifa de manutenção somente debitada quando `(saldo - tarifa) ≥ limite` — não viola o limite contratual
-- ✅ Encerramento bloqueado quando `saldo ≠ 0` (positivo ou negativo)
-- ✅ Bloqueio/Desbloqueio: REWRITE executado apenas quando o status efetivamente muda
+- ✅ CPF validated by the **complete algorithm** (two check digits + rejection of 10 invalid sequences)
+- ✅ Alert issued when CPF already has an account (multiple accounts per CPF are allowed)
+- ✅ Account number generated as `YYYYMMDD × 100 + session_sequential`
+- ✅ Check digit computed as `MOD(account_number, 10)`
+- ✅ Maintenance fee only debited when `(balance - fee) ≥ limit` — never violates the contractual limit
+- ✅ Account closure blocked when `balance ≠ 0` (positive or negative)
+- ✅ Lock/Unlock: REWRITE executed only when status actually changes
 
 ---
 
-### 💸 Transações e Limites
+### 💸 Transactions and Limits
 
-#### Limites Operacionais
+#### Operational Limits
 
-| Operação | Limite | Condição |
-|----------|--------|---------|
-| 💵 Saque diário | R$ 5.000,00 | Por conta, por dia |
-| 🔄 Transferência diária | R$ 10.000,00 | TED/DOC |
-| ⚡ PIX diário | R$ 20.000,00 | Horário comercial |
-| 🌙 PIX noturno | R$ 1.000,00 | 22h00 – 06h00 |
+| Operation | Limit | Condition |
+|-----------|-------|-----------|
+| 💵 Daily withdrawal | R$ 5,000.00 | Per account, per day |
+| 🔄 Daily transfer | R$ 10,000.00 | TED/DOC |
+| ⚡ Daily PIX | R$ 20,000.00 | Business hours |
+| 🌙 Nighttime PIX | R$ 1,000.00 | 10:00 PM – 6:00 AM |
 
-#### Taxas por Operação
+#### Fees by Operation
 
-| Operação | Taxa | Observação |
-|----------|------|------------|
-| Depósito | Gratuito | — |
-| Saque | Gratuito | Limite diário aplicável |
-| TED | R$ 14,90 | Verificada junto com o saldo disponível |
-| DOC | R$ 5,80 | Verificada junto com o saldo disponível |
-| PIX | **R$ 0,00** | Taxa zero garantida em qualquer horário |
-| Boleto | Gratuito | Validação Módulo 10 obrigatória |
-| Tarifa CC | R$ 12,90/mês | Somente conta corrente ativa |
+| Operation | Fee | Note |
+|-----------|-----|------|
+| Deposit | Free | — |
+| Withdrawal | Free | Daily limit applies |
+| TED | R$ 14.90 | Checked along with available balance |
+| DOC | R$ 5.80 | Checked along with available balance |
+| PIX | **R$ 0.00** | Zero fee guaranteed at any time |
+| Bill Payment | Free | Modulo-10 validation mandatory |
+| Checking Maint. | R$ 12.90/mo | Active checking accounts only |
 
-#### Cálculo de Saldo Disponível
+#### Available Balance Calculation
 
 ```
-saldo_disponivel = saldo_atual + abs(limite_conta)
+available_balance = current_balance + abs(account_limit)
 
-Exemplo — conta corrente com limite R$ 500:
-  Saldo  R$ 100,00  →  disponível  R$ 600,00
-  Saldo  R$   0,00  →  disponível  R$ 500,00
-  Saldo  R$ -200,00 →  disponível  R$ 300,00
-  Saldo  R$ -500,00 →  disponível  R$   0,00  ← limite esgotado
+Example — checking account with R$ 500 limit:
+  Balance  R$ 100.00  →  available  R$ 600.00
+  Balance  R$   0.00  →  available  R$ 500.00
+  Balance  R$ -200.00 →  available  R$ 300.00
+  Balance  R$ -500.00 →  available  R$   0.00  ← limit exhausted
 ```
 
-#### Status de Transação
+#### Transaction Status
 
-| Código | Significado |
-|--------|-------------|
-| `P` | Pendente — aguardando processamento |
-| `E` | Efetivada — processada com sucesso |
-| `C` | Cancelada — cancelada antes da execução |
-| `X` | Estornada — revertida após efetivação |
+| Code | Meaning |
+|------|---------|
+| `P` | Pending — awaiting processing |
+| `E` | Settled — successfully processed |
+| `C` | Cancelled — cancelled before execution |
+| `X` | Reversed — reverted after settlement |
 
 ---
 
-### 📊 Validação de CPF
+### 📊 CPF Validation
 
 ```mermaid
 flowchart TD
-    A["📥 CPF Informado (11 dígitos)"] --> B{Sequência\ninválida?\n000...9\n111...9...}
-    B -->|"Sim"| FAIL["❌ CPF INVÁLIDO"]
-    B -->|"Não"| C["Calcular 1º DV\n∑(dígito[i] × (11-i)) para i = 1..9"]
-    C --> D["resto = MOD(soma, 11)"]
-    D --> E{resto < 2?}
-    E -->|"Sim"| F["DV₁ = 0"]
-    E -->|"Não"| G["DV₁ = 11 - resto"]
-    F --> H{DV₁ = CPF[10]?}
+    A["📥 CPF Entered (11 digits)"] --> B{Invalid\nsequence?\n000...0 to 999...9}
+    B -->|"Yes"| FAIL["❌ INVALID CPF"]
+    B -->|"No"| C["Compute 1st check digit\n∑(digit[i] × (11-i)) for i = 1..9"]
+    C --> D["remainder = MOD(sum, 11)"]
+    D --> E{remainder < 2?}
+    E -->|"Yes"| F["CD₁ = 0"]
+    E -->|"No"| G["CD₁ = 11 - remainder"]
+    F --> H{CD₁ = CPF[10]?}
     G --> H
-    H -->|"Não"| FAIL
-    H -->|"Sim"| I["Calcular 2º DV\n∑(dígito[i] × (12-i)) para i = 1..10"]
-    I --> J["resto = MOD(soma, 11)"]
-    J --> K{resto < 2?}
-    K -->|"Sim"| L["DV₂ = 0"]
-    K -->|"Não"| M["DV₂ = 11 - resto"]
-    L --> N{DV₂ = CPF[11]?}
+    H -->|"No"| FAIL
+    H -->|"Yes"| I["Compute 2nd check digit\n∑(digit[i] × (12-i)) for i = 1..10"]
+    I --> J["remainder = MOD(sum, 11)"]
+    J --> K{remainder < 2?}
+    K -->|"Yes"| L["CD₂ = 0"]
+    K -->|"No"| M["CD₂ = 11 - remainder"]
+    L --> N{CD₂ = CPF[11]?}
     M --> N
-    N -->|"Não"| FAIL
-    N -->|"Sim"| OK["✅ CPF VÁLIDO"]
+    N -->|"No"| FAIL
+    N -->|"Yes"| OK["✅ VALID CPF"]
 
     style FAIL fill:#c62828,color:#fff
     style OK fill:#2e7d32,color:#fff
@@ -695,412 +701,412 @@ flowchart TD
 
 ---
 
-## ✅ Requisitos Funcionais
+## ✅ Functional Requirements
 
 <details>
-<summary><strong>🏦 RF01–RF10 — Gestão de Contas</strong></summary>
+<summary><strong>🏦 FR01–FR10 — Account Management</strong></summary>
 
-| ID | Requisito |
-|----|-----------|
-| RF01 | O sistema deve permitir abertura de conta com coleta de: nome, CPF, tipo, agência, email e telefone |
-| RF02 | O sistema deve validar o CPF pelo algoritmo oficial (dois dígitos verificadores) antes de criar a conta |
-| RF03 | O sistema deve rejeitar CPFs com todos os dígitos iguais (000...0 a 999...9) |
-| RF04 | O sistema deve gerar número de conta único por sessão com base em data e sequencial |
-| RF05 | O sistema deve calcular dígito verificador da conta automaticamente |
-| RF06 | O sistema deve exibir confirmação de abertura somente quando o WRITE for bem-sucedido (FS=00) |
-| RF07 | O sistema deve suportar quatro tipos de conta: CC, CP, CS e CI |
-| RF08 | O sistema deve permitir bloqueio e desbloqueio de conta (status A↔B) realizando REWRITE apenas quando há mudança efetiva |
-| RF09 | O sistema deve impedir encerramento de conta com saldo diferente de zero |
-| RF10 | O sistema deve aplicar tarifa de manutenção somente quando o saldo não ultrapassar o limite após o débito |
+| ID | Requirement |
+|----|-------------|
+| FR01 | The system must allow account opening by collecting: name, CPF, type, branch, email and phone |
+| FR02 | The system must validate CPF using the official algorithm (two check digits) before creating the account |
+| FR03 | The system must reject CPFs where all digits are equal (000...0 through 999...9) |
+| FR04 | The system must generate a session-unique account number based on date and sequential |
+| FR05 | The system must compute the account check digit automatically |
+| FR06 | The system must show the opening confirmation only when WRITE succeeds (FS=00) |
+| FR07 | The system must support four account types: CC, CP, CS and CI |
+| FR08 | The system must allow account locking and unlocking (status A↔B), performing REWRITE only when the status actually changes |
+| FR09 | The system must prevent account closure when balance is not zero |
+| FR10 | The system must apply maintenance fees only when the balance after the debit does not exceed the account limit |
 
 </details>
 
 <details>
-<summary><strong>💸 RF11–RF28 — Transações</strong></summary>
+<summary><strong>💸 FR11–FR28 — Transactions</strong></summary>
 
-| ID | Requisito |
-|----|-----------|
-| RF11 | O sistema deve aceitar depósitos em qualquer conta ativa, valor positivo obrigatório |
-| RF12 | O sistema deve validar saldo disponível (saldo + limite) antes de qualquer débito |
-| RF13 | O sistema deve aplicar limite diário de R$ 5.000 para saques |
-| RF14 | O sistema deve cobrar taxa de R$ 14,90 para TED e deduzir do saldo do remetente |
-| RF15 | O sistema deve cobrar taxa de R$ 5,80 para DOC e deduzir do saldo do remetente |
-| RF16 | O sistema deve executar PIX sem taxa (R$ 0,00) em qualquer horário |
-| RF17 | O sistema deve limitar PIX a R$ 1.000 entre 22h00 e 06h00 |
-| RF18 | O sistema deve solicitar conta de origem antes de qualquer operação PIX |
-| RF19 | O sistema deve verificar se a conta de destino está ativa antes de transferências e PIX |
-| RF20 | O sistema deve registrar todas as transações bem-sucedidas no arquivo BANKTRAN.DAT com tipo correto |
-| RF21 | O sistema deve gerar IDs de transação baseados em timestamp (YYYYMMDDHHMMSS×10) para evitar colisão entre sessões |
-| RF22 | O sistema deve exibir alerta quando o WRITE do registro de auditoria falhar, sem reverter a operação |
-| RF23 | O sistema deve exibir extrato com filtro real dos últimos 30 dias usando cálculo por inteiro de data |
-| RF24 | O sistema deve permitir estorno somente de transações com status 'E' (Efetivada) |
-| RF25 | O sistema deve usar `REG-TRANS-ID` (chave do arquivo) no READ do estorno, não uma variável de working-storage |
-| RF26 | O sistema deve usar `REG-CONTA-NUM` (chave do arquivo) no READ de reversão de estorno |
-| RF27 | O sistema deve validar código de barras pelo algoritmo Módulo 10 antes de pagar boleto |
-| RF28 | O sistema deve registrar pagamento de boleto com tipo 'PAG' no arquivo de transações |
-
-</details>
-
-<details>
-<summary><strong>📈 RF29–RF36 — Investimentos</strong></summary>
-
-| ID | Requisito |
-|----|-----------|
-| RF29 | O sistema deve calcular rentabilidade diária de CDB usando `EXP(LOG(1+r)/252)` — base 252 dias úteis ANBIMA |
-| RF30 | O sistema deve aplicar IR regressivo: 22,5% (≤180d), 20% (≤360d), 17,5% (≤720d), 15% (>720d) |
-| RF31 | O sistema deve informar que LCI e LCA são isentos de IR |
-| RF32 | O sistema deve impor valor mínimo de R$ 1.000 para CDB e R$ 5.000 para LCI |
-| RF33 | O sistema deve exibir valor bruto, IR e valor líquido antes de confirmar a aplicação |
-| RF34 | O sistema deve oferecer simulador de investimento com os mesmos cálculos do CDB |
-| RF35 | O sistema deve exibir as taxas de mercado atuais (CDI, SELIC, IPCA, IGPM) no menu de investimentos |
-| RF36 | O sistema deve oferecer pelo menos 5 tipos de produtos: CDB, LCI, LCA, Tesouro, Fundos |
+| ID | Requirement |
+|----|-------------|
+| FR11 | The system must accept deposits into any active account; positive amount mandatory |
+| FR12 | The system must validate available balance (balance + limit) before any debit |
+| FR13 | The system must enforce a daily withdrawal limit of R$ 5,000 |
+| FR14 | The system must charge a R$ 14.90 fee for TED and deduct it from the sender's balance |
+| FR15 | The system must charge a R$ 5.80 fee for DOC and deduct it from the sender's balance |
+| FR16 | The system must process PIX with zero fee (R$ 0.00) at any time |
+| FR17 | The system must limit PIX to R$ 1,000 between 10:00 PM and 6:00 AM |
+| FR18 | The system must request the source account before any PIX operation |
+| FR19 | The system must verify that the destination account is active before transfers and PIX |
+| FR20 | The system must record all successful transactions in BANKTRAN.DAT with the correct type |
+| FR21 | The system must generate transaction IDs based on timestamp (YYYYMMDDHHMMSS×10) to avoid inter-session collision |
+| FR22 | The system must display a warning when the audit WRITE fails, without rolling back the operation |
+| FR23 | The system must display statements with a real 30-day filter using integer-date arithmetic |
+| FR24 | The system must allow reversal only for transactions with status 'E' (Settled) |
+| FR25 | The system must use `REG-TRANS-ID` (file key) in the reversal READ, not a working-storage variable |
+| FR26 | The system must use `REG-CONTA-NUM` (file key) in the account reversal READ |
+| FR27 | The system must validate the barcode using the Modulo-10 algorithm before paying a bill |
+| FR28 | The system must record bill payments with type 'PAG' in the transaction file |
 
 </details>
 
 <details>
-<summary><strong>👥 RF37–RF41 — Clientes (CRM)</strong></summary>
+<summary><strong>📈 FR29–FR36 — Investments</strong></summary>
 
-| ID | Requisito |
-|----|-----------|
-| RF37 | O sistema deve cadastrar cliente com dados pessoais, financeiros e de endereço completos |
-| RF38 | O sistema deve suportar três perfis de risco: Conservador (C), Moderado (M) e Arrojado (A) |
-| RF39 | O sistema deve atribuir score de crédito inicial de 500 pontos a novos clientes |
-| RF40 | O sistema deve suportar os status de cliente: Ativo (A), Inativo (I) e Bloqueado (B) |
-| RF41 | O sistema deve permitir busca de cliente por ID (chave primária) e por CPF (chave alternativa) |
+| ID | Requirement |
+|----|-------------|
+| FR29 | The system must calculate CDB daily yield using `EXP(LOG(1+r)/252)` — ANBIMA 252 business-day base |
+| FR30 | The system must apply regressive withholding tax: 22.5% (≤180d), 20% (≤360d), 17.5% (≤720d), 15% (>720d) |
+| FR31 | The system must inform that LCI and LCA are tax-exempt |
+| FR32 | The system must enforce a minimum of R$ 1,000 for CDB and R$ 5,000 for LCI |
+| FR33 | The system must display gross value, tax, and net value before confirming the investment |
+| FR34 | The system must offer an investment simulator using the same CDB calculations |
+| FR35 | The system must display current market rates (CDI, SELIC, IPCA, IGPM) in the investment menu |
+| FR36 | The system must offer at least 5 product types: CDB, LCI, LCA, Treasury, Funds |
 
 </details>
 
 <details>
-<summary><strong>📊 RF42–RF48 — Relatórios e Administração</strong></summary>
+<summary><strong>👥 FR37–FR41 — Customers (CRM)</strong></summary>
 
-| ID | Requisito |
-|----|-----------|
-| RF42 | O sistema deve gerar balancete com totais por tipo de conta (CC, CP) e status |
-| RF43 | O sistema deve persistir relatórios em BANKREP.TXT sem apagar conteúdo anterior (OPEN EXTEND com fallback) |
-| RF44 | O sistema deve calcular movimentação diária filtrando por data atual |
-| RF45 | O sistema deve listar contas com saldo negativo (overdraft) |
-| RF46 | O sistema deve registrar cada operação do menu principal no log de auditoria com timestamp |
-| RF47 | O sistema deve exibir sumário de sessão ao encerrar: total de operações e erros |
-| RF48 | O sistema deve exibir estatísticas gerais (contagem de contas, transações e clientes) no módulo de administração |
+| ID | Requirement |
+|----|-------------|
+| FR37 | The system must register customers with complete personal, financial, and address data |
+| FR38 | The system must support three risk profiles: Conservative (C), Moderate (M) and Aggressive (A) |
+| FR39 | The system must assign an initial credit score of 500 to new customers |
+| FR40 | The system must support customer statuses: Active (A), Inactive (I) and Blocked (B) |
+| FR41 | The system must allow customer lookup by ID (primary key) and by CPF (alternate key) |
+
+</details>
+
+<details>
+<summary><strong>📊 FR42–FR48 — Reports and Administration</strong></summary>
+
+| ID | Requirement |
+|----|-------------|
+| FR42 | The system must generate a trial balance with totals by account type (CC, CP) and status |
+| FR43 | The system must persist reports in BANKREP.TXT without overwriting prior content (OPEN EXTEND with fallback) |
+| FR44 | The system must calculate daily movement filtered by current date |
+| FR45 | The system must list accounts with negative balances (overdraft) |
+| FR46 | The system must log every main-menu operation in the audit log with timestamp |
+| FR47 | The system must display a session summary on exit: total operations and errors |
+| FR48 | The system must display general statistics (account, transaction and customer counts) in the administration module |
 
 </details>
 
 ---
 
-## ⚡ Requisitos Não-Funcionais
+## ⚡ Non-Functional Requirements
 
-| Categoria | ID | Requisito |
-|-----------|----|-----------|
-| 🎯 **Precisão** | RNF01 | Todos os cálculos financeiros usam `COMP-3` (packed decimal BCD) — sem ponto flutuante binário |
-| 🎯 **Precisão** | RNF02 | Fórmulas de investimento seguem padrão ANBIMA — base 252 dias úteis por ano |
-| 🔐 **Segurança** | RNF03 | CPF validado pelo algoritmo completo (2 dígitos) antes de qualquer abertura de conta |
-| 🔐 **Segurança** | RNF04 | Contas bloqueadas ou encerradas não podem realizar transações |
-| 🔐 **Segurança** | RNF05 | IDs de transação únicos entre sessões via timestamp `YYYYMMDDHHMMSS × 10` |
-| 🔐 **Segurança** | RNF06 | Limite PIX noturno (22h–06h) de R$ 1.000 verificado antes da execução |
-| 📋 **Auditoria** | RNF07 | Toda transação financeira bem-sucedida gera registro em BANKTRAN.DAT |
-| 📋 **Auditoria** | RNF08 | Falha no WRITE de auditoria deve exibir aviso mas não bloquear a operação |
-| 📋 **Auditoria** | RNF09 | Log de sessão em BANKAUDT.LOG aberto em modo EXTEND (append-only por sessão) |
-| 🔧 **Modularidade** | RNF10 | Módulos compilados como shared objects (`.so`) carregados via `CALL` dinâmico |
-| 🔧 **Modularidade** | RNF11 | Estruturas de dados compartilhadas exclusivamente via copybook `BANKDATA.cpy` |
-| ⚡ **Desempenho** | RNF12 | Acesso a contas por número e CPF usa índices ISAM — sem full-scan |
-| ⚡ **Desempenho** | RNF13 | Extratos e relatórios usam full-scan com filtro por data aplicado durante a leitura |
-| 🖥️ **Interface** | RNF14 | GUI sincroniza stdout do processo COBOL via fila thread-safe (`queue.Queue`) |
-| 🖥️ **Interface** | RNF15 | GUI envia sequências de input com delay configurável (padrão 80ms entre inputs) |
-| 🧪 **Testabilidade** | RNF16 | Sistema testável via pseudo-terminal (pty) sem qualquer interação humana |
-| 🌍 **Localização** | RNF17 | `DECIMAL-POINT IS COMMA` ativo em todos os módulos (padrão pt-BR) |
-| 🏗️ **Compilação** | RNF18 | Flags de hardening: `-D_FORTIFY_SOURCE=3 -fsigned-char -ggdb3 -pipe` |
-| 🔄 **Compatibilidade** | RNF19 | Código em formato fixo COBOL (colunas 1–72), compatível com GnuCOBOL 3.x |
+| Category | ID | Requirement |
+|----------|----|-------------|
+| 🎯 **Precision** | NFR01 | All financial calculations use `COMP-3` (BCD packed decimal) — no binary floating point |
+| 🎯 **Precision** | NFR02 | Investment formulas follow the ANBIMA standard — 252 business days per year base |
+| 🔐 **Security** | NFR03 | CPF validated by the complete algorithm (2 check digits) before any account opening |
+| 🔐 **Security** | NFR04 | Blocked or closed accounts cannot perform transactions |
+| 🔐 **Security** | NFR05 | Transaction IDs are unique across sessions via timestamp `YYYYMMDDHHMMSS × 10` |
+| 🔐 **Security** | NFR06 | Nighttime PIX limit (10 PM–6 AM) of R$ 1,000 verified before execution |
+| 📋 **Audit** | NFR07 | Every successful financial transaction generates a record in BANKTRAN.DAT |
+| 📋 **Audit** | NFR08 | Audit WRITE failure must display a warning but not block the financial operation |
+| 📋 **Audit** | NFR09 | Session log in BANKAUDT.LOG opened in EXTEND mode (append-only per session) |
+| 🔧 **Modularity** | NFR10 | Modules compiled as shared objects (`.so`) loaded via dynamic `CALL` |
+| 🔧 **Modularity** | NFR11 | Shared data structures exclusively via `BANKDATA.cpy` copybook |
+| ⚡ **Performance** | NFR12 | Account access by number and CPF uses ISAM indexes — no full-scan |
+| ⚡ **Performance** | NFR13 | Statements and reports use full-scan with date filter applied during read |
+| 🖥️ **Interface** | NFR14 | GUI synchronizes COBOL process stdout via thread-safe queue (`queue.Queue`) |
+| 🖥️ **Interface** | NFR15 | GUI sends input sequences with configurable delay (default 80 ms between inputs) |
+| 🧪 **Testability** | NFR16 | System testable via pseudo-terminal (pty) without any human interaction |
+| 🌍 **Locale** | NFR17 | `DECIMAL-POINT IS COMMA` active in all modules (Brazilian standard) |
+| 🏗️ **Build** | NFR18 | Hardening flags: `-D_FORTIFY_SOURCE=3 -fsigned-char -ggdb3 -pipe` |
+| 🔄 **Compatibility** | NFR19 | Fixed-format COBOL source (columns 1–72), compatible with GnuCOBOL 3.x |
 
 ---
 
-## 🗄️ Modelo de Dados
+## 🗄️ Data Model
 
-### Diagrama Entidade-Relacionamento
+### Entity-Relationship Diagram
 
 ```mermaid
 erDiagram
-    CONTA {
-        PIC9_10   NUM_CONTA       PK  "Número único gerado automaticamente"
-        PIC9_4    AGENCIA             "Código da agência (4 dígitos)"
-        PIC9_1    DIGITO              "Dígito verificador MOD(num,10)"
-        PICX2     TIPO                "CC / CP / CS / CI"
-        PICX1     STATUS              "A=Ativa B=Bloqueada E=Encerrada P=Pendente"
-        COMP3     SALDO               "S9(13)V99 — saldo atual em R$"
-        COMP3     LIMITE              "S9(11)V99 — limite de crédito"
-        PICX60    TITULAR             "Nome completo do titular"
-        PICX11    CPF             UK  "CPF sem formatação (chave alternativa)"
-        PICX80    EMAIL               "Email de contato"
-        PICX15    TELEFONE            "Telefone de contato"
-        PIC9_8    DT_ABERTURA         "AAAAMMDD — data de abertura"
-        PIC9_8    DT_ATUALIZACAO      "Última modificação"
-        PICX64    SENHA_HASH          "Hash da senha (campo reservado)"
+    ACCOUNT {
+        PIC9_10   ACCT_NUM        PK  "Automatically generated unique number"
+        PIC9_4    BRANCH              "Branch code (4 digits)"
+        PIC9_1    CHECK_DIGIT         "Check digit MOD(num,10)"
+        PICX2     TYPE                "CC / CP / CS / CI"
+        PICX1     STATUS              "A=Active B=Blocked E=Closed P=Pending"
+        COMP3     BALANCE             "S9(13)V99 — current balance"
+        COMP3     CREDIT_LIMIT        "S9(11)V99 — credit limit"
+        PICX60    HOLDER              "Full holder name"
+        PICX11    CPF             UK  "CPF without formatting (alternate key)"
+        PICX80    EMAIL               "Contact email"
+        PICX15    PHONE               "Contact phone"
+        PIC9_8    OPEN_DATE           "YYYYMMDD — opening date"
+        PIC9_8    UPDATE_DATE         "Last modification"
+        PICX64    PASSWORD_HASH       "Password hash (reserved field)"
     }
 
-    TRANSACAO {
-        PIC9_15   TRANS_ID        PK  "YYYYMMDDHHMMSS×10+seq — único entre sessões"
-        PIC9_10   CONTA_ORG       FK  "Conta de origem"
-        PIC9_10   CONTA_DEST      FK  "Conta de destino (0 quando N/A)"
-        PICX3     TIPO                "DEP SAQ TED DOC PIX PAG TRF TAR REN"
-        COMP3     VALOR               "S9(13)V99 — valor da operação em R$"
-        PIC9_8    DATA                "AAAAMMDD"
-        PIC9_6    HORA                "HHMMSS"
-        PICX100   DESCRICAO           "Descrição livre da operação"
-        PICX1     STATUS              "P=Pendente E=Efetivada C=Cancelada X=Estornada"
-        PIC9_12   NSU                 "Número Sequencial Único"
-        PICX10    CANAL               "AGENCIA INTERNET APP MODTRF MODPAY"
+    TRANSACTION {
+        PIC9_15   TRANS_ID        PK  "YYYYMMDDHHMMSS×10+seq — unique across sessions"
+        PIC9_10   SRC_ACCT        FK  "Source account"
+        PIC9_10   DST_ACCT        FK  "Destination account (0 when N/A)"
+        PICX3     TYPE                "DEP WDR TED DOC PIX PAG TRF FEE YLD"
+        COMP3     AMOUNT              "S9(13)V99 — operation amount"
+        PIC9_8    DATE                "YYYYMMDD"
+        PIC9_6    TIME                "HHMMSS"
+        PICX100   DESCRIPTION         "Free-form operation description"
+        PICX1     STATUS              "P=Pending E=Settled C=Cancelled X=Reversed"
+        PIC9_12   NSU                 "Unique sequential number"
+        PICX10    CHANNEL             "BRANCH INTERNET APP MODTRF MODPAY"
     }
 
-    CLIENTE {
-        PIC9_10   CLI_ID          PK  "ID único informado pelo operador"
-        PICX60    NOME                "Nome completo"
-        PICX14    CPF             UK  "CPF com formatação (chave alternativa)"
-        PICX15    RG                  "Documento de identidade"
-        PIC9_8    DT_NASC             "Data de nascimento AAAAMMDD"
-        PICX1     SEXO                "M=Masculino F=Feminino O=Outro"
-        PICX2     ESTADO_CIVIL        "Código 2 caracteres"
-        PICX40    PROFISSAO           "Profissão declarada"
-        COMP3     RENDA               "S9(11)V99 — renda mensal em R$"
-        PICX1     PERFIL_RISCO        "C=Conservador M=Moderado A=Arrojado"
-        PICX190   ENDERECO            "Logradouro, número, complemento, bairro, cidade, UF, CEP"
-        PICX1     STATUS              "A=Ativo I=Inativo B=Bloqueado"
-        PIC9_4    SCORE_CREDITO       "Score de crédito 0–1000 (inicial: 500)"
+    CUSTOMER {
+        PIC9_10   CUST_ID         PK  "Unique ID entered by operator"
+        PICX60    NAME                "Full name"
+        PICX14    CPF             UK  "CPF with formatting (alternate key)"
+        PICX15    ID_DOC              "Identity document (RG)"
+        PIC9_8    BIRTH_DATE          "Birth date YYYYMMDD"
+        PICX1     GENDER              "M=Male F=Female O=Other"
+        PICX2     MARITAL_STATUS      "2-character code"
+        PICX40    OCCUPATION          "Declared occupation"
+        COMP3     INCOME              "S9(11)V99 — monthly income"
+        PICX1     RISK_PROFILE        "C=Conservative M=Moderate A=Aggressive"
+        PICX190   ADDRESS             "Street, number, complement, district, city, state, ZIP"
+        PICX1     STATUS              "A=Active I=Inactive B=Blocked"
+        PIC9_4    CREDIT_SCORE        "Credit score 0–1000 (initial: 500)"
     }
 
-    CONTA ||--o{ TRANSACAO : "origina (CONTA_ORG)"
-    CONTA ||--o{ TRANSACAO : "recebe (CONTA_DEST)"
-    CLIENTE ||--o{ CONTA : "é titular de"
+    ACCOUNT ||--o{ TRANSACTION : "originates (SRC_ACCT)"
+    ACCOUNT ||--o{ TRANSACTION : "receives (DST_ACCT)"
+    CUSTOMER ||--o{ ACCOUNT : "holds"
 ```
 
-### Especificação dos Arquivos ISAM
+### ISAM File Specification
 
 <details>
-<summary><strong>📋 BANKACCT.DAT — Arquivo de Contas</strong></summary>
+<summary><strong>📋 BANKACCT.DAT — Account File</strong></summary>
 
-| Propriedade | Valor |
-|-------------|-------|
-| Organização | `INDEXED` |
-| Modo de Acesso | `DYNAMIC` |
-| Chave Primária | `REG-CONTA-NUM` — PIC 9(10) |
-| Chave Alternativa | `REG-CONTA-CPF` — PIC X(11) — `WITH DUPLICATES` |
-| Tamanho do registro | ~279 bytes |
-| Arquivo de índice | `BANKACCT.DAT.1` (gerado automaticamente pelo GnuCOBOL) |
-| Módulos com acesso `I-O` | BANKACCT, BANKTRAN, BANKTRF, BANKPAY |
-| Módulos com acesso `INPUT` | BANKQRY, BANKREP, BANKADM |
+| Property | Value |
+|----------|-------|
+| Organization | `INDEXED` |
+| Access Mode | `DYNAMIC` |
+| Primary Key | `REG-CONTA-NUM` — PIC 9(10) |
+| Alternate Key | `REG-CONTA-CPF` — PIC X(11) — `WITH DUPLICATES` |
+| Record size | ~279 bytes |
+| Index file | `BANKACCT.DAT.1` (auto-generated by GnuCOBOL) |
+| Modules with `I-O` access | BANKACCT, BANKTRAN, BANKTRF, BANKPAY |
+| Modules with `INPUT` access | BANKQRY, BANKREP, BANKADM |
 
 </details>
 
 <details>
-<summary><strong>📋 BANKTRAN.DAT — Arquivo de Transações</strong></summary>
+<summary><strong>📋 BANKTRAN.DAT — Transaction File</strong></summary>
 
-| Propriedade | Valor |
-|-------------|-------|
-| Organização | `INDEXED` |
-| Modo de Acesso | `DYNAMIC` |
-| Chave Primária | `REG-TRANS-ID` — PIC 9(15) |
-| Formato do ID | `YYYYMMDDHHMMSS × 10 + incremento_sessão` (0–9) |
-| Tamanho do registro | ~169 bytes |
-| Módulos com acesso `I-O` | BANKTRAN, BANKTRF, BANKPAY |
-| Módulos com acesso `INPUT` | BANKQRY, BANKREP, BANKADM |
+| Property | Value |
+|----------|-------|
+| Organization | `INDEXED` |
+| Access Mode | `DYNAMIC` |
+| Primary Key | `REG-TRANS-ID` — PIC 9(15) |
+| ID Format | `YYYYMMDDHHMMSS × 10 + session_increment` (0–9) |
+| Record size | ~169 bytes |
+| Modules with `I-O` access | BANKTRAN, BANKTRF, BANKPAY |
+| Modules with `INPUT` access | BANKQRY, BANKREP, BANKADM |
 
 </details>
 
 <details>
-<summary><strong>📋 BANKCUST.DAT — Arquivo de Clientes</strong></summary>
+<summary><strong>📋 BANKCUST.DAT — Customer File</strong></summary>
 
-| Propriedade | Valor |
-|-------------|-------|
-| Organização | `INDEXED` |
-| Modo de Acesso | `DYNAMIC` |
-| Chave Primária | `REG-CLI-ID` — PIC 9(10) |
-| Chave Alternativa | `REG-CLI-CPF` — PIC X(14) — única |
-| Tamanho do registro | ~407 bytes |
-| Score inicial | 500 pontos |
-| Módulos com acesso `I-O` | BANKCRM |
-| Módulos com acesso `INPUT` | BANKADM |
+| Property | Value |
+|----------|-------|
+| Organization | `INDEXED` |
+| Access Mode | `DYNAMIC` |
+| Primary Key | `REG-CLI-ID` — PIC 9(10) |
+| Alternate Key | `REG-CLI-CPF` — PIC X(14) — unique |
+| Record size | ~407 bytes |
+| Initial score | 500 points |
+| Modules with `I-O` access | BANKCRM |
+| Modules with `INPUT` access | BANKADM |
 
 </details>
 
 ---
 
-## 🔄 Fluxos do Sistema
+## 🔄 System Flows
 
-### Ciclo de Vida da Conta
+### Account Lifecycle
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Operador
+    actor Operator
     participant BANKMAIN
     participant BANKACCT
-    participant ARQCONTAS as BANKACCT.DAT
+    participant ACCTFILE as BANKACCT.DAT
 
-    Operador->>BANKMAIN: Seleciona "1. Gestao de Contas"
+    Operator->>BANKMAIN: Selects "1. Account Management"
     BANKMAIN->>BANKACCT: CALL 'BANKACCT' USING WS-RETORNO
 
     Note over BANKACCT: OPEN I-O BANKACCT.DAT
 
-    Operador->>BANKACCT: Seleciona "01. Abrir Nova Conta"
-    BANKACCT->>Operador: Solicita dados (nome, CPF, tipo, agência, email, tel)
-    Operador->>BANKACCT: Informa os dados
+    Operator->>BANKACCT: Selects "01. Open New Account"
+    BANKACCT->>Operator: Requests data (name, CPF, type, branch, email, phone)
+    Operator->>BANKACCT: Provides data
 
-    BANKACCT->>BANKACCT: Valida CPF (2 dígitos + sequências inválidas)
+    BANKACCT->>BANKACCT: Validates CPF (2 check digits + invalid sequences)
 
-    alt CPF inválido
-        BANKACCT->>Operador: "CPF INVALIDO - OPERACAO CANCELADA"
-    else CPF válido
-        BANKACCT->>ARQCONTAS: READ KEY IS REG-CONTA-CPF (alerta duplicidade)
-        BANKACCT->>BANKACCT: Gera número = YYYYMMDD × 100 + CTR_SESSAO
-        BANKACCT->>BANKACCT: Calcula DV = MOD(numero, 10)
-        BANKACCT->>BANKACCT: Status = 'A', Saldo = 0, Limite = -500 (CC)
-        BANKACCT->>ARQCONTAS: WRITE REG-CONTA
+    alt Invalid CPF
+        BANKACCT->>Operator: "INVALID CPF - OPERATION CANCELLED"
+    else Valid CPF
+        BANKACCT->>ACCTFILE: READ KEY IS REG-CONTA-CPF (duplicate alert)
+        BANKACCT->>BANKACCT: Generates number = YYYYMMDD × 100 + SESSION_CTR
+        BANKACCT->>BANKACCT: Computes DV = MOD(number, 10)
+        BANKACCT->>BANKACCT: Status = 'A', Balance = 0, Limit = -500 (CC)
+        BANKACCT->>ACCTFILE: WRITE REG-CONTA
 
-        alt WRITE FS=00 (sucesso)
-            BANKACCT->>Operador: "CONTA ABERTA COM SUCESSO!" + dados completos
-        else WRITE FS=22 (chave duplicada)
-            BANKACCT->>Operador: "ERRO AO CRIAR CONTA: 22"
+        alt WRITE FS=00 (success)
+            BANKACCT->>Operator: "ACCOUNT OPENED SUCCESSFULLY!" + full data
+        else WRITE FS=22 (duplicate key)
+            BANKACCT->>Operator: "ERROR CREATING ACCOUNT: 22"
         end
     end
 
-    Operador->>BANKACCT: Seleciona "00. Voltar"
+    Operator->>BANKACCT: Selects "00. Back"
     Note over BANKACCT: CLOSE BANKACCT.DAT
     BANKACCT->>BANKMAIN: GOBACK (LS-CODIGO)
-    BANKMAIN->>BANKMAIN: Registra no BANKAUDT.LOG
+    BANKMAIN->>BANKMAIN: Records in BANKAUDT.LOG
 ```
 
-### Fluxo Transações TED/PIX
+### TED/PIX Transaction Flow
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Cliente
+    actor Customer
     participant BANKTRAN
-    participant ARQCONTAS as BANKACCT.DAT
-    participant ARQTRANS as BANKTRAN.DAT
+    participant ACCTFILE as BANKACCT.DAT
+    participant TRANFILE as BANKTRAN.DAT
 
-    Note over BANKTRAN: WS-PROXIMO-ID = YYYYMMDDHHMMSS × 10
+    Note over BANKTRAN: NEXT_ID = YYYYMMDDHHMMSS × 10
 
-    Cliente->>BANKTRAN: Seleciona TED (03) ou PIX (05)
+    Customer->>BANKTRAN: Selects TED (03) or PIX (05)
 
     rect rgb(20, 60, 20)
-        Note over BANKTRAN,ARQCONTAS: VALIDAÇÃO CONTA ORIGEM
-        BANKTRAN->>Cliente: Solicita número da conta origem
-        Cliente->>BANKTRAN: Informa conta origem
-        BANKTRAN->>ARQCONTAS: READ KEY IS REG-CONTA-NUM
-        alt Não encontrada / Inativa
-            BANKTRAN->>Cliente: Mensagem de erro
+        Note over BANKTRAN,ACCTFILE: SOURCE ACCOUNT VALIDATION
+        BANKTRAN->>Customer: Requests source account number
+        Customer->>BANKTRAN: Provides source account
+        BANKTRAN->>ACCTFILE: READ KEY IS REG-CONTA-NUM
+        alt Not found / Inactive
+            BANKTRAN->>Customer: Error message
         end
     end
 
     rect rgb(60, 20, 20)
-        Note over BANKTRAN,ARQCONTAS: VALIDAÇÃO CONTA DESTINO
-        BANKTRAN->>Cliente: Solicita conta destino (número ou CPF para PIX)
-        Cliente->>BANKTRAN: Informa destino
-        BANKTRAN->>ARQCONTAS: READ KEY IS REG-CONTA-NUM ou REG-CONTA-CPF
-        alt Não encontrada / Inativa
-            BANKTRAN->>Cliente: Mensagem de erro
+        Note over BANKTRAN,ACCTFILE: DESTINATION ACCOUNT VALIDATION
+        BANKTRAN->>Customer: Requests destination (number or CPF for PIX)
+        Customer->>BANKTRAN: Provides destination
+        BANKTRAN->>ACCTFILE: READ KEY IS REG-CONTA-NUM or REG-CONTA-CPF
+        alt Not found / Inactive
+            BANKTRAN->>Customer: Error message
         end
     end
 
     rect rgb(20, 20, 60)
-        Note over BANKTRAN: VALIDAÇÕES FINANCEIRAS
-        BANKTRAN->>Cliente: Solicita valor
-        Cliente->>BANKTRAN: Informa valor
-        BANKTRAN->>BANKTRAN: disponivel = saldo_orig + limite_orig
-        BANKTRAN->>BANKTRAN: total = valor + taxa_corrente (PIX: taxa=0)
-        alt Saldo insuficiente
-            BANKTRAN->>Cliente: "SALDO INSUFICIENTE"
-        else PIX entre 22h-06h > R$1.000
-            BANKTRAN->>Cliente: "LIMITE PIX NOTURNO"
+        Note over BANKTRAN: FINANCIAL VALIDATIONS
+        BANKTRAN->>Customer: Requests amount
+        Customer->>BANKTRAN: Provides amount
+        BANKTRAN->>BANKTRAN: available = src_balance + src_limit
+        BANKTRAN->>BANKTRAN: total = amount + fee (PIX: fee=0)
+        alt Insufficient balance
+            BANKTRAN->>Customer: "INSUFFICIENT BALANCE"
+        else PIX between 10PM-6AM > R$1,000
+            BANKTRAN->>Customer: "NIGHTTIME PIX LIMIT EXCEEDED"
         end
     end
 
     rect rgb(60, 40, 0)
-        Note over BANKTRAN,ARQTRANS: EXECUÇÃO
-        BANKTRAN->>Cliente: "Confirmar? (S/N)" — apenas TED/DOC
-        BANKTRAN->>ARQCONTAS: REWRITE origem (saldo - valor - taxa)
-        alt Falha no débito
-            BANKTRAN->>Cliente: "ERRO AO DEBITAR CONTA ORIGEM"
-        else Débito OK
-            BANKTRAN->>ARQCONTAS: REWRITE destino (saldo + valor)
-            alt Falha no crédito
-                BANKTRAN->>Cliente: "ERRO AO CREDITAR CONTA DESTINO"
-            else Crédito OK
-                BANKTRAN->>BANKTRAN: ADD 1 TO WS-PROXIMO-ID
-                BANKTRAN->>ARQTRANS: WRITE REG-TRANS (tipo=TED/DOC/PIX correto)
-                BANKTRAN->>Cliente: "TED/DOC/PIX REALIZADO COM SUCESSO!"
+        Note over BANKTRAN,TRANFILE: EXECUTION
+        BANKTRAN->>Customer: "Confirm? (Y/N)" — TED/DOC only
+        BANKTRAN->>ACCTFILE: REWRITE source (balance - amount - fee)
+        alt Debit fails
+            BANKTRAN->>Customer: "ERROR DEBITING SOURCE ACCOUNT"
+        else Debit OK
+            BANKTRAN->>ACCTFILE: REWRITE destination (balance + amount)
+            alt Credit fails
+                BANKTRAN->>Customer: "ERROR CREDITING DESTINATION ACCOUNT"
+            else Credit OK
+                BANKTRAN->>BANKTRAN: ADD 1 TO NEXT_ID
+                BANKTRAN->>TRANFILE: WRITE REG-TRANS (type=TED/DOC/PIX correct)
+                BANKTRAN->>Customer: "TED/DOC/PIX COMPLETED SUCCESSFULLY!"
             end
         end
     end
 ```
 
-### Fluxo de Validação de CPF
+### CPF Validation Flow
 
 ```mermaid
 flowchart LR
-    subgraph IN["📥 Entrada"]
-        CPF["CPF 11 dígitos\nex: 52998224725"]
+    subgraph IN["📥 Input"]
+        CPF["CPF 11 digits\ne.g.: 52998224725"]
     end
 
-    subgraph V1["🔍 Pré-validação"]
-        SQ{"Todos dígitos\niguais?\n00000000000\n...99999999999"}
+    subgraph V1["🔍 Pre-validation"]
+        SQ{"All digits\nidentical?\n00000000000\n...99999999999"}
     end
 
-    subgraph V2["🧮 1º Dígito Verificador"]
+    subgraph V2["🧮 1st Check Digit"]
         D1["∑(dig[i] × (11-i))\ni = 1..9"]
-        R1["resto = MOD(soma,11)"]
-        C1{"resto < 2?"}
-        DV1A["DV₁ = 0"]
-        DV1B["DV₁ = 11 - resto"]
-        CK1{"DV₁ = CPF[10]?"}
+        R1["rem = MOD(sum,11)"]
+        C1{"rem < 2?"}
+        DV1A["CD₁ = 0"]
+        DV1B["CD₁ = 11 - rem"]
+        CK1{"CD₁ = CPF[10]?"}
     end
 
-    subgraph V3["🧮 2º Dígito Verificador"]
+    subgraph V3["🧮 2nd Check Digit"]
         D2["∑(dig[i] × (12-i))\ni = 1..10"]
-        R2["resto = MOD(soma,11)"]
-        C2{"resto < 2?"}
-        DV2A["DV₂ = 0"]
-        DV2B["DV₂ = 11 - resto"]
-        CK2{"DV₂ = CPF[11]?"}
+        R2["rem = MOD(sum,11)"]
+        C2{"rem < 2?"}
+        DV2A["CD₂ = 0"]
+        DV2B["CD₂ = 11 - rem"]
+        CK2{"CD₂ = CPF[11]?"}
     end
 
-    OK(["✅ VÁLIDO\nCPF aceito"])
-    NOK(["❌ INVÁLIDO\nOperação cancelada"])
+    OK(["✅ VALID\nCPF accepted"])
+    NOK(["❌ INVALID\nOperation cancelled"])
 
     CPF --> SQ
-    SQ -->|"Sim"| NOK
-    SQ -->|"Não"| D1 --> R1 --> C1
-    C1 -->|"Sim"| DV1A --> CK1
-    C1 -->|"Não"| DV1B --> CK1
-    CK1 -->|"Não"| NOK
-    CK1 -->|"Sim"| D2 --> R2 --> C2
-    C2 -->|"Sim"| DV2A --> CK2
-    C2 -->|"Não"| DV2B --> CK2
-    CK2 -->|"Não"| NOK
-    CK2 -->|"Sim"| OK
+    SQ -->|"Yes"| NOK
+    SQ -->|"No"| D1 --> R1 --> C1
+    C1 -->|"Yes"| DV1A --> CK1
+    C1 -->|"No"| DV1B --> CK1
+    CK1 -->|"No"| NOK
+    CK1 -->|"Yes"| D2 --> R2 --> C2
+    C2 -->|"Yes"| DV2A --> CK2
+    C2 -->|"No"| DV2B --> CK2
+    CK2 -->|"No"| NOK
+    CK2 -->|"Yes"| OK
 
     style OK fill:#2e7d32,color:#fff,stroke:#1b5e20
     style NOK fill:#c62828,color:#fff,stroke:#b71c1c
     style IN fill:#1565c0,color:#fff,stroke:#0d47a1
 ```
 
-### Fluxo de Pagamento de Boleto (Módulo 10)
+### Bill Payment Flow (Modulo 10)
 
 ```mermaid
 flowchart TD
-    A["📋 Código de Barras\n(até 50 caracteres com formatação)"] --> B["Extrair somente dígitos numéricos"]
-    B --> C{"Exatamente\n44 dígitos?"}
-    C -->|"Não"| E1["❌ CODIGO INVALIDO\n(44 DIGITOS)"]
-    C -->|"Sim"| D["Algoritmo Módulo 10:\nPercorre posições 43→1\ncom pesos 2–9 em ciclo"]
-    D --> E["DV_calc = 11 - MOD(soma, 11)\nse DV_calc > 9 → DV_calc = 1"]
-    E --> G{"DV_calc =\nCódigo[44]?"}
-    G -->|"Não"| E2["❌ REPROVADO NO DV"]
-    G -->|"Sim"| H["✅ Código válido\nSolicitar conta e valor"]
-    H --> I["Verificar saldo disponível\n(saldo + limite ≥ valor)"]
-    I --> J{"Suficiente?"}
-    J -->|"Não"| E3["❌ SALDO INSUFICIENTE"]
-    J -->|"Sim"| K["REWRITE conta\n(débito do valor)"]
-    K --> L["WRITE REG-TRANS\ntipo='PAG', canal='AGENCIA'"]
-    L --> M["✅ BOLETO PAGO COM SUCESSO!"]
+    A["📋 Barcode\n(up to 50 chars with formatting)"] --> B["Extract numeric digits only"]
+    B --> C{"Exactly\n44 digits?"}
+    C -->|"No"| E1["❌ INVALID BARCODE\n(44 DIGITS REQUIRED)"]
+    C -->|"Yes"| D["Modulo 10 Algorithm:\nTraverse positions 43→1\nwith weights 2–9 in cycle"]
+    D --> E["DV_calc = 11 - MOD(sum, 11)\nif DV_calc > 9 → DV_calc = 1"]
+    E --> G{"DV_calc =\nCode[44]?"}
+    G -->|"No"| E2["❌ CHECK DIGIT FAILED"]
+    G -->|"Yes"| H["✅ Valid code\nRequest account and amount"]
+    H --> I["Check available balance\n(balance + limit ≥ amount)"]
+    I --> J{"Sufficient?"}
+    J -->|"No"| E3["❌ INSUFFICIENT BALANCE"]
+    J -->|"Yes"| K["REWRITE account\n(debit amount)"]
+    K --> L["WRITE REG-TRANS\ntype='PAG', channel='BRANCH'"]
+    L --> M["✅ BILL PAID SUCCESSFULLY!"]
 
     style E1 fill:#c62828,color:#fff
     style E2 fill:#c62828,color:#fff
@@ -1109,28 +1115,28 @@ flowchart TD
     style H fill:#1565c0,color:#fff
 ```
 
-### Fluxo de Investimento CDB
+### CDB Investment Flow
 
 ```mermaid
 flowchart TD
-    A["📈 Módulo de Investimentos"] --> B["Exibe taxas de mercado\nCDI: 10,5% / SELIC: 10,5%\nIPCA: 4,62% / IGPM: 3,89%"]
-    B --> C["Seleciona CDB (01)"]
-    C --> D{"Valor ≥\nR$ 1.000?"}
-    D -->|"Não"| E["❌ VALOR ABAIXO DO MINIMO"]
-    D -->|"Sim"| F["Informa prazo em dias"]
-    F --> G["Calcula taxa anual:\ntaxa = CDI × 105% / 100 / 100"]
-    G --> H["Calcula taxa diária:\ntaxa_d = EXP(LOG(1+taxa)/252) - 1"]
-    H --> I["Calcula valor bruto:\nbruto = aporte × (1+taxa_d)^prazo"]
-    I --> J{"Prazo (dias)?"}
-    J -->|"≤ 180"| K["IR = 22,5%"]
-    J -->|"≤ 360"| L["IR = 20,0%"]
-    J -->|"≤ 720"| M["IR = 17,5%"]
-    J -->|"> 720"| N["IR = 15,0%"]
-    K & L & M & N --> O["imposto = (bruto - aporte) × IR\nlíquido = bruto - imposto"]
-    O --> P["Exibe simulação:\n• Aplicação: R$ X\n• Valor bruto: R$ Y\n• IR (xx%): R$ Z\n• Valor líquido: R$ W"]
-    P --> Q{"Confirmar\nS/N?"}
-    Q -->|"N"| R["OPERACAO CANCELADA"]
-    Q -->|"S"| S["✅ APLICACAO REALIZADA!"]
+    A["📈 Investment Module"] --> B["Displays market rates\nCDI: 10.5% / SELIC: 10.5%\nIPCA: 4.62% / IGPM: 3.89%"]
+    B --> C["Selects CDB (01)"]
+    C --> D{"Amount ≥\nR$ 1,000?"}
+    D -->|"No"| E["❌ AMOUNT BELOW MINIMUM"]
+    D -->|"Yes"| F["Enter term in days"]
+    F --> G["Compute annual rate:\nrate = CDI × 105% / 100 / 100"]
+    G --> H["Compute daily rate:\ndaily = EXP(LOG(1+rate)/252) - 1"]
+    H --> I["Compute gross value:\ngross = principal × (1+daily)^term"]
+    I --> J{"Term (days)?"}
+    J -->|"≤ 180"| K["Tax = 22.5%"]
+    J -->|"≤ 360"| L["Tax = 20.0%"]
+    J -->|"≤ 720"| M["Tax = 17.5%"]
+    J -->|"> 720"| N["Tax = 15.0%"]
+    K & L & M & N --> O["tax_amount = (gross - principal) × rate\nnet = gross - tax_amount"]
+    O --> P["Display simulation:\n• Principal: R$ X\n• Gross value: R$ Y\n• Tax (xx%): R$ Z\n• Net value: R$ W"]
+    P --> Q{"Confirm\nY/N?"}
+    Q -->|"N"| R["OPERATION CANCELLED"]
+    Q -->|"Y"| S["✅ INVESTMENT CONFIRMED!"]
 
     style E fill:#c62828,color:#fff
     style S fill:#2e7d32,color:#fff
@@ -1139,113 +1145,113 @@ flowchart TD
 
 ---
 
-## 🔐 Segurança
+## 🔐 Security
 
-### Controles Implementados
+### Implemented Controls
 
-| Controle | Onde | Mecanismo |
-|----------|------|-----------|
-| 🔏 **Validação de Identidade** | BANKACCT | CPF com algoritmo completo (2 DV) + rejeição de sequências inválidas |
-| 🔒 **Controle de Status** | BANKTRAN, BANKTRF, BANKPAY | `STATUS = 'A'` verificado antes de qualquer débito/crédito |
-| 🛡️ **Validação de Saldo** | BANKTRAN, BANKTRF, BANKPAY | `disponível = saldo + limite` verificado antes de cada operação |
-| ⏰ **Limite PIX Noturno** | BANKTRAN | R$ 1.000 entre 22h00–06h00 via `CURRENT-DATE(9:4)` |
-| 🔑 **Validação de Boleto** | BANKPAY | Módulo 10 obrigatório — rejeita boletos inválidos antes do débito |
-| 📋 **Trilha de Auditoria** | BANKMAIN | Cada operação do menu registrada em `BANKAUDT.LOG` com timestamp |
-| 🆔 **IDs Únicos de Transação** | BANKTRAN, BANKTRF | `YYYYMMDDHHMMSS × 10 + seq` — sem colisão entre sessões |
-| 🔄 **REWRITE Condicional** | BANKACCT | Bloqueio/Desbloqueio somente grava quando status efetivamente muda |
-| 🏗️ **Hardening de Compilação** | Makefile | `-D_FORTIFY_SOURCE=3 -fsigned-char -ggdb3 -pipe -Wno-pointer-sign` |
-| 📊 **Contagem de Erros** | BANKMAIN | `WS-CTR-ERROS` incrementado a cada falha detectada na sessão |
+| Control | Where | Mechanism |
+|---------|-------|-----------|
+| 🔏 **Identity Validation** | BANKACCT | Full CPF algorithm (2 CDs) + rejection of 10 invalid sequences |
+| 🔒 **Status Control** | BANKTRAN, BANKTRF, BANKPAY | `STATUS = 'A'` verified before any debit/credit |
+| 🛡️ **Balance Validation** | BANKTRAN, BANKTRF, BANKPAY | `available = balance + limit` checked before each operation |
+| ⏰ **Nighttime PIX Limit** | BANKTRAN | R$ 1,000 between 10 PM–6 AM via `CURRENT-DATE(9:4)` |
+| 🔑 **Bill Validation** | BANKPAY | Modulo-10 mandatory — rejects invalid bills before debit |
+| 📋 **Audit Trail** | BANKMAIN | Every menu operation recorded in `BANKAUDT.LOG` with timestamp |
+| 🆔 **Unique Transaction IDs** | BANKTRAN, BANKTRF | `YYYYMMDDHHMMSS × 10 + seq` — no collision across sessions |
+| 🔄 **Conditional REWRITE** | BANKACCT | Lock/Unlock only writes when status actually changes |
+| 🏗️ **Compile Hardening** | Makefile | `-D_FORTIFY_SOURCE=3 -fsigned-char -ggdb3 -pipe -Wno-pointer-sign` |
+| 📊 **Error Counting** | BANKMAIN | `WS-CTR-ERROS` incremented on every detected failure |
 
-### Limitações de Segurança Conhecidas
+### Known Security Limitations
 
 > [!CAUTION]
-> As seguintes limitações existem no sistema atual. **Não use em produção sem endereçá-las.**
+> The following limitations exist in the current system. **Do not use in production without addressing them.**
 
-| # | Limitação | Impacto | Recomendação |
-|---|-----------|---------|--------------|
-| 🔴 1 | **Sem autenticação** — `SENHA-HASH (X(64))` existe no schema mas nunca é preenchido ou verificado | Qualquer operador acessa qualquer conta | Integrar módulo C de hashing (bcrypt/Argon2) via `CALL` |
-| 🔴 2 | **Transferências não atômicas** — débito e crédito são dois REWRITEs independentes | Risco de perda de fundos se o processo morrer entre os dois escritas | Implementar journaling antes-depois ou adaptar 2-Phase Commit |
-| 🟡 3 | **Session ID previsível** — gerado com `RANDOM(DATA_ATUAL)` — mesma semente no mesmo dia | Sessões do mesmo dia têm IDs idênticos | Usar `/dev/urandom` via módulo utilitário em C |
-| 🟡 4 | **Log de auditoria deletável** — `3000-LIMPAR-LOG` em BANKADM trunca `BANKAUDT.LOG` | Um operador pode apagar evidências de fraude | Remover a operação do menu ou tornar o log append-only com permissões restritivas |
-| 🟠 5 | **Email/telefone em campos de endereço no CRM** — mapeamento semântico incorreto | Dados em posições não intuitivas, dificulta manutenção | Adicionar campos `EMAIL (X(80))` e `TELEFONE (X(15))` ao registro de cliente |
+| # | Limitation | Impact | Recommendation |
+|---|-----------|--------|----------------|
+| 🔴 1 | **No authentication** — `PASSWORD-HASH (X(64))` exists in the schema but is never populated or checked | Any operator can access any account | Integrate a C hashing module (bcrypt/Argon2) via `CALL` |
+| 🔴 2 | **Non-atomic transfers** — debit and credit are two independent REWRITEs | Risk of fund loss if the process dies between the two writes | Implement before-after journaling or adapt 2-Phase Commit |
+| 🟡 3 | **Predictable session ID** — generated with `RANDOM(CURRENT_DATE)` — same seed all day | Sessions on the same day share identical IDs | Use `/dev/urandom` via a utility C module |
+| 🟡 4 | **Audit log deletable** — `3000-LIMPAR-LOG` in BANKADM truncates `BANKAUDT.LOG` | An operator could erase evidence of fraud | Remove from menu or make log append-only with restricted permissions |
+| 🟠 5 | **Email/phone in address fields in CRM** — wrong semantic mapping | Data in non-intuitive positions, complicates maintenance | Add dedicated `EMAIL (X(80))` and `PHONE (X(15))` fields to the customer record |
 
 ---
 
-## 🚀 Instalação e Execução
+## 🚀 Installation & Execution
 
-### Pré-requisitos
+### Prerequisites
 
 ```bash
 # Ubuntu / Debian / WSL2
 sudo apt update
 sudo apt install -y gnucobol libcob-dev python3 python3-tk make
 
-# Verificar instalação
+# Verify installation
 cobc --version     # GnuCOBOL 3.x
 python3 --version  # Python 3.8+
 ```
 
-### Compilação
+### Build
 
 ```bash
-# Compilar todos os módulos
+# Compile all modules
 make all
 
-# Saída esperada:
-#   bin/BANKACCT.so, BANKTRAN.so ... (módulos dinâmicos)
-#   bin/bankmain                     (executável principal)
+# Expected output:
+#   bin/BANKACCT.so, BANKTRAN.so ... (dynamic modules)
+#   bin/bankmain                     (main executable)
 
-# Limpar tudo (ATENÇÃO: apaga .DAT, .LOG e .TXT)
+# Clean everything (WARNING: deletes .DAT, .LOG and .TXT files)
 make clean
 ```
 
-### Execução
+### Execution
 
 <table>
 <tr>
 <td width="50%">
 
-**🖥️ Interface Gráfica**
+**🖥️ Graphical Interface**
 ```bash
 make run-gui
 
-# Ou diretamente:
+# Or directly:
 python3 bank_gui.py
 ```
 
-A GUI detecta automaticamente se está rodando em WSL e usa `cmd.exe /C py -3` quando necessário.
+The GUI automatically detects WSL and uses `cmd.exe /C py -3` when needed.
 
 </td>
 <td width="50%">
 
-**⌨️ CLI Direto**
+**⌨️ Direct CLI**
 ```bash
 make run
 
-# Ou:
+# Or:
 COB_LIBRARY_PATH=bin ./bin/bankmain
 ```
 
-Execução interativa diretamente no terminal com menus COBOL nativos.
+Interactive execution directly in the terminal with native COBOL menus.
 
 </td>
 </tr>
 </table>
 
-### Targets do Makefile
+### Makefile Targets
 
-| Target | Descrição |
-|--------|-----------|
-| `make all` | Compila todos os módulos (`.so` + executável) |
-| `make run` | Compila + executa em modo CLI interativo |
-| `make run-gui` | Compila + executa a GUI Python/tkinter |
-| `make acceptance` | Compila + executa testes de regressão E2E |
-| `make acceptance-fast` | Executa testes sem recompilar |
-| `make acceptance-finance` | Executa testes de regressão financeira |
-| `make clean` | Remove `bin/`, `*.DAT`, `*.DAT.*`, `*.LOG`, `*.TXT` |
-| `make install` | Copia `bankmain` para `/usr/local/bin` |
+| Target | Description |
+|--------|-------------|
+| `make all` | Compiles all modules (`.so` + executable) |
+| `make run` | Compiles + runs in interactive CLI mode |
+| `make run-gui` | Compiles + runs the Python/tkinter GUI |
+| `make acceptance` | Compiles + runs E2E regression tests |
+| `make acceptance-fast` | Runs tests without recompiling |
+| `make acceptance-finance` | Runs financial regression tests |
+| `make clean` | Removes `bin/`, `*.DAT`, `*.DAT.*`, `*.LOG`, `*.TXT` |
+| `make install` | Copies `bankmain` to `/usr/local/bin` |
 
-### Flags de Compilação
+### Compilation Flags
 
 ```makefile
 COB_CFLAGS_SAFE = -finline-functions -ggdb3 -pipe -Wdate-time \
@@ -1255,35 +1261,35 @@ COB_CFLAGS_SAFE = -finline-functions -ggdb3 -pipe -Wdate-time \
 
 ---
 
-## 🧪 Testes Automatizados
+## 🧪 Automated Tests
 
-O sistema possui uma suíte completa de testes de aceitação que executa o binário COBOL real através de um **pseudo-terminal (PTY)** — sem mocks, sem simulações, com comportamento idêntico ao uso manual.
+The system has a complete acceptance test suite that runs the real COBOL binary through a **pseudo-terminal (PTY)** — no mocks, no simulations, identical behavior to manual use.
 
-### Arquitetura de Testes
+### Test Architecture
 
 ```mermaid
 flowchart TB
     subgraph SUITE["acceptance_regression.py"]
         direction LR
-        DISC["🔍 discover_active_accounts()\nProbe contas por data (D, D-1, D-2)\nFormato: YYYYMMDD×100 + 0..29"]
-        BOOT["🏗️ bootstrap_accounts()\nCria 3 contas QA se < 2 encontradas"]
-        RUN["▶️ run_session(inputs, timeout, delay)\nAbre PTY → injeta inputs c/ delay 70ms\n→ captura stdout → retorna string"]
-        BAR["🔢 make_valid_barcode()\nGera código 44 dígitos\ncom DV Módulo 10 correto"]
-        CHK["✅ check_contains(name, output, tokens)\nVerifica presença de tokens\nna saída do processo"]
+        DISC["🔍 discover_active_accounts()\nProbe accounts by date (D, D-1, D-2)\nFormat: YYYYMMDD×100 + 0..29"]
+        BOOT["🏗️ bootstrap_accounts()\nCreates 3 QA accounts if < 2 found"]
+        RUN["▶️ run_session(inputs, timeout, delay)\nOpens PTY → injects inputs w/ 70ms delay\n→ captures stdout → returns string"]
+        BAR["🔢 make_valid_barcode()\nGenerates 44-digit code\nwith correct Modulo-10 DV"]
+        CHK["✅ check_contains(name, output, tokens)\nChecks for token presence\nin process output"]
     end
 
-    subgraph CASOS["Casos de Teste"]
-        TC1["💵 Depósito R$700\n→ 'DEPOSITO REALIZADO'"]
+    subgraph CASES["Test Cases"]
+        TC1["💵 Deposit R$700\n→ 'DEPOSITO REALIZADO'"]
         TC2["🔄 TED R$10\n→ 'TED EFETUADA'"]
         TC3["📄 DOC R$10\n→ 'DOC EFETUADA'"]
         TC4["⚡ PIX R$5\n→ 'PIX EFETUADO'"]
-        TC5["💳 Boleto DV válido R$3\n→ 'BOLETO PAGO'"]
-        TC6["👥 CRM CRUD completo\nCadastrar → Consultar\nAtualizar → Inativar\n→ 'Status: I'"]
+        TC5["💳 Valid barcode R$3\n→ 'BOLETO PAGO'"]
+        TC6["👥 Full CRM CRUD\nCreate → Query\nUpdate → Deactivate\n→ 'Status: I'"]
     end
 
-    subgraph PTY["Binário COBOL"]
+    subgraph PTY["COBOL Binary"]
         direction LR
-        BIN["bin/bankmain\n─────────────\nstdin ← inputs (delay 70ms)\nstdout → captura output\nPTY emula terminal real"]
+        BIN["bin/bankmain\n─────────────\nstdin ← inputs (70ms delay)\nstdout → captured output\nPTY emulates real terminal"]
     end
 
     DISC --> BOOT --> TC1 & TC2 & TC3 & TC4 & TC5 & TC6
@@ -1293,17 +1299,17 @@ flowchart TB
     RUN --> CHK
 
     style SUITE fill:#1a237e,color:#fff
-    style CASOS fill:#1b5e20,color:#fff
+    style CASES fill:#1b5e20,color:#fff
     style PTY fill:#bf360c,color:#fff
 ```
 
-### Executando os Testes
+### Running the Tests
 
 ```bash
-# Requer Linux / WSL2 (pty não disponível no Windows nativo)
+# Requires Linux / WSL2 (pty not available on native Windows)
 make acceptance
 
-# Saída esperada:
+# Expected output:
 # [INFO] Active accounts discovered: 3
 # [INFO] Account 2026060400 cpf=52998224725 email=qa1@example.com phone=11990000001
 # [PASS] Deposito
@@ -1316,35 +1322,35 @@ make acceptance
 # Result: 6/6 checks passed
 ```
 
-### Contas QA (Bootstrap Automático)
+### QA Accounts (Auto-Bootstrap)
 
-Quando menos de 2 contas ativas são encontradas nos últimos 3 dias, a suíte cria automaticamente:
+When fewer than 2 active accounts are found in the last 3 days, the suite automatically creates:
 
-| Conta | CPF | Agência | Email |
-|-------|-----|---------|-------|
+| Account | CPF | Branch | Email |
+|---------|-----|--------|-------|
 | AUTO QA 1 | 12345678909 | 1234 | qa1@example.com |
 | AUTO QA 2 | 11144477735 | 1234 | qa2@example.com |
 | AUTO QA 3 | 52998224725 | 1234 | qa3@example.com |
 
 ---
 
-## 📊 Métricas e Monitoramento
+## 📊 Metrics & Monitoring
 
-### Métricas de Sessão (BANKMAIN)
+### Session Metrics (BANKMAIN)
 
-| Campo | Tipo | Descrição |
-|-------|------|-----------|
-| `WS-CTR-OPERACOES` | PIC 9(10) | Total de operações realizadas na sessão |
-| `WS-CTR-ERROS` | PIC 9(6) | Total de erros encontrados na sessão |
-| `WS-CTR-SESSOES` | PIC 9(6) | Contador acumulado de sessões |
-| `WS-MET-TEMPO-RESP` | COMP-3 | Tempo médio de resposta (extensível) |
-| `WS-MET-THROUGHPUT` | COMP-3 | Throughput de operações (extensível) |
-| `WS-MET-DISPONIB` | COMP-3 | Disponibilidade percentual (extensível) |
+| Field | Type | Description |
+|-------|------|-------------|
+| `WS-CTR-OPERACOES` | PIC 9(10) | Total operations performed in the session |
+| `WS-CTR-ERROS` | PIC 9(6) | Total errors found in the session |
+| `WS-CTR-SESSOES` | PIC 9(6) | Cumulative session counter |
+| `WS-MET-TEMPO-RESP` | COMP-3 | Average response time (extensible) |
+| `WS-MET-THROUGHPUT` | COMP-3 | Operation throughput (extensible) |
+| `WS-MET-DISPONIB` | COMP-3 | Availability percentage (extensible) |
 
-### Formato do Log de Auditoria
+### Audit Log Format
 
 ```
-YYYYMMDD HHMMSS OP:[opcao] COD:[codigo_retorno]
+YYYYMMDD HHMMSS OP:[option] COD:[return_code]
 
 20260604 143022 OP:1   COD:0000
 20260604 143045 OP:2   COD:0000
@@ -1352,35 +1358,35 @@ YYYYMMDD HHMMSS OP:[opcao] COD:[codigo_retorno]
 20260604 143112 OP:0   COD:0000
 ```
 
-### Códigos de Retorno Padronizados
+### Standardized Return Codes
 
-| Código | Significado |
-|--------|-------------|
-| `0000` | Sucesso |
-| `0001` | Saldo insuficiente |
-| `0002` | Conta/CPF não encontrado |
-| `0003` | Limite excedido / valor inválido |
-| `0004` | Conta bloqueada ou encerrada |
-| `0005` | Erro de autenticação |
-| `9999` | Erro de sistema (I/O) |
+| Code | Meaning |
+|------|---------|
+| `0000` | Success |
+| `0001` | Insufficient balance |
+| `0002` | Account/CPF not found |
+| `0003` | Limit exceeded / invalid amount |
+| `0004` | Account blocked or closed |
+| `0005` | Authentication error |
+| `9999` | System error (I/O) |
 
 ---
 
-## ⚠️ Limitações Conhecidas
+## ⚠️ Known Limitations
 
 > [!IMPORTANT]
-> Este sistema foi desenvolvido para fins educacionais e demonstração de arquitetura COBOL.
+> This system was developed for educational purposes and COBOL architecture demonstration.
 
-| Categoria | Limitação | Contexto |
-|-----------|-----------|---------|
-| 🔄 **Atomicidade** | Transferências usam dois REWRITEs separados — sem transação distribuída | ISAM não oferece suporte nativo a 2PC |
-| 💾 **Investimentos** | Módulo BANKINV é um simulador — aplicações e resgates não persistem em arquivo | Requer arquivo de portfólio `BANKINV.DAT` |
-| 📊 **DRE** | Valores do DRE simplificado são fixos (não calculados dos dados reais) | Integração com dados de receita necessária |
-| 👤 **Autenticação** | Campo `SENHA-HASH (X(64))` existe mas nunca é preenchido ou verificado | Requer módulo C para hash seguro |
-| 📱 **Concorrência** | Sistema monousuário — sem controle de concorrência entre processos | Lock básico do ISAM apenas |
-| 🔑 **Chaves PIX** | BANKTRAN suporta somente chave CPF; BANKTRF suporta CPF, Email e Telefone | Chave aleatória (UUID) não implementada em nenhum módulo |
-| 🗄️ **BCB** | Relatório BCB exibe cabeçalho mas sem dados no formato SCR real | Estrutura de saída a implementar conforme manual BACEN |
-| 📧 **BANKCRM** | Email e telefone armazenados nos campos de endereço (logradouro/número) | Limitação do schema atual — mudança quebraria arquivo `.DAT` existente |
+| Category | Limitation | Context |
+|----------|-----------|---------|
+| 🔄 **Atomicity** | Transfers use two separate REWRITEs — no distributed transaction | ISAM has no native 2PC support |
+| 💾 **Investments** | BANKINV is a simulator — investments and redemptions are not persisted | Requires a portfolio file `BANKINV.DAT` |
+| 📊 **P&L** | Simplified P&L values are hardcoded (not calculated from real data) | Revenue data integration needed |
+| 👤 **Authentication** | `PASSWORD-HASH (X(64))` field exists but is never populated or verified | Requires a C module for secure hashing |
+| 📱 **Concurrency** | Single-user system — no inter-process concurrency control | Basic ISAM locking only |
+| 🔑 **PIX Keys** | BANKTRAN supports CPF key only; BANKTRF supports CPF, Email and Phone | Random key (UUID) not implemented in any module |
+| 🗄️ **BCB** | BCB report shows header but no data in real SCR format | Output structure to be implemented per BACEN manual |
+| 📧 **BANKCRM** | Email and phone stored in address fields (street/number) | Current schema limitation — changing it would break the existing `.DAT` file |
 
 ---
 
@@ -1390,19 +1396,19 @@ YYYYMMDD HHMMSS OP:[opcao] COD:[codigo_retorno]
 
 ### 🏦 Banco COBOL S/A
 
-*Desenvolvido com rigor técnico, precisão financeira e respeito ao legado*
+*Built with technical rigor, financial precision and respect for legacy*
 
 [![GnuCOBOL](https://img.shields.io/badge/Powered%20by-GnuCOBOL-005CA5?style=flat-square&logo=gnu&logoColor=white)](https://gnucobol.sourceforge.io/)
 [![Python](https://img.shields.io/badge/GUI-Python%20tkinter-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![ISAM](https://img.shields.io/badge/Storage-ISAM%20Indexed%20Files-6DB33F?style=flat-square)](https://en.wikipedia.org/wiki/ISAM)
 [![Precision](https://img.shields.io/badge/Precision-COMP--3%20Packed%20Decimal-FF6B35?style=flat-square)]()
-[![252](https://img.shields.io/badge/Investment-252%20dias%20úteis%20ANBIMA-8B5CF6?style=flat-square)]()
+[![252](https://img.shields.io/badge/Investment-252%20business%20days%20ANBIMA-8B5CF6?style=flat-square)]()
 
 <br/>
 
 ```
 "The reports of COBOL's death have been greatly exaggerated."
-— Toda empresa Fortune 500 que ainda processa trilhões de dólares em COBOL.
+— Every Fortune 500 company still processing trillions of dollars in COBOL.
 ```
 
 </div>
