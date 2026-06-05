@@ -7,7 +7,7 @@ BINDIR   = bin
 COB_CFLAGS_SAFE = -finline-functions -ggdb3 -pipe -Wdate-time -Wno-unused -fsigned-char -Wno-pointer-sign -D_FORTIFY_SOURCE=3
 COBENV   = env CFLAGS= CPPFLAGS= COB_CFLAGS="$(COB_CFLAGS_SAFE)"
 
-.PHONY: all clean install run run-gui acceptance acceptance-fast acceptance-finance test test-fast
+.PHONY: all clean install run run-gui acceptance acceptance-fast acceptance-finance test test-fast export-deps
 
 all: dirs bankacct banktran bankinv bankrep bankqry banktrf bankpay bankcrm bankadm bankloan bankcard bankschd bankmain
 
@@ -116,3 +116,7 @@ test: bankmain
 
 test-fast:
 	python3 test_suite.py
+
+# Instala dependências opcionais para xlsx e pdf
+export-deps:
+	pip3 install openpyxl fpdf2

@@ -10,8 +10,14 @@ import threading
 import time
 import tkinter as tk
 from pathlib import Path
-from tkinter import messagebox
+from tkinter import filedialog, messagebox
 from tkinter.scrolledtext import ScrolledText
+
+from bank_export import (
+    AVAILABLE_FORMATS,
+    export_formats,
+    parse_extrato_lines,
+)
 
 
 def windows_path_to_wsl(path: Path) -> str:
@@ -108,6 +114,7 @@ class BankGuiApp:
         self._build_payment_form(guided)
         self._build_investment_form(guided)
         self._build_report_form(guided)
+        self._build_export_form(guided)
         self._build_loan_form(guided)
         self._build_card_form(guided)
         self._build_schedule_form(guided)
@@ -320,6 +327,42 @@ class BankGuiApp:
         tk.Button(frame, text="Executar Relatorio", width=18, command=self.report_flow).grid(
             row=0, column=4, padx=4, sticky="e"
         )
+
+    def _build_export_form(self, parent: tk.Widget) -> None:
+        frame = tk.LabelFrame(parent, text="Exportar Extrato", padx=8, pady=6)
+        frame.pack(fill=tk.X, pady=(6, 0))
+
+        self.exp_dir_var = tk.StringVar(value=str(Path.home() / "exports"))
+        self.exp_stem_var = tk.StringVar(value="extrato")
+        self._exp_fmt_vars: dict[str, tk.BooleanVar] = {
+            fmt: tk.BooleanVar(value=fmt in ("csv", "html", "txt"))
+            for fmt in AVAILABLE_FORMATS
+        }
+
+        tk.Label(frame, text="Pasta de saída").grid(row=0, column=0, sticky="w")
+        tk.Entry(frame, textvariable=self.exp_dir_var, width=36).grid(row=0, column=1, padx=4, sticky="we", columnspan=3)
+        tk.Button(frame, text="…", width=3,
+                  command=lambda: self.exp_dir_var.set(
+                      filedialog.askdirectory(initialdir=self.exp_dir_var.get()) or self.exp_dir_var.get()
+                  )).grid(row=0, column=4, padx=2)
+
+        tk.Label(frame, text="Nome base").grid(row=0, column=5, sticky="w", padx=(10, 0))
+        tk.Entry(frame, textvariable=self.exp_stem_var, width=18).grid(row=0, column=6, padx=4, sticky="w")
+
+        fmt_frame = tk.Frame(frame)
+        fmt_frame.grid(row=1, column=0, columnspan=7, sticky="w", pady=(6, 2))
+        tk.Label(fmt_frame, text="Formatos:").pack(side=tk.LEFT, padx=(0, 6))
+        for fmt, var in self._exp_fmt_vars.items():
+            tk.Checkbutton(fmt_frame, text=fmt.upper(), variable=var).pack(side=tk.LEFT, padx=3)
+
+        btn_frame = tk.Frame(frame)
+        btn_frame.grid(row=2, column=0, columnspan=7, sticky="e", pady=(4, 0))
+        tk.Button(btn_frame, text="Selecionar Tudo", width=14,
+                  command=lambda: [v.set(True) for v in self._exp_fmt_vars.values()]).pack(side=tk.LEFT, padx=3)
+        tk.Button(btn_frame, text="Limpar Seleção", width=14,
+                  command=lambda: [v.set(False) for v in self._exp_fmt_vars.values()]).pack(side=tk.LEFT, padx=3)
+        tk.Button(btn_frame, text="Exportar Saída Atual", width=20,
+                  bg="#1a3c6e", fg="white", command=self.export_flow).pack(side=tk.LEFT, padx=6)
 
     def _build_loan_form(self, parent: tk.Widget) -> None:
         frame = tk.LabelFrame(parent, text="Emprestimos", padx=8, pady=6)
@@ -721,6 +764,32 @@ class BankGuiApp:
         if self.inv_back_to_main_var.get():
             steps.extend(["00", "0"])
         self.send_sequence(steps)
+
+    def export_flow(self) -> None:
+        formats = [fmt for fmt, var in self._exp_fmt_vars.items() if var.get()]
+        if not formats:
+            messagebox.showwarning("Exportar", "Selecione ao menos um formato.")
+            return
+
+        raw_text: str = self.output.get("1.0", tk.END)
+        if len(raw_text.strip()) < 10:
+            messagebox.showwarning("Exportar", "Nenhum conteúdo na saída para exportar.")
+            return
+
+        out_dir = Path(self.exp_dir_var.get().strip() or "exports")
+        stem = self.exp_stem_var.get().strip() or "extrato"
+
+        def _run() -> None:
+            records = parse_extrato_lines(raw_text)
+            results = export_formats(records, formats, out_dir, stem, raw_text=raw_text)
+            lines = [f"Exportação concluída — {len(records)} transação(ões) detectadas\n"]
+            for fmt, ok in results.items():
+                icon = "✓" if ok else "✗ (dep. ausente)"
+                lines.append(f"  {icon}  {fmt.upper():6} → {out_dir / f'{stem}.{fmt}'}")
+            msg = "\n".join(lines)
+            self.root.after(0, lambda: messagebox.showinfo("Exportar", msg))
+
+        threading.Thread(target=_run, daemon=True).start()
 
     def loan_flow(self) -> None:
         op = self.loan_op_var.get().strip() or "01"
