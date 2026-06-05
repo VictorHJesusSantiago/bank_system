@@ -7,7 +7,7 @@ BINDIR   = bin
 COB_CFLAGS_SAFE = -finline-functions -ggdb3 -pipe -Wdate-time -Wno-unused -fsigned-char -Wno-pointer-sign -D_FORTIFY_SOURCE=3
 COBENV   = env CFLAGS= CPPFLAGS= COB_CFLAGS="$(COB_CFLAGS_SAFE)"
 
-.PHONY: all clean install run run-gui acceptance acceptance-fast acceptance-finance
+.PHONY: all clean install run run-gui acceptance acceptance-fast acceptance-finance test test-fast
 
 all: dirs bankacct banktran bankinv bankrep bankqry banktrf bankpay bankcrm bankadm bankmain
 
@@ -95,3 +95,9 @@ acceptance-fast:
 
 acceptance-finance:
 	python3 finance_regression.py
+
+test: bankmain
+	python3 test_suite.py
+
+test-fast:
+	python3 test_suite.py
