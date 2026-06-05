@@ -225,6 +225,9 @@
            DISPLAY ' 7. Gestao de Clientes'
            DISPLAY ' 8. Relatorios'
            DISPLAY ' 9. Administracao'
+           DISPLAY ' A. Emprestimos e Financiamentos'
+           DISPLAY ' B. Cartoes Bancarios'
+           DISPLAY ' C. Agendamentos'
            DISPLAY ' 0. Sair'
            DISPLAY '================================================'.
 
@@ -255,6 +258,12 @@
                    CALL 'BANKREP' USING WS-RETORNO
                WHEN '9'
                    CALL 'BANKADM' USING WS-RETORNO
+               WHEN 'A' 'a'
+                   CALL 'BANKLOAN' USING WS-RETORNO
+               WHEN 'B' 'b'
+                   CALL 'BANKCARD' USING WS-RETORNO
+               WHEN 'C' 'c'
+                   CALL 'BANKSCHD' USING WS-RETORNO
                WHEN '0'
                    MOVE 'N' TO WS-CONTINUAR
                WHEN OTHER

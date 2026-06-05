@@ -63,6 +63,9 @@ class BankGuiApp:
             ("Transacoes", "2"),
             ("Investimentos", "6"),
             ("Relatorios", "8"),
+            ("Emprestimos", "A"),
+            ("Cartoes", "B"),
+            ("Agendamentos", "C"),
         ]:
             tk.Button(nav, text=label, width=16, command=lambda c=cmd: self.send_input(c)).pack(side=tk.LEFT, padx=3)
 
@@ -105,6 +108,9 @@ class BankGuiApp:
         self._build_payment_form(guided)
         self._build_investment_form(guided)
         self._build_report_form(guided)
+        self._build_loan_form(guided)
+        self._build_card_form(guided)
+        self._build_schedule_form(guided)
 
         output_box = tk.LabelFrame(self.root, text="Saida do Sistema", padx=10, pady=8)
         output_box.pack(fill=tk.BOTH, expand=True, padx=12, pady=(0, 12))
@@ -313,6 +319,121 @@ class BankGuiApp:
         )
         tk.Button(frame, text="Executar Relatorio", width=18, command=self.report_flow).grid(
             row=0, column=4, padx=4, sticky="e"
+        )
+
+    def _build_loan_form(self, parent: tk.Widget) -> None:
+        frame = tk.LabelFrame(parent, text="Emprestimos", padx=8, pady=6)
+        frame.pack(fill=tk.X, pady=(6, 0))
+
+        self.loan_op_var = tk.StringVar(value="01")
+        self.loan_conta_var = tk.StringVar()
+        self.loan_tipo_var = tk.StringVar(value="PES")
+        self.loan_valor_var = tk.StringVar()
+        self.loan_parcelas_var = tk.StringVar()
+        self.loan_id_var = tk.StringVar()
+        self.loan_back_var = tk.BooleanVar(value=True)
+
+        tk.Label(frame, text="Operacao").grid(row=0, column=0, sticky="w")
+        tk.OptionMenu(frame, self.loan_op_var, "01", "02", "03", "04", "05", "06").grid(
+            row=0, column=1, padx=4, sticky="w"
+        )
+        tk.Label(frame, text="01=Solicitar 02=Consultar 03=Pagar 04=Simular 05=Listar 06=Quitar").grid(
+            row=0, column=2, padx=6, sticky="w", columnspan=4
+        )
+        tk.Label(frame, text="Conta").grid(row=1, column=0, sticky="w")
+        tk.Entry(frame, textvariable=self.loan_conta_var, width=14).grid(row=1, column=1, padx=4, sticky="w")
+        tk.Label(frame, text="Tipo").grid(row=1, column=2, sticky="w")
+        tk.OptionMenu(frame, self.loan_tipo_var, "PES", "CON", "IMO", "VEI").grid(row=1, column=3, padx=4, sticky="w")
+        tk.Label(frame, text="Valor").grid(row=1, column=4, sticky="w")
+        tk.Entry(frame, textvariable=self.loan_valor_var, width=14).grid(row=1, column=5, padx=4, sticky="w")
+        tk.Label(frame, text="Parcelas").grid(row=1, column=6, sticky="w")
+        tk.Entry(frame, textvariable=self.loan_parcelas_var, width=8).grid(row=1, column=7, padx=4, sticky="w")
+        tk.Label(frame, text="ID Empr").grid(row=2, column=0, sticky="w")
+        tk.Entry(frame, textvariable=self.loan_id_var, width=14).grid(row=2, column=1, padx=4, sticky="w")
+        tk.Checkbutton(frame, text="Voltar ao menu principal", variable=self.loan_back_var).grid(
+            row=2, column=2, columnspan=3, sticky="w"
+        )
+        tk.Button(frame, text="Executar", width=14, command=self.loan_flow).grid(
+            row=2, column=5, columnspan=2, padx=4, sticky="e"
+        )
+
+    def _build_card_form(self, parent: tk.Widget) -> None:
+        frame = tk.LabelFrame(parent, text="Cartoes Bancarios", padx=8, pady=6)
+        frame.pack(fill=tk.X, pady=(6, 0))
+
+        self.card_op_var = tk.StringVar(value="01")
+        self.card_conta_var = tk.StringVar()
+        self.card_tipo_var = tk.StringVar(value="D")
+        self.card_limite_var = tk.StringVar()
+        self.card_num_var = tk.StringVar()
+        self.card_valor_var = tk.StringVar()
+        self.card_back_var = tk.BooleanVar(value=True)
+
+        tk.Label(frame, text="Operacao").grid(row=0, column=0, sticky="w")
+        tk.OptionMenu(frame, self.card_op_var, "01", "02", "03", "04", "05", "06", "07", "08").grid(
+            row=0, column=1, padx=4, sticky="w"
+        )
+        tk.Label(frame, text="01=Emitir 02=Consultar 03=Bloquear 04=Desbloquear"
+                 " 05=Limite 06=Fatura 07=Pagar 08=Listar").grid(
+            row=0, column=2, padx=6, sticky="w", columnspan=5
+        )
+        tk.Label(frame, text="Conta").grid(row=1, column=0, sticky="w")
+        tk.Entry(frame, textvariable=self.card_conta_var, width=14).grid(row=1, column=1, padx=4, sticky="w")
+        tk.Label(frame, text="Tipo").grid(row=1, column=2, sticky="w")
+        tk.OptionMenu(frame, self.card_tipo_var, "D", "C").grid(row=1, column=3, padx=4, sticky="w")
+        tk.Label(frame, text="Limite").grid(row=1, column=4, sticky="w")
+        tk.Entry(frame, textvariable=self.card_limite_var, width=14).grid(row=1, column=5, padx=4, sticky="w")
+        tk.Label(frame, text="Num Cartao").grid(row=2, column=0, sticky="w")
+        tk.Entry(frame, textvariable=self.card_num_var, width=20).grid(row=2, column=1, padx=4, sticky="w")
+        tk.Label(frame, text="Valor Pgto").grid(row=2, column=2, sticky="w")
+        tk.Entry(frame, textvariable=self.card_valor_var, width=14).grid(row=2, column=3, padx=4, sticky="w")
+        tk.Checkbutton(frame, text="Voltar ao menu principal", variable=self.card_back_var).grid(
+            row=2, column=4, columnspan=2, sticky="w"
+        )
+        tk.Button(frame, text="Executar", width=14, command=self.card_flow).grid(
+            row=2, column=6, padx=4, sticky="e"
+        )
+
+    def _build_schedule_form(self, parent: tk.Widget) -> None:
+        frame = tk.LabelFrame(parent, text="Agendamentos", padx=8, pady=6)
+        frame.pack(fill=tk.X, pady=(6, 0))
+
+        self.schd_op_var = tk.StringVar(value="01")
+        self.schd_conta_var = tk.StringVar()
+        self.schd_tipo_var = tk.StringVar(value="TED")
+        self.schd_dest_var = tk.StringVar()
+        self.schd_valor_var = tk.StringVar()
+        self.schd_data_var = tk.StringVar()
+        self.schd_rec_var = tk.StringVar(value="U")
+        self.schd_id_var = tk.StringVar()
+        self.schd_back_var = tk.BooleanVar(value=True)
+
+        tk.Label(frame, text="Operacao").grid(row=0, column=0, sticky="w")
+        tk.OptionMenu(frame, self.schd_op_var, "01", "02", "03", "04", "05").grid(
+            row=0, column=1, padx=4, sticky="w"
+        )
+        tk.Label(frame, text="01=Agendar Trf 02=Agendar Pag 03=Listar 04=Cancelar 05=Processar").grid(
+            row=0, column=2, padx=6, sticky="w", columnspan=5
+        )
+        tk.Label(frame, text="Conta").grid(row=1, column=0, sticky="w")
+        tk.Entry(frame, textvariable=self.schd_conta_var, width=14).grid(row=1, column=1, padx=4, sticky="w")
+        tk.Label(frame, text="Tipo").grid(row=1, column=2, sticky="w")
+        tk.OptionMenu(frame, self.schd_tipo_var, "TED", "DOC", "PIX", "BOL").grid(row=1, column=3, padx=4, sticky="w")
+        tk.Label(frame, text="Destino").grid(row=1, column=4, sticky="w")
+        tk.Entry(frame, textvariable=self.schd_dest_var, width=14).grid(row=1, column=5, padx=4, sticky="w")
+        tk.Label(frame, text="Valor").grid(row=1, column=6, sticky="w")
+        tk.Entry(frame, textvariable=self.schd_valor_var, width=14).grid(row=1, column=7, padx=4, sticky="w")
+        tk.Label(frame, text="Data(AAAAMMDD)").grid(row=2, column=0, sticky="w")
+        tk.Entry(frame, textvariable=self.schd_data_var, width=12).grid(row=2, column=1, padx=4, sticky="w")
+        tk.Label(frame, text="Recor").grid(row=2, column=2, sticky="w")
+        tk.OptionMenu(frame, self.schd_rec_var, "U", "M", "S").grid(row=2, column=3, padx=4, sticky="w")
+        tk.Label(frame, text="ID Agend").grid(row=2, column=4, sticky="w")
+        tk.Entry(frame, textvariable=self.schd_id_var, width=12).grid(row=2, column=5, padx=4, sticky="w")
+        tk.Checkbutton(frame, text="Voltar ao menu principal", variable=self.schd_back_var).grid(
+            row=2, column=6, sticky="w"
+        )
+        tk.Button(frame, text="Executar", width=14, command=self.schedule_flow).grid(
+            row=2, column=7, padx=4, sticky="e"
         )
 
     def _bind_masks(self) -> None:
@@ -598,6 +719,129 @@ class BankGuiApp:
         confirm = "S" if self.inv_confirmar_var.get() else "N"
         steps = ["6", "01", valor, prazo, confirm]
         if self.inv_back_to_main_var.get():
+            steps.extend(["00", "0"])
+        self.send_sequence(steps)
+
+    def loan_flow(self) -> None:
+        op = self.loan_op_var.get().strip() or "01"
+        conta = self._digits_only(self.loan_conta_var.get().strip())
+        tipo = self.loan_tipo_var.get().strip() or "PES"
+        valor = self._normalize_money(self.loan_valor_var.get().strip())
+        parcelas = self._digits_only(self.loan_parcelas_var.get().strip())
+        emp_id = self._digits_only(self.loan_id_var.get().strip())
+
+        steps = ["A", op]
+        if op == "01":
+            if not conta or not valor or not parcelas:
+                messagebox.showwarning("Emprestimo", "Informe conta, valor e parcelas.")
+                return
+            steps += [conta, tipo, valor, parcelas, "S"]
+        elif op in ("02", "03", "06"):
+            if not emp_id:
+                messagebox.showwarning("Emprestimo", "Informe o ID do emprestimo.")
+                return
+            steps += [emp_id]
+            if op == "03":
+                steps.append("S")
+            elif op == "06":
+                steps.append("S")
+        elif op == "04":
+            if not valor or not parcelas:
+                messagebox.showwarning("Simulacao", "Informe valor e parcelas.")
+                return
+            steps += [tipo, valor, parcelas]
+        elif op == "05":
+            if not conta:
+                messagebox.showwarning("Emprestimo", "Informe o numero da conta.")
+                return
+            steps.append(conta)
+
+        if self.loan_back_var.get():
+            steps.extend(["00", "0"])
+        self.send_sequence(steps)
+
+    def card_flow(self) -> None:
+        op = self.card_op_var.get().strip() or "01"
+        conta = self._digits_only(self.card_conta_var.get().strip())
+        tipo = self.card_tipo_var.get().strip() or "D"
+        limite = self._normalize_money(self.card_limite_var.get().strip())
+        num = self._digits_only(self.card_num_var.get().strip())
+        valor = self._normalize_money(self.card_valor_var.get().strip())
+
+        steps = ["B", op]
+        if op == "01":
+            if not conta:
+                messagebox.showwarning("Cartao", "Informe o numero da conta.")
+                return
+            steps += [conta, tipo]
+            if tipo == "C":
+                if not limite:
+                    messagebox.showwarning("Cartao", "Informe o limite de credito.")
+                    return
+                steps.append(limite)
+        elif op in ("02", "03", "04", "06"):
+            if not num:
+                messagebox.showwarning("Cartao", "Informe o numero do cartao.")
+                return
+            steps.append(num)
+        elif op == "05":
+            if not num or not limite:
+                messagebox.showwarning("Cartao", "Informe cartao e novo limite.")
+                return
+            steps += [num, limite]
+        elif op == "07":
+            if not num:
+                messagebox.showwarning("Cartao", "Informe o numero do cartao.")
+                return
+            steps.append(num)
+            pagar_total = "S" if not valor else "N"
+            steps.append(pagar_total)
+            if pagar_total == "N" and valor:
+                steps.append(valor)
+        elif op == "08":
+            if not conta:
+                messagebox.showwarning("Cartao", "Informe o numero da conta.")
+                return
+            steps.append(conta)
+
+        if self.card_back_var.get():
+            steps.extend(["00", "0"])
+        self.send_sequence(steps)
+
+    def schedule_flow(self) -> None:
+        op = self.schd_op_var.get().strip() or "01"
+        conta = self._digits_only(self.schd_conta_var.get().strip())
+        tipo = self.schd_tipo_var.get().strip() or "TED"
+        dest = self._digits_only(self.schd_dest_var.get().strip())
+        valor = self._normalize_money(self.schd_valor_var.get().strip())
+        data = self._digits_only(self.schd_data_var.get().strip())
+        rec = self.schd_rec_var.get().strip() or "U"
+        agend_id = self._digits_only(self.schd_id_var.get().strip())
+
+        steps = ["C", op]
+        if op == "01":
+            if not conta or not valor or not data:
+                messagebox.showwarning("Agendamento", "Informe conta, valor e data.")
+                return
+            steps += [conta, tipo, dest or "0", valor, data, rec]
+        elif op == "02":
+            if not conta or not valor or not data:
+                messagebox.showwarning("Agendamento", "Informe conta, valor e data.")
+                return
+            steps += [conta, valor, data, "Pagamento agendado"]
+        elif op == "03":
+            if not conta:
+                messagebox.showwarning("Agendamento", "Informe o numero da conta.")
+                return
+            steps.append(conta)
+        elif op == "04":
+            if not agend_id:
+                messagebox.showwarning("Agendamento", "Informe o ID do agendamento.")
+                return
+            steps.append(agend_id)
+        # op 05: no extra input needed
+
+        if self.schd_back_var.get():
             steps.extend(["00", "0"])
         self.send_sequence(steps)
 

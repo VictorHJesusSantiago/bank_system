@@ -48,6 +48,10 @@
                88  TRANS-DOC        VALUE 'DOC'.
                88  TRANS-RENDIMENTO VALUE 'REN'.
                88  TRANS-TARIFA     VALUE 'TAR'.
+               88  TRANS-EMPREST    VALUE 'EMP'.
+               88  TRANS-PARCELA    VALUE 'PMT'.
+               88  TRANS-FATURA     VALUE 'FAT'.
+               88  TRANS-AGEND      VALUE 'AGN'.
            05  WS-TRANS-VALOR       PIC S9(13)V99 COMP-3.
            05  WS-TRANS-DATA        PIC 9(8).
            05  WS-TRANS-HORA        PIC 9(6).
@@ -128,3 +132,77 @@
            05  WS-INV-DT-INICIO     PIC 9(8).
            05  WS-INV-DT-VENCTO     PIC 9(8).
            05  WS-INV-RENTABILIDADE PIC S9(5)V99 COMP-3.
+
+      *----------------------------------------------------------------
+      * ESTRUTURA DE EMPRESTIMO
+      *----------------------------------------------------------------
+       01  WS-EMPRESTIMO.
+           05  WS-EMP-ID            PIC 9(10).
+           05  WS-EMP-CONTA         PIC 9(10).
+           05  WS-EMP-TIPO          PIC X(3).
+               88  EMP-PESSOAL      VALUE 'PES'.
+               88  EMP-CONSIG       VALUE 'CON'.
+               88  EMP-IMOB         VALUE 'IMO'.
+               88  EMP-VEICULO      VALUE 'VEI'.
+           05  WS-EMP-VALOR-SOLICIT PIC S9(13)V99 COMP-3.
+           05  WS-EMP-VALOR-PARCEL  PIC S9(13)V99 COMP-3.
+           05  WS-EMP-TAXA-MENSAL   PIC S9(3)V9(6) COMP-3.
+           05  WS-EMP-PARCELAS-TOT  PIC 9(3).
+           05  WS-EMP-PARCELAS-PG   PIC 9(3).
+           05  WS-EMP-DT-CONTRATO   PIC 9(8).
+           05  WS-EMP-DT-VENCTO     PIC 9(8).
+           05  WS-EMP-SALDO-DEVEDOR PIC S9(13)V99 COMP-3.
+           05  WS-EMP-STATUS        PIC X(1).
+               88  EMP-ATIVO        VALUE 'A'.
+               88  EMP-QUITADO      VALUE 'Q'.
+               88  EMP-ATRASO       VALUE 'T'.
+               88  EMP-CANCELADO    VALUE 'C'.
+
+      *----------------------------------------------------------------
+      * ESTRUTURA DE CARTAO BANCARIO
+      *----------------------------------------------------------------
+       01  WS-CARTAO.
+           05  WS-CART-NUMERO       PIC 9(16).
+           05  WS-CART-CONTA        PIC 9(10).
+           05  WS-CART-TIPO         PIC X(1).
+               88  CART-DEBITO      VALUE 'D'.
+               88  CART-CREDITO     VALUE 'C'.
+           05  WS-CART-TITULAR      PIC X(60).
+           05  WS-CART-LIMITE       PIC S9(11)V99 COMP-3.
+           05  WS-CART-LIMITE-DISP  PIC S9(11)V99 COMP-3.
+           05  WS-CART-FATURA-ATU   PIC S9(13)V99 COMP-3.
+           05  WS-CART-DT-VENCTO    PIC 9(8).
+           05  WS-CART-DT-EMISSAO   PIC 9(8).
+           05  WS-CART-EXPIRY       PIC 9(6).
+           05  WS-CART-CVV-HASH     PIC X(64).
+           05  WS-CART-STATUS       PIC X(1).
+               88  CART-ATIVO       VALUE 'A'.
+               88  CART-BLOQUEADO   VALUE 'B'.
+               88  CART-CANCELADO   VALUE 'C'.
+           05  WS-CART-BANDEIRA     PIC X(10).
+
+      *----------------------------------------------------------------
+      * ESTRUTURA DE AGENDAMENTO
+      *----------------------------------------------------------------
+       01  WS-AGENDAMENTO.
+           05  WS-AGEND-ID          PIC 9(10).
+           05  WS-AGEND-CONTA       PIC 9(10).
+           05  WS-AGEND-TIPO        PIC X(3).
+               88  AGEND-TED        VALUE 'TED'.
+               88  AGEND-DOC        VALUE 'DOC'.
+               88  AGEND-PIX        VALUE 'PIX'.
+               88  AGEND-BOL        VALUE 'BOL'.
+           05  WS-AGEND-CONTA-DEST  PIC 9(10).
+           05  WS-AGEND-VALOR       PIC S9(13)V99 COMP-3.
+           05  WS-AGEND-DT-AGEND    PIC 9(8).
+           05  WS-AGEND-DT-EXEC     PIC 9(8).
+           05  WS-AGEND-DESCRICAO   PIC X(100).
+           05  WS-AGEND-STATUS      PIC X(1).
+               88  AGEND-PENDENTE   VALUE 'P'.
+               88  AGEND-EXECUTADO  VALUE 'E'.
+               88  AGEND-CANCELADO  VALUE 'C'.
+               88  AGEND-FALHOU     VALUE 'F'.
+           05  WS-AGEND-RECORRENCIA PIC X(1).
+               88  AGEND-UNICO      VALUE 'U'.
+               88  AGEND-MENSAL     VALUE 'M'.
+               88  AGEND-SEMANAL    VALUE 'S'.

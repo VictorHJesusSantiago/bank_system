@@ -9,7 +9,7 @@ COBENV   = env CFLAGS= CPPFLAGS= COB_CFLAGS="$(COB_CFLAGS_SAFE)"
 
 .PHONY: all clean install run run-gui acceptance acceptance-fast acceptance-finance test test-fast
 
-all: dirs bankacct banktran bankinv bankrep bankqry banktrf bankpay bankcrm bankadm bankmain
+all: dirs bankacct banktran bankinv bankrep bankqry banktrf bankpay bankcrm bankadm bankloan bankcard bankschd bankmain
 
 dirs:
 	mkdir -p $(BINDIR)
@@ -50,7 +50,19 @@ bankadm:
 	$(COBENV) $(COBC) -m $(COBFLAGS) \
 		BANKADM.cob -o $(BINDIR)/BANKADM.so
 
-bankmain: bankacct banktran bankinv bankrep bankqry banktrf bankpay bankcrm bankadm
+bankloan:
+	$(COBENV) $(COBC) -m $(COBFLAGS) \
+		BANKLOAN.cob -o $(BINDIR)/BANKLOAN.so
+
+bankcard:
+	$(COBENV) $(COBC) -m $(COBFLAGS) \
+		BANKCARD.cob -o $(BINDIR)/BANKCARD.so
+
+bankschd:
+	$(COBENV) $(COBC) -m $(COBFLAGS) \
+		BANKSCHD.cob -o $(BINDIR)/BANKSCHD.so
+
+bankmain: bankacct banktran bankinv bankrep bankqry banktrf bankpay bankcrm bankadm bankloan bankcard bankschd
 	$(COBENV) $(COBC) -x $(COBFLAGS) \
 		BANKMAIN.cob \
 		$(BINDIR)/BANKACCT.so \
@@ -62,11 +74,14 @@ bankmain: bankacct banktran bankinv bankrep bankqry banktrf bankpay bankcrm bank
 		$(BINDIR)/BANKPAY.so \
 		$(BINDIR)/BANKCRM.so \
 		$(BINDIR)/BANKADM.so \
+		$(BINDIR)/BANKLOAN.so \
+		$(BINDIR)/BANKCARD.so \
+		$(BINDIR)/BANKSCHD.so \
 		-o $(BINDIR)/bankmain
 
 clean:
 	rm -rf $(BINDIR)
-	rm -f *.DAT *.DAT.* *.LOG *.LOG.* *.TXT
+	rm -f *.DAT *.DAT.* *.LOG *.LOG.* *.TXT *.idx *.dat
 
 install:
 	cp $(BINDIR)/bankmain /usr/local/bin/bankmain
