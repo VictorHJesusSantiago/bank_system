@@ -165,7 +165,9 @@
            DISPLAY 'Email: '
            ACCEPT WS-CONTA-EMAIL
            DISPLAY 'Telefone: '
-           ACCEPT WS-CONTA-TELEFONE.
+           ACCEPT WS-CONTA-TELEFONE
+           DISPLAY 'Senha de acesso (8 chars): '
+           ACCEPT WS-CONTA-SENHA-HASH.
 
        2200-VALIDAR-DADOS.
            PERFORM 2210-VALIDAR-CPF

@@ -12,17 +12,46 @@
        CONFIGURATION SECTION.
        SPECIAL-NAMES.
            DECIMAL-POINT IS COMMA.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT ARQINV ASSIGN TO 'BANKINV.DAT'
+               ORGANIZATION IS INDEXED
+               ACCESS MODE IS DYNAMIC
+               RECORD KEY IS REG-INV-ID
+               FILE STATUS IS FS-INV.
 
       *----------------------------------------------------------------
        DATA DIVISION.
+       FILE SECTION.
+       FD  ARQINV.
+       01  REG-INV.
+           05  REG-INV-ID            PIC 9(10).
+           05  REG-INV-CONTA         PIC 9(10).
+           05  REG-INV-TIPO          PIC X(3).
+           05  REG-INV-VALOR-APORT   PIC S9(13)V99 COMP-3.
+           05  REG-INV-VALOR-ATUAL   PIC S9(13)V99 COMP-3.
+           05  REG-INV-TAXA          PIC S9(5)V9(6) COMP-3.
+           05  REG-INV-DT-INICIO     PIC 9(8).
+           05  REG-INV-PRAZO         PIC 9(4).
+           05  REG-INV-STATUS        PIC X(1).
+
        WORKING-STORAGE SECTION.
        COPY BANKDATA.
 
        01  WS-INV-CTRL.
+           05  FS-INV               PIC XX.
+               88  FS-INV-OK        VALUE '00'.
+               88  FS-INV-EOF       VALUE '10'.
+               88  FS-INV-NFD       VALUE '23'.
+               88  FS-INV-DUP       VALUE '22'.
+           05  WS-INV-ID-SEQ        PIC 9(10) VALUE ZEROS.
            05  WS-OPCAO-INV         PIC X(2).
            05  WS-CONTINUAR         PIC X VALUE 'S'.
                88  INV-CONTINUAR    VALUE 'S'.
                88  INV-PARAR        VALUE 'N'.
+           05  WS-INV-DIS           PIC ZZZ.ZZZ.ZZZ.ZZ9,99-.
+           05  WS-INV-CTR           PIC 9(6) COMP-3.
+           05  WS-INV-TOTAL         PIC S9(13)V99 COMP-3.
 
        01  WS-CALC-INVEST.
            05  WS-PRAZO-DIAS        PIC 9(4) COMP-3.
@@ -63,7 +92,14 @@
        0000-PRINCIPAL SECTION.
       *================================================================
        0000-INICIO.
+           OPEN I-O ARQINV
+           IF NOT FS-INV-OK
+               OPEN OUTPUT ARQINV
+               CLOSE ARQINV
+               OPEN I-O ARQINV
+           END-IF
            PERFORM 1000-MENU-INV UNTIL INV-PARAR
+           CLOSE ARQINV
            MOVE 0 TO LS-CODIGO
            GOBACK.
 
@@ -164,8 +200,24 @@
            DISPLAY 'Confirmar? (S/N): '
            ACCEPT WS-INV-TIPO
            IF WS-INV-TIPO = 'S'
-               DISPLAY 'APLICACAO REALIZADA!'
-               MOVE 0 TO LS-CODIGO
+               ADD 1 TO WS-INV-ID-SEQ
+               MOVE WS-INV-ID-SEQ TO REG-INV-ID
+               MOVE WS-INV-CONTA TO REG-INV-CONTA
+               MOVE WS-INV-TIPO TO REG-INV-TIPO
+               MOVE WS-INV-VALOR-APORT TO REG-INV-VALOR-APORT
+               MOVE WS-VALOR-LIQUIDO TO REG-INV-VALOR-ATUAL
+               MOVE WS-TAXA-ANUAL TO REG-INV-TAXA
+               MOVE FUNCTION CURRENT-DATE(1:8) TO REG-INV-DT-INICIO
+               MOVE WS-PRAZO-DIAS TO REG-INV-PRAZO
+               MOVE 'A' TO REG-INV-STATUS
+               WRITE REG-INV
+               IF FS-INV-OK
+                   DISPLAY 'APLICACAO REALIZADA! ID: ' REG-INV-ID
+                   MOVE 0 TO LS-CODIGO
+               ELSE
+                   DISPLAY 'ERRO AO GRAVAR: ' FS-INV
+                   MOVE 9999 TO LS-CODIGO
+               END-IF
            ELSE
                DISPLAY 'OPERACAO CANCELADA'
            END-IF.
@@ -208,18 +260,60 @@
        4000-RESGATAR.
            DISPLAY 'ID do Investimento: '
            ACCEPT WS-INV-ID
-           DISPLAY 'RESGATE PROCESSADO!'
-           MOVE 0 TO LS-CODIGO.
+           MOVE WS-INV-ID TO REG-INV-ID
+           READ ARQINV KEY IS REG-INV-ID
+           IF FS-INV-NFD
+               DISPLAY 'INVESTIMENTO NAO ENCONTRADO'
+               MOVE 2 TO LS-CODIGO
+           ELSE IF FS-INV-OK
+               IF REG-INV-STATUS = 'R'
+                   DISPLAY 'INVESTIMENTO JA RESGATADO'
+                   MOVE 4 TO LS-CODIGO
+               ELSE
+                   MOVE REG-INV-VALOR-ATUAL TO WS-INV-DIS
+                   DISPLAY 'Valor: R$ ' WS-INV-DIS
+                   MOVE 'R' TO REG-INV-STATUS
+                   REWRITE REG-INV
+                   IF FS-INV-OK
+                       DISPLAY 'RESGATE PROCESSADO COM SUCESSO!'
+                       MOVE 0 TO LS-CODIGO
+                   ELSE
+                       DISPLAY 'ERRO NO RESGATE: ' FS-INV
+                       MOVE 9999 TO LS-CODIGO
+                   END-IF
+               END-IF
+           ELSE
+               DISPLAY 'ERRO DE LEITURA: ' FS-INV
+               MOVE 9999 TO LS-CODIGO
+           END-IF.
 
        5000-CONSULTAR-CARTEIRA.
+           MOVE ZEROS TO WS-INV-CTR WS-INV-TOTAL
            DISPLAY '==================================='
-           DISPLAY 'CARTEIRA DE INVESTIMENTOS'
-           DISPLAY 'CDB Banco X: R$ 15.234,56'
-           DISPLAY 'LCI Banco X: R$ 25.000,00'
-           DISPLAY 'Tesouro Selic 2029: R$ 5.156,78'
+           DISPLAY ' CARTEIRA DE INVESTIMENTOS'
+           DISPLAY '==================================='
+           DISPLAY ' ID         Tipo  Valor Aportado  Status'
            DISPLAY '-----------------------------------'
-           DISPLAY 'Total: R$ 45.391,34'
-           DISPLAY 'Rentabilidade Mes: +1,24%'
+           MOVE ZEROS TO REG-INV-ID
+           START ARQINV KEY >= REG-INV-ID
+           PERFORM UNTIL FS-INV-EOF
+               READ ARQINV NEXT
+               IF FS-INV-OK
+                   MOVE REG-INV-VALOR-ATUAL TO WS-INV-DIS
+                   DISPLAY REG-INV-ID ' '
+                           REG-INV-TIPO '  R$ '
+                           WS-INV-DIS ' '
+                           REG-INV-STATUS
+                   IF REG-INV-STATUS = 'A'
+                       ADD REG-INV-VALOR-ATUAL TO WS-INV-TOTAL
+                       ADD 1 TO WS-INV-CTR
+                   END-IF
+               END-IF
+           END-PERFORM
+           DISPLAY '-----------------------------------'
+           MOVE WS-INV-TOTAL TO WS-INV-DIS
+           DISPLAY ' Investimentos ativos: ' WS-INV-CTR
+           DISPLAY ' Total da carteira: R$ ' WS-INV-DIS
            DISPLAY '==================================='.
 
        6000-SIMULAR.

@@ -42,6 +42,8 @@
                10  CRM-CLI-CEP       PIC X(8).
            05  CRM-CLI-STATUS        PIC X(1).
            05  CRM-CLI-SCORE-CREDITO PIC 9(4).
+           05  CRM-CLI-EMAIL         PIC X(80).
+           05  CRM-CLI-TELEFONE      PIC X(15).
 
        WORKING-STORAGE SECTION.
        01  WS-CTRL.
@@ -124,9 +126,13 @@
            ACCEPT CRM-CLI-RENDA
            DISPLAY 'Perfil risco (C/M/A): '
            ACCEPT CRM-CLI-PERFIL-RISCO
-           DISPLAY 'Email/Contato: '
-           ACCEPT CRM-CLI-LOGRADOURO
+           DISPLAY 'Email: '
+           ACCEPT CRM-CLI-EMAIL
            DISPLAY 'Telefone: '
+           ACCEPT CRM-CLI-TELEFONE
+           DISPLAY 'Logradouro: '
+           ACCEPT CRM-CLI-LOGRADOURO
+           DISPLAY 'Numero: '
            ACCEPT CRM-CLI-NUMERO
            DISPLAY 'Cidade: '
            ACCEPT CRM-CLI-CIDADE
@@ -164,8 +170,10 @@
                DISPLAY 'Profissao: ' CRM-CLI-PROFISSAO
                DISPLAY 'Renda: ' CRM-CLI-RENDA
                DISPLAY 'Perfil risco: ' CRM-CLI-PERFIL-RISCO
-               DISPLAY 'Contato: ' CRM-CLI-LOGRADOURO
-               DISPLAY 'Telefone: ' CRM-CLI-NUMERO
+               DISPLAY 'Email: ' CRM-CLI-EMAIL
+               DISPLAY 'Telefone: ' CRM-CLI-TELEFONE
+               DISPLAY 'Endereco: ' CRM-CLI-LOGRADOURO ' '
+                       CRM-CLI-NUMERO
                DISPLAY 'Cidade: ' CRM-CLI-CIDADE ' - ' CRM-CLI-ESTADO
                DISPLAY 'Status: ' CRM-CLI-STATUS
                DISPLAY 'Score: ' CRM-CLI-SCORE-CREDITO

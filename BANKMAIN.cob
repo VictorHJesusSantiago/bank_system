@@ -41,6 +41,10 @@
                ORGANIZATION IS SEQUENTIAL
                FILE STATUS IS FS-LOG.
 
+           SELECT ARQLCK ASSIGN TO 'BANKMAIN.LCK'
+               ORGANIZATION IS LINE SEQUENTIAL
+               FILE STATUS IS FS-LOCK.
+
       *----------------------------------------------------------------
        DATA DIVISION.
        FILE SECTION.
@@ -101,6 +105,9 @@
        FD  ARQLOG.
        01  REG-LOG                  PIC X(200).
 
+       FD  ARQLCK.
+       01  REG-LOCK                 PIC X(20).
+
       *----------------------------------------------------------------
        WORKING-STORAGE SECTION.
        COPY BANKDATA.
@@ -118,6 +125,7 @@
                88  FS-CLI-OK        VALUE '00'.
                88  FS-CLI-EOF       VALUE '10'.
            05  FS-LOG               PIC XX VALUE SPACES.
+           05  FS-LOCK              PIC XX VALUE SPACES.
 
        01  WS-CONTROLE.
            05  WS-OPCAO             PIC X(3).
@@ -125,6 +133,7 @@
                88  CONTINUAR-SIM    VALUE 'S' 'Y'.
                88  CONTINUAR-NAO    VALUE 'N'.
            05  WS-LOG-ATIVO         PIC X(1) VALUE 'N'.
+           05  WS-LOCK-NAME         PIC X(30) VALUE 'BANKMAIN.LCK'.
            05  WS-VERSAO            PIC X(10) VALUE '2.0.0'.
            05  WS-AMBIENTE          PIC X(10) VALUE 'PRODUCAO'.
            05  WS-SESSION-ID        PIC X(32).
@@ -169,6 +178,19 @@
            EXIT SECTION.
 
        1100-ABRIR-ARQUIVOS.
+      *    Verifica lock de instancia unica
+           OPEN INPUT ARQLCK
+           IF FS-LOCK = '00'
+               CLOSE ARQLCK
+               DISPLAY 'ERRO: Outra instancia do sistema esta ativa.'
+               DISPLAY 'Encerre a sessao anterior e tente novamente.'
+               STOP RUN
+           END-IF
+           OPEN OUTPUT ARQLCK
+           MOVE FUNCTION CURRENT-DATE(1:14) TO REG-LOCK
+           WRITE REG-LOCK
+           CLOSE ARQLCK
+      *    Log de auditoria
            OPEN EXTEND ARQLOG
            IF FS-LOG = '35'
                OPEN OUTPUT ARQLOG
@@ -291,7 +313,8 @@
        9100-FECHAR-ARQUIVOS.
            IF WS-LOG-ATIVO = 'S'
                CLOSE ARQLOG
-           END-IF.
+           END-IF
+           CALL 'CBL_DELETE_FILE' USING WS-LOCK-NAME.
 
        9200-GRAVAR-METRICAS.
            CONTINUE.

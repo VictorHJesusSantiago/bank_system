@@ -182,7 +182,23 @@
            ADD WS-VALOR TO WS-DES-SALDO
 
            PERFORM 2300-GRAVAR-ORIGEM
+           IF NOT FS-OK
+               DISPLAY 'ERRO AO DEBITAR ORIGEM: ' FS-CONTAS
+               MOVE 9999 TO LS-CODIGO
+               EXIT PARAGRAPH
+           END-IF
            PERFORM 2400-GRAVAR-DESTINO
+           IF NOT FS-OK
+               DISPLAY 'ERRO AO CREDITAR DESTINO - REVERTENDO'
+      *        Restaura before-image da origem (saldo original)
+               MOVE WS-ORG-BUF TO REG-CONTA
+               REWRITE REG-CONTA
+               IF NOT FS-OK
+                   DISPLAY 'ATENCAO: FALHA NO ROLLBACK - ' FS-CONTAS
+               END-IF
+               MOVE 9999 TO LS-CODIGO
+               EXIT PARAGRAPH
+           END-IF
            PERFORM 2500-GRAVAR-TRANS
 
            MOVE WS-VALOR TO WS-VAL-DISP
@@ -332,7 +348,22 @@
            ADD WS-VALOR TO WS-DES-SALDO
 
            PERFORM 2300-GRAVAR-ORIGEM
+           IF NOT FS-OK
+               DISPLAY 'ERRO AO DEBITAR ORIGEM PIX: ' FS-CONTAS
+               MOVE 9999 TO LS-CODIGO
+               EXIT PARAGRAPH
+           END-IF
            PERFORM 2400-GRAVAR-DESTINO
+           IF NOT FS-OK
+               DISPLAY 'ERRO AO CREDITAR DESTINO PIX - REVERTENDO'
+               MOVE WS-ORG-BUF TO REG-CONTA
+               REWRITE REG-CONTA
+               IF NOT FS-OK
+                   DISPLAY 'ATENCAO: FALHA NO ROLLBACK PIX - ' FS-CONTAS
+               END-IF
+               MOVE 9999 TO LS-CODIGO
+               EXIT PARAGRAPH
+           END-IF
            PERFORM 2500-GRAVAR-TRANS
 
            MOVE WS-VALOR TO WS-VAL-DISP

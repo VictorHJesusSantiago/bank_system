@@ -97,6 +97,23 @@
            05  WS-TOT-TRANSF        PIC S9(15)V99 COMP-3 VALUE ZEROS.
            05  WS-CTR-TRANS-DIA     PIC 9(10) COMP-3 VALUE ZEROS.
 
+       01  WS-DRE.
+           05  WS-DRE-REC-TAR       PIC S9(15)V99 COMP-3 VALUE ZEROS.
+           05  WS-DRE-REC-TED       PIC S9(15)V99 COMP-3 VALUE ZEROS.
+           05  WS-DRE-REC-DOC       PIC S9(15)V99 COMP-3 VALUE ZEROS.
+           05  WS-DRE-REC-REN       PIC S9(15)V99 COMP-3 VALUE ZEROS.
+           05  WS-DRE-CTR-TED       PIC 9(10) COMP-3 VALUE ZEROS.
+           05  WS-DRE-CTR-DOC       PIC 9(10) COMP-3 VALUE ZEROS.
+           05  WS-DRE-RECEITA-BRUTA PIC S9(15)V99 COMP-3 VALUE ZEROS.
+           05  WS-DRE-DESPESA       PIC S9(15)V99 COMP-3 VALUE ZEROS.
+           05  WS-DRE-RESULTADO     PIC S9(15)V99 COMP-3 VALUE ZEROS.
+           05  WS-DRE-DIS-TAR       PIC ZZZ.ZZZ.ZZZ.ZZZ,99-.
+           05  WS-DRE-DIS-TED       PIC ZZZ.ZZZ.ZZZ.ZZZ,99-.
+           05  WS-DRE-DIS-DOC       PIC ZZZ.ZZZ.ZZZ.ZZZ,99-.
+           05  WS-DRE-DIS-REC       PIC ZZZ.ZZZ.ZZZ.ZZZ,99-.
+           05  WS-DRE-DIS-DESP      PIC ZZZ.ZZZ.ZZZ.ZZZ,99-.
+           05  WS-DRE-DIS-RES       PIC ZZZ.ZZZ.ZZZ.ZZZ,99-.
+
        01  WS-DISPLAY-TOTAIS.
            05  WS-DIS-SALDO-CC      PIC ZZZ.ZZZ.ZZZ.ZZZ,99-.
            05  WS-DIS-SALDO-CP      PIC ZZZ.ZZZ.ZZZ.ZZZ,99-.
@@ -342,19 +359,93 @@
        8000-DRE SECTION.
       *================================================================
        8000-INICIO.
-           DISPLAY 'DRE SIMPLIFICADO'
-           DISPLAY 'Receitas de Tarifas: R$ 145.230,50'
-           DISPLAY 'Receitas de Juros:   R$ 892.450,00'
-           DISPLAY 'Despesas Operac.:    R$ 312.780,30'
-           DISPLAY 'Resultado Liquido:   R$ 724.900,20'.
+      *    Zera acumuladores DRE
+           MOVE ZEROS TO WS-DRE-REC-TAR WS-DRE-REC-TED WS-DRE-REC-DOC
+           MOVE ZEROS TO WS-DRE-REC-REN  WS-DRE-CTR-TED WS-DRE-CTR-DOC
+      *    Varre BANKTRAN.DAT acumulando receitas reais
+           MOVE ZEROS TO REG-TRANS-ID
+           START ARQTRANS KEY >= REG-TRANS-ID
+           PERFORM UNTIL FS-EOF-TRANS
+               READ ARQTRANS NEXT
+               IF FS-TRANS-OK
+                   EVALUATE REG-TRANS-TIPO
+                       WHEN 'TAR'
+                           ADD REG-TRANS-VALOR TO WS-DRE-REC-TAR
+                       WHEN 'TED'
+                           ADD 1 TO WS-DRE-CTR-TED
+                           COMPUTE WS-DRE-REC-TED =
+                               WS-DRE-REC-TED + 14,90
+                       WHEN 'DOC'
+                           ADD 1 TO WS-DRE-CTR-DOC
+                           COMPUTE WS-DRE-REC-DOC =
+                               WS-DRE-REC-DOC + 5,80
+                       WHEN 'REN'
+                           ADD REG-TRANS-VALOR TO WS-DRE-REC-REN
+                   END-EVALUATE
+               END-IF
+           END-PERFORM
+      *    Calcula totais
+           COMPUTE WS-DRE-RECEITA-BRUTA =
+               WS-DRE-REC-TAR + WS-DRE-REC-TED +
+               WS-DRE-REC-DOC + WS-DRE-REC-REN
+      *    Despesas operacionais estimadas em 40% da receita bruta
+           COMPUTE WS-DRE-DESPESA ROUNDED =
+               WS-DRE-RECEITA-BRUTA * 0,40
+           COMPUTE WS-DRE-RESULTADO =
+               WS-DRE-RECEITA-BRUTA - WS-DRE-DESPESA
+      *    Exibe DRE
+           MOVE WS-DRE-REC-TAR TO WS-DRE-DIS-TAR
+           MOVE WS-DRE-REC-TED TO WS-DRE-DIS-TED
+           MOVE WS-DRE-REC-DOC TO WS-DRE-DIS-DOC
+           MOVE WS-DRE-RECEITA-BRUTA TO WS-DRE-DIS-REC
+           MOVE WS-DRE-DESPESA TO WS-DRE-DIS-DESP
+           MOVE WS-DRE-RESULTADO TO WS-DRE-DIS-RES
+           DISPLAY '========================================'
+           DISPLAY ' DRE SIMPLIFICADO — DADOS REAIS'
+           DISPLAY '========================================'
+           DISPLAY ' Receitas de Tarifas (TAR): R$ '
+                   WS-DRE-DIS-TAR
+           DISPLAY ' Receitas TED (' WS-DRE-CTR-TED
+                   ' ops x 14,90): R$ ' WS-DRE-DIS-TED
+           DISPLAY ' Receitas DOC (' WS-DRE-CTR-DOC
+                   ' ops x  5,80): R$ ' WS-DRE-DIS-DOC
+           DISPLAY ' Receitas Rendimentos:      R$ '
+                   WS-DRE-DIS-REC
+           DISPLAY '----------------------------------------'
+           DISPLAY ' RECEITA BRUTA TOTAL:       R$ '
+                   WS-DRE-DIS-REC
+           DISPLAY ' Despesas Operac. (40%):  - R$ '
+                   WS-DRE-DIS-DESP
+           DISPLAY '----------------------------------------'
+           DISPLAY ' RESULTADO LIQUIDO:         R$ '
+                   WS-DRE-DIS-RES
+           DISPLAY '========================================'.
 
       *================================================================
        9000-RELATORIO-BCB SECTION.
       *================================================================
        9000-INICIO.
-           DISPLAY 'RELATORIO BANCO CENTRAL'
-           DISPLAY 'SCR - Sistema de Informacoes de Credito'
-           DISPLAY 'Gerando arquivo no formato BACEN...'.
+           DISPLAY '========================================'
+           DISPLAY ' SCR - SIST. INF. DE CREDITO BCB'
+           DISPLAY ' Data: ' FUNCTION CURRENT-DATE(1:8)
+           DISPLAY '========================================'
+           DISPLAY ' Conta       CPF         Tipo  Saldo'
+           DISPLAY '--------------------------------------'
+           MOVE ZEROS TO REG-CONTA-NUM
+           START ARQCONTAS KEY >= REG-CONTA-NUM
+           PERFORM UNTIL FS-EOF-CONTAS
+               READ ARQCONTAS NEXT
+               IF FS-CONTA-OK
+                   DISPLAY REG-CONTA-NUM ' '
+                           REG-CONTA-CPF '  '
+                           REG-CONTA-TIPO '  '
+                           REG-CONTA-STATUS ' '
+                           REG-CONTA-SALDO
+               END-IF
+           END-PERFORM
+           DISPLAY '========================================'
+           DISPLAY ' Fin do Relatorio BCB'
+           DISPLAY '========================================'.
 
       *================================================================
        9999-FIM.

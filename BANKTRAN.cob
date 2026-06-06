@@ -113,6 +113,7 @@
        01  WS-TRAN-DADOS.
            05  WS-VALOR-SOLICITADO  PIC S9(13)V99 COMP-3.
            05  WS-VALOR-COM-TAXA    PIC S9(13)V99 COMP-3.
+           05  WS-SALDO-ORIG-SAVE   PIC S9(13)V99 COMP-3.
            05  WS-CONTA-ORIGEM-SALDO-DISPONIVEL PIC S9(13)V99 COMP-3.
            05  WS-VALOR-DISPLAY     PIC ZZZ.ZZZ.ZZZ.ZZ9,99-.
            05  WS-SENHA-DIGITADA    PIC X(64).
@@ -386,6 +387,8 @@
            END-IF.
 
        4300-EXECUTAR-TRANSFERENCIA.
+      *    Salva saldo original para rollback atomico
+           MOVE WS-CONTA-ORIGEM-SALDO TO WS-SALDO-ORIG-SAVE
       *    Debitar origem (valor + taxa da operacao corrente)
            SUBTRACT WS-VALOR-SOLICITADO FROM WS-CONTA-ORIGEM-SALDO
            SUBTRACT WS-TAXA-CORRENTE FROM WS-CONTA-ORIGEM-SALDO
@@ -400,7 +403,14 @@
                MOVE WS-CONTA-DESTINO TO REG-CONTA
                REWRITE REG-CONTA
                IF NOT FS-CONTA-OK
-                   DISPLAY 'ERRO AO CREDITAR DESTINO: ' FS-CONTAS
+                   DISPLAY 'ERRO AO CREDITAR DESTINO - REVERTENDO'
+      *            Rollback: restaura saldo original na conta origem
+                   MOVE WS-SALDO-ORIG-SAVE TO WS-CONTA-ORIGEM-SALDO
+                   MOVE WS-CONTA-ORIGEM TO REG-CONTA
+                   REWRITE REG-CONTA
+                   IF NOT FS-CONTA-OK
+                       DISPLAY 'ATENCAO: FALHA NO ROLLBACK - ' FS-CONTAS
+                   END-IF
                    MOVE 9999 TO LS-CODIGO
                ELSE
       *            Registrar transacao com tipo correto da operacao
