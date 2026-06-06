@@ -228,6 +228,8 @@
            DISPLAY ' A. Emprestimos e Financiamentos'
            DISPLAY ' B. Cartoes Bancarios'
            DISPLAY ' C. Agendamentos'
+           DISPLAY ' D. Seguranca e Autenticacao'
+           DISPLAY ' H. Ajuda e Suporte'
            DISPLAY ' 0. Sair'
            DISPLAY '================================================'.
 
@@ -264,6 +266,10 @@
                    CALL 'BANKCARD' USING WS-RETORNO
                WHEN 'C' 'c'
                    CALL 'BANKSCHD' USING WS-RETORNO
+               WHEN 'D' 'd'
+                   CALL 'BANKAUTH' USING WS-RETORNO
+               WHEN 'H' 'h'
+                   CALL 'BANKHELP' USING WS-RETORNO
                WHEN '0'
                    MOVE 'N' TO WS-CONTINUAR
                WHEN OTHER

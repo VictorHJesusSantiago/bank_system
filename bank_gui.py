@@ -19,6 +19,46 @@ from bank_export import (
     parse_extrato_lines,
 )
 
+LIGHT_THEME = {
+    "bg": "#f5f5f5", "fg": "#1a1a1a", "entry_bg": "#ffffff",
+    "btn_bg": "#e0e0e0", "btn_fg": "#1a1a1a", "frame_bg": "#f5f5f5",
+    "output_bg": "#ffffff", "output_fg": "#1a1a1a",
+    "highlight": "#1565c0", "toast_bg": "#323232", "toast_fg": "#ffffff",
+}
+DARK_THEME = {
+    "bg": "#1e1e2e", "fg": "#cdd6f4", "entry_bg": "#313244",
+    "btn_bg": "#45475a", "btn_fg": "#cdd6f4", "frame_bg": "#181825",
+    "output_bg": "#11111b", "output_fg": "#a6e3a1",
+    "highlight": "#89b4fa", "toast_bg": "#cba6f7", "toast_fg": "#1e1e2e",
+}
+
+CATEGORY_COLORS = {
+    "DEP": "#4caf50", "SAQ": "#f44336", "TRF": "#2196f3",
+    "PIX": "#9c27b0", "PAG": "#ff9800", "EMP": "#795548",
+    "PMT": "#607d8b", "CRT": "#e91e63", "DEB": "#00bcd4",
+    "AGN": "#8bc34a", "FAT": "#ff5722", "BLT": "#ffc107",
+}
+
+ONBOARDING_STEPS = [
+    ("Bem-vindo ao Banco COBOL!", "Este sistema bancario oferece conta corrente,\npoupanca, transferencias, cartoes, emprestimos e muito mais."),
+    ("Primeiros passos", "Clique em 'Iniciar' para abrir uma sessao COBOL.\nUse os botoes de navegacao para acessar os modulos."),
+    ("Operacoes guiadas", "Os formularios abaixo facilitam operacoes comuns.\nPreencha os campos e clique em Executar."),
+    ("Exportacao de extratos", "Exporte seu historico em CSV, PDF, Excel, XML, JSON\ne outros formatos pelo painel de Exportacao."),
+    ("Seguranca e dicas", "Ative o 2FA em Seguranca > 2FA.\nNunca compartilhe sua senha. Pronto para comecar!"),
+]
+
+LANG_LABELS = {
+    "pt": {"start": "Iniciar", "stop": "Parar", "clear": "Limpar", "send": "Enviar",
+           "status_stopped": "Status: parado", "status_running": "Status: executando",
+           "input_label": "Entrada", "output_label": "Saida do Sistema"},
+    "en": {"start": "Start", "stop": "Stop", "clear": "Clear", "send": "Send",
+           "status_stopped": "Status: stopped", "status_running": "Status: running",
+           "input_label": "Input", "output_label": "System Output"},
+    "es": {"start": "Iniciar", "stop": "Detener", "clear": "Limpiar", "send": "Enviar",
+           "status_stopped": "Estado: detenido", "status_running": "Estado: ejecutando",
+           "input_label": "Entrada", "output_label": "Salida del Sistema"},
+}
+
 
 def windows_path_to_wsl(path: Path) -> str:
     resolved = str(path.resolve())
@@ -38,6 +78,13 @@ class BankGuiApp:
         self.process: subprocess.Popen[str] | None = None
         self.output_queue: queue.Queue[str] = queue.Queue()
         self._mask_updating = False
+        self._theme_name = "light"
+        self._theme = LIGHT_THEME
+        self._lang = "pt"
+        self._gamification_points = 0
+        self._gamification_badge = "BRONZE"
+        self._onboarding_done = False
+        self._search_active = False
 
         self._build_ui()
         self._bind_masks()
@@ -51,12 +98,17 @@ class BankGuiApp:
 
         self.status_var = tk.StringVar(value="Status: parado")
         tk.Label(top, textvariable=self.status_var, anchor="w").pack(side=tk.LEFT)
+        self.gamif_var = tk.StringVar(value="BRONZE | 0 pts")
+        tk.Label(top, textvariable=self.gamif_var, fg="#ff9800", font=("Courier", 9, "bold")).pack(side=tk.LEFT, padx=12)
 
         controls = tk.Frame(top)
         controls.pack(side=tk.RIGHT)
         tk.Button(controls, text="Iniciar", width=10, command=self.start_session).pack(side=tk.LEFT, padx=4)
         tk.Button(controls, text="Parar", width=10, command=self.stop_session).pack(side=tk.LEFT, padx=4)
         tk.Button(controls, text="Limpar", width=10, command=self.clear_output).pack(side=tk.LEFT, padx=4)
+        tk.Button(controls, text="Tema", width=8, command=self.toggle_theme).pack(side=tk.LEFT, padx=4)
+        tk.Button(controls, text="Dashboard", width=10, command=self.show_dashboard).pack(side=tk.LEFT, padx=4)
+        tk.Button(controls, text="Config", width=8, command=self.show_settings).pack(side=tk.LEFT, padx=4)
 
         app_panel = tk.LabelFrame(self.root, text="Painel de Acoes", padx=10, pady=8)
         app_panel.pack(fill=tk.X, padx=12, pady=(0, 8))
@@ -72,6 +124,8 @@ class BankGuiApp:
             ("Emprestimos", "A"),
             ("Cartoes", "B"),
             ("Agendamentos", "C"),
+            ("Seguranca", "D"),
+            ("Ajuda", "H"),
         ]:
             tk.Button(nav, text=label, width=16, command=lambda c=cmd: self.send_input(c)).pack(side=tk.LEFT, padx=3)
 
@@ -118,11 +172,23 @@ class BankGuiApp:
         self._build_loan_form(guided)
         self._build_card_form(guided)
         self._build_schedule_form(guided)
+        self._build_auth_form(guided)
+        self._build_help_form(guided)
+
+        # Search bar above output
+        search_bar = tk.Frame(self.root)
+        search_bar.pack(fill=tk.X, padx=12, pady=(0, 4))
+        tk.Label(search_bar, text="Buscar:").pack(side=tk.LEFT)
+        self.search_var = tk.StringVar()
+        self.search_var.trace_add("write", lambda *_: self._filter_output())
+        tk.Entry(search_bar, textvariable=self.search_var, width=30).pack(side=tk.LEFT, padx=6)
+        tk.Button(search_bar, text="Limpar Busca", command=lambda: self.search_var.set("")).pack(side=tk.LEFT)
 
         output_box = tk.LabelFrame(self.root, text="Saida do Sistema", padx=10, pady=8)
         output_box.pack(fill=tk.BOTH, expand=True, padx=12, pady=(0, 12))
         self.output = ScrolledText(output_box, wrap=tk.WORD, height=22, state=tk.DISABLED)
         self.output.pack(fill=tk.BOTH, expand=True)
+        self.output.tag_configure("search_match", background="#ffeb3b", foreground="#1a1a1a")
 
     def _build_open_account_form(self, parent: tk.Widget) -> None:
         frame = tk.LabelFrame(parent, text="Abrir Conta", padx=8, pady=6)
@@ -563,6 +629,9 @@ class BankGuiApp:
         self.status_var.set("Status: executando")
         self._append_output("[GUI] Sessao iniciada.\n")
         threading.Thread(target=self._reader_loop, daemon=True).start()
+        self._add_points(10)
+        self.show_toast("Sessao iniciada com sucesso!")
+        self.root.after(800, self.show_onboarding)
 
     def stop_session(self) -> None:
         if not self.process or self.process.poll() is not None:
@@ -598,6 +667,9 @@ class BankGuiApp:
                 self.process.stdin.write(value + "\n")
                 self.process.stdin.flush()
             self._append_output(f"[VOCE] {value}\n")
+            if value in ("1","2","3","4","5","6","7","8","A","B","C","D","H",
+                         "a","b","c","d","h"):
+                self._add_points(10)
         except Exception as exc:
             messagebox.showerror("Erro", f"Falha ao enviar entrada: {exc}")
 
@@ -913,6 +985,225 @@ class BankGuiApp:
         if self.schd_back_var.get():
             steps.extend(["00", "0"])
         self.send_sequence(steps)
+
+    def auth_flow(self) -> None:
+        op = self.auth_op_var.get().strip() or "01"
+        steps = ["D", op]
+        if self.auth_back_var.get():
+            steps.extend(["00", "0"])
+        self.send_sequence(steps)
+        self._add_points(10)
+
+    def help_flow(self) -> None:
+        op = self.help_op_var.get().strip() or "01"
+        steps = ["H", op]
+        if self.help_back_var.get():
+            steps.extend(["00", "0"])
+        self.send_sequence(steps)
+
+    def _build_auth_form(self, parent: tk.Widget) -> None:
+        frame = tk.LabelFrame(parent, text="Seguranca e Autenticacao", padx=8, pady=6)
+        frame.pack(fill=tk.X, pady=(6, 0))
+        self.auth_op_var = tk.StringVar(value="01")
+        self.auth_back_var = tk.BooleanVar(value=True)
+        tk.Label(frame, text="Operacao").grid(row=0, column=0, sticky="w")
+        tk.OptionMenu(frame, self.auth_op_var, "01", "02", "03", "04", "05").grid(row=0, column=1, padx=4)
+        tk.Label(frame, text="01=Login 02=AlterarSenha 03=2FA 04=Recuperar 05=Pontuacao").grid(
+            row=0, column=2, padx=6, sticky="w", columnspan=4
+        )
+        tk.Checkbutton(frame, text="Voltar ao menu principal", variable=self.auth_back_var).grid(
+            row=1, column=0, columnspan=3, sticky="w"
+        )
+        tk.Button(frame, text="Executar", width=14, command=self.auth_flow).grid(row=1, column=3, padx=4, sticky="e")
+
+    def _build_help_form(self, parent: tk.Widget) -> None:
+        frame = tk.LabelFrame(parent, text="Ajuda e Suporte", padx=8, pady=6)
+        frame.pack(fill=tk.X, pady=(6, 0))
+        self.help_op_var = tk.StringVar(value="01")
+        self.help_back_var = tk.BooleanVar(value=True)
+        tk.Label(frame, text="Topico").grid(row=0, column=0, sticky="w")
+        tk.OptionMenu(frame, self.help_op_var, "01", "02", "03", "04", "05", "06").grid(row=0, column=1, padx=4)
+        tk.Label(frame, text="01=FAQ 02=Guia 03=Termos 04=Privacidade 05=Suporte 06=Sobre").grid(
+            row=0, column=2, padx=6, sticky="w", columnspan=4
+        )
+        tk.Checkbutton(frame, text="Voltar ao menu principal", variable=self.help_back_var).grid(
+            row=1, column=0, columnspan=3, sticky="w"
+        )
+        tk.Button(frame, text="Consultar", width=14, command=self.help_flow).grid(row=1, column=3, padx=4, sticky="e")
+
+    def _add_points(self, pts: int) -> None:
+        self._gamification_points += pts
+        p = self._gamification_points
+        if p >= 10000:
+            self._gamification_badge = "PLATINA"
+        elif p >= 5000:
+            self._gamification_badge = "OURO"
+        elif p >= 1000:
+            self._gamification_badge = "PRATA"
+        else:
+            self._gamification_badge = "BRONZE"
+        self.gamif_var.set(f"{self._gamification_badge} | {p} pts")
+
+    def toggle_theme(self) -> None:
+        if self._theme_name == "light":
+            self._theme_name = "dark"
+            self._theme = DARK_THEME
+        else:
+            self._theme_name = "light"
+            self._theme = LIGHT_THEME
+        self._apply_theme()
+        self.show_toast(f"Tema alterado: {self._theme_name}")
+
+    def _apply_theme(self) -> None:
+        t = self._theme
+        try:
+            self.root.configure(bg=t["bg"])
+            self.output.configure(bg=t["output_bg"], fg=t["output_fg"], insertbackground=t["fg"])
+        except Exception:
+            pass
+
+    def show_toast(self, message: str, duration_ms: int = 2500) -> None:
+        toast = tk.Toplevel(self.root)
+        toast.overrideredirect(True)
+        toast.attributes("-topmost", True)
+        rw = self.root.winfo_width()
+        rx = self.root.winfo_rootx()
+        ry = self.root.winfo_rooty() + self.root.winfo_height() - 60
+        toast.geometry(f"320x44+{rx + rw - 340}+{ry}")
+        t = self._theme
+        tk.Label(
+            toast, text=message, bg=t["toast_bg"], fg=t["toast_fg"],
+            font=("Courier", 10), padx=16, pady=10,
+        ).pack(fill=tk.BOTH, expand=True)
+        toast.after(duration_ms, toast.destroy)
+
+    def show_onboarding(self) -> None:
+        if self._onboarding_done:
+            return
+        self._onboarding_done = True
+        self._add_points(100)
+        win = tk.Toplevel(self.root)
+        win.title("Bem-vindo ao Banco COBOL")
+        win.geometry("480x280")
+        win.grab_set()
+
+        step_idx = [0]
+        title_var = tk.StringVar()
+        body_var = tk.StringVar()
+
+        def _show_step(i: int) -> None:
+            step_idx[0] = i
+            title_var.set(ONBOARDING_STEPS[i][0])
+            body_var.set(ONBOARDING_STEPS[i][1])
+            prev_btn.configure(state=tk.NORMAL if i > 0 else tk.DISABLED)
+            next_btn.configure(text="Concluir" if i == len(ONBOARDING_STEPS) - 1 else "Proximo")
+
+        tk.Label(win, textvariable=title_var, font=("Courier", 13, "bold"), pady=16).pack()
+        tk.Label(win, textvariable=body_var, font=("Courier", 10), wraplength=440, justify="left", padx=20).pack(fill=tk.X)
+        prog_var = tk.StringVar()
+        tk.Label(win, textvariable=prog_var, font=("Courier", 9), fg="#888").pack(pady=8)
+
+        btns = tk.Frame(win)
+        btns.pack(pady=12)
+        prev_btn = tk.Button(btns, text="Anterior", width=12,
+                             command=lambda: (_show_step(step_idx[0] - 1), prog_var.set(f"Passo {step_idx[0]+1}/{len(ONBOARDING_STEPS)}")))
+        prev_btn.pack(side=tk.LEFT, padx=8)
+        next_btn = tk.Button(btns, text="Proximo", width=12,
+                             command=lambda: (win.destroy() if step_idx[0] == len(ONBOARDING_STEPS) - 1
+                                             else (_show_step(step_idx[0] + 1),
+                                                   prog_var.set(f"Passo {step_idx[0]+1}/{len(ONBOARDING_STEPS)}"))))
+        next_btn.pack(side=tk.LEFT, padx=8)
+
+        _show_step(0)
+        prog_var.set(f"Passo 1/{len(ONBOARDING_STEPS)}")
+
+    def show_dashboard(self) -> None:
+        raw: str = self.output.get("1.0", tk.END)
+        records = parse_extrato_lines(raw)
+        totals: dict[str, float] = {}
+        for r in records:
+            cat = r.get("tipo", "OUT")
+            try:
+                v = float(str(r.get("valor", 0)).replace(",", "."))
+            except ValueError:
+                v = 0.0
+            totals[cat] = totals.get(cat, 0.0) + abs(v)
+
+        win = tk.Toplevel(self.root)
+        win.title("Dashboard de Gastos")
+        win.geometry("640x400")
+        canvas = tk.Canvas(win, bg="#1e1e2e", width=620, height=360)
+        canvas.pack(padx=10, pady=10)
+
+        if not totals:
+            canvas.create_text(310, 180, text="Nenhuma transacao detectada na saida.",
+                               fill="#cdd6f4", font=("Courier", 12))
+            return
+
+        max_val = max(totals.values()) or 1.0
+        bar_w = min(50, 560 // max(len(totals), 1))
+        margin_left = 50
+        margin_bottom = 40
+        chart_h = 280
+
+        for i, (cat, val) in enumerate(sorted(totals.items())):
+            x0 = margin_left + i * (bar_w + 8)
+            bar_h = int((val / max_val) * chart_h)
+            y0 = 20 + (chart_h - bar_h)
+            y1 = 20 + chart_h
+            color = CATEGORY_COLORS.get(cat, "#90a4ae")
+            canvas.create_rectangle(x0, y0, x0 + bar_w, y1, fill=color, outline="")
+            canvas.create_text(x0 + bar_w // 2, y1 + 14, text=cat, fill="#cdd6f4", font=("Courier", 8))
+            canvas.create_text(x0 + bar_w // 2, y0 - 10, text=f"{val:,.0f}", fill="#cdd6f4", font=("Courier", 7))
+
+        canvas.create_text(320, 375, text="Categoria de Transacao", fill="#888", font=("Courier", 9))
+        canvas.create_text(14, 150, text="Valor (R$)", fill="#888", font=("Courier", 9), angle=90)
+
+    def show_settings(self) -> None:
+        win = tk.Toplevel(self.root)
+        win.title("Configuracoes")
+        win.geometry("340x200")
+        win.grab_set()
+
+        tk.Label(win, text="Idioma / Language / Idioma:", font=("Courier", 10, "bold")).pack(pady=(16, 4))
+        lang_var = tk.StringVar(value=self._lang)
+        lang_frame = tk.Frame(win)
+        lang_frame.pack()
+        for code, label in [("pt", "Portugues"), ("en", "English"), ("es", "Espanol")]:
+            tk.Radiobutton(lang_frame, text=label, variable=lang_var, value=code).pack(side=tk.LEFT, padx=8)
+
+        tk.Label(win, text="Tema:", font=("Courier", 10, "bold")).pack(pady=(12, 4))
+        theme_var = tk.StringVar(value=self._theme_name)
+        theme_frame = tk.Frame(win)
+        theme_frame.pack()
+        tk.Radiobutton(theme_frame, text="Claro", variable=theme_var, value="light").pack(side=tk.LEFT, padx=8)
+        tk.Radiobutton(theme_frame, text="Escuro", variable=theme_var, value="dark").pack(side=tk.LEFT, padx=8)
+
+        def _apply() -> None:
+            self._lang = lang_var.get()
+            new_theme = theme_var.get()
+            if new_theme != self._theme_name:
+                self._theme_name = new_theme
+                self._theme = DARK_THEME if new_theme == "dark" else LIGHT_THEME
+                self._apply_theme()
+            win.destroy()
+            self.show_toast("Configuracoes salvas!")
+
+        tk.Button(win, text="Salvar", width=14, command=_apply).pack(pady=16)
+
+    def _filter_output(self) -> None:
+        term = self.search_var.get().strip()
+        self.output.tag_remove("search_match", "1.0", tk.END)
+        if not term:
+            return
+        start = "1.0"
+        while True:
+            pos = self.output.search(term, start, nocase=True, stopindex=tk.END)
+            if not pos:
+                break
+            end = f"{pos}+{len(term)}c"
+            self.output.tag_add("search_match", pos, end)
+            start = end
 
     def clear_output(self) -> None:
         self.output.configure(state=tk.NORMAL)
