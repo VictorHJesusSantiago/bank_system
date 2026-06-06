@@ -254,6 +254,11 @@
            DISPLAY ' E. Cambio e Moedas Estrangeiras'
            DISPLAY ' F. Seguros'
            DISPLAY ' G. Consorcio'
+           DISPLAY ' I. Previdencia Privada (PGBL/VGBL)'
+           DISPLAY ' J. Debito Automatico'
+           DISPLAY ' K. Titulo de Capitalizacao'
+           DISPLAY ' L. Gestao de Limites de Credito'
+           DISPLAY ' M. Notificacoes e Alertas'
            DISPLAY ' H. Ajuda e Suporte'
            DISPLAY ' 0. Sair'
            DISPLAY '================================================'.
@@ -299,6 +304,16 @@
                    CALL 'BANKSEG' USING WS-RETORNO
                WHEN 'G' 'g'
                    CALL 'BANKCONS' USING WS-RETORNO
+               WHEN 'I' 'i'
+                   CALL 'BANKPREV' USING WS-RETORNO
+               WHEN 'J' 'j'
+                   CALL 'BANKDEB' USING WS-RETORNO
+               WHEN 'K' 'k'
+                   CALL 'BANKCAP' USING WS-RETORNO
+               WHEN 'L' 'l'
+                   CALL 'BANKLIM' USING WS-RETORNO
+               WHEN 'M' 'm'
+                   CALL 'BANKNOTIF' USING WS-RETORNO
                WHEN 'H' 'h'
                    CALL 'BANKHELP' USING WS-RETORNO
                WHEN '0'

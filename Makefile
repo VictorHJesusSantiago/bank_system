@@ -9,7 +9,7 @@ COBENV   = env CFLAGS= CPPFLAGS= COB_CFLAGS="$(COB_CFLAGS_SAFE)"
 
 .PHONY: all clean install run run-gui acceptance acceptance-fast acceptance-finance test test-fast export-deps
 
-all: dirs bankacct banktran bankinv bankrep bankqry banktrf bankpay bankcrm bankadm bankloan bankcard bankschd bankauth bankhelp bankfx bankseg bankcons bankmain
+all: dirs bankacct banktran bankinv bankrep bankqry banktrf bankpay bankcrm bankadm bankloan bankcard bankschd bankauth bankhelp bankfx bankseg bankcons bankprev bankdeb bankcap banklim banknotif bankmain
 
 dirs:
 	mkdir -p $(BINDIR)
@@ -82,7 +82,27 @@ bankcons:
 	$(COBENV) $(COBC) -m $(COBFLAGS) \
 		BANKCONS.cob -o $(BINDIR)/BANKCONS.so
 
-bankmain: bankacct banktran bankinv bankrep bankqry banktrf bankpay bankcrm bankadm bankloan bankcard bankschd bankauth bankhelp bankfx bankseg bankcons
+bankprev:
+	$(COBENV) $(COBC) -m $(COBFLAGS) \
+		BANKPREV.cob -o $(BINDIR)/BANKPREV.so
+
+bankdeb:
+	$(COBENV) $(COBC) -m $(COBFLAGS) \
+		BANKDEB.cob -o $(BINDIR)/BANKDEB.so
+
+bankcap:
+	$(COBENV) $(COBC) -m $(COBFLAGS) \
+		BANKCAP.cob -o $(BINDIR)/BANKCAP.so
+
+banklim:
+	$(COBENV) $(COBC) -m $(COBFLAGS) \
+		BANKLIM.cob -o $(BINDIR)/BANKLIM.so
+
+banknotif:
+	$(COBENV) $(COBC) -m $(COBFLAGS) \
+		BANKNOTIF.cob -o $(BINDIR)/BANKNOTIF.so
+
+bankmain: bankacct banktran bankinv bankrep bankqry banktrf bankpay bankcrm bankadm bankloan bankcard bankschd bankauth bankhelp bankfx bankseg bankcons bankprev bankdeb bankcap banklim banknotif
 	$(COBENV) $(COBC) -x $(COBFLAGS) \
 		BANKMAIN.cob \
 		$(BINDIR)/BANKACCT.so \
@@ -102,6 +122,11 @@ bankmain: bankacct banktran bankinv bankrep bankqry banktrf bankpay bankcrm bank
 		$(BINDIR)/BANKFX.so \
 		$(BINDIR)/BANKSEG.so \
 		$(BINDIR)/BANKCONS.so \
+		$(BINDIR)/BANKPREV.so \
+		$(BINDIR)/BANKDEB.so \
+		$(BINDIR)/BANKCAP.so \
+		$(BINDIR)/BANKLIM.so \
+		$(BINDIR)/BANKNOTIF.so \
 		-o $(BINDIR)/bankmain
 
 clean:
