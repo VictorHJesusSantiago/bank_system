@@ -23,6 +23,12 @@
                RECORD KEY IS TRF-TRANS-ID
                FILE STATUS IS FS-TRANS.
 
+           SELECT ARQPIX ASSIGN TO 'BANKPIX.DAT'
+               ORGANIZATION IS INDEXED
+               ACCESS MODE IS DYNAMIC
+               RECORD KEY IS PIX-REC-CHAVE
+               FILE STATUS IS FS-PIX.
+
        DATA DIVISION.
        FILE SECTION.
        FD  ARQCONTAS.
@@ -56,6 +62,12 @@
            05  TRF-TRANS-NSU         PIC 9(12).
            05  TRF-TRANS-CANAL       PIC X(10).
 
+       FD  ARQPIX.
+       01  REG-PIX.
+           05  PIX-REC-CHAVE         PIC X(36).
+           05  PIX-REC-CONTA         PIC 9(10).
+           05  PIX-REC-STATUS        PIC X(1).
+
        WORKING-STORAGE SECTION.
        01  WS-CTRL.
            05  FS-CONTAS             PIC XX.
@@ -64,6 +76,18 @@
                88  FS-NFD            VALUE '23'.
            05  FS-TRANS              PIC XX.
                88  FS-OK-TRANS       VALUE '00'.
+           05  FS-PIX                PIC XX.
+               88  FS-PIX-OK         VALUE '00'.
+               88  FS-PIX-DUP        VALUE '22'.
+               88  FS-PIX-NFD        VALUE '23'.
+
+       01  WS-PIX-GEN.
+           05  WS-PIX-SEED           PIC 9(8).
+           05  WS-PIX-RN1            PIC 9(9).
+           05  WS-PIX-RN2            PIC 9(9).
+           05  WS-PIX-RN1X           PIC X(9).
+           05  WS-PIX-RN2X           PIC X(9).
+           05  WS-PIX-TS             PIC X(14).
            05  WS-OPCAO              PIC X(2).
            05  WS-CONTINUAR          PIC X VALUE 'S'.
                88  CONTINUAR         VALUE 'S'.
@@ -109,6 +133,12 @@
        PROCEDURE DIVISION USING LS-RETORNO.
        0000-PRINCIPAL.
            OPEN I-O ARQCONTAS ARQTRANS
+           OPEN I-O ARQPIX
+           IF NOT FS-PIX-OK
+               OPEN OUTPUT ARQPIX
+               CLOSE ARQPIX
+               OPEN I-O ARQPIX
+           END-IF
       *    ID baseado em timestamp evita colisao entre sessoes
            MOVE FUNCTION CURRENT-DATE(1:8) TO WS-ID-BASE-DT
            MOVE FUNCTION CURRENT-DATE(9:6) TO WS-ID-BASE-HR
@@ -116,7 +146,7 @@
                FUNCTION NUMVAL(WS-ID-BASE-DT) * 10000000 +
                FUNCTION NUMVAL(WS-ID-BASE-HR) * 10
            PERFORM 1000-MENU UNTIL PARAR
-           CLOSE ARQCONTAS ARQTRANS
+           CLOSE ARQCONTAS ARQTRANS ARQPIX
            MOVE 0 TO LS-CODIGO
            GOBACK.
 
@@ -127,6 +157,7 @@
            DISPLAY ' 01. TED (taxa R$ 14,90)'
            DISPLAY ' 02. DOC (taxa R$ 5,80)'
            DISPLAY ' 03. PIX (taxa R$ 0,00)'
+           DISPLAY ' 04. Cadastrar Chave PIX Aleatoria'
            DISPLAY ' 00. Voltar'
            ACCEPT WS-OPCAO
            EVALUATE WS-OPCAO
@@ -138,6 +169,8 @@
                    MOVE 'DOC' TO WS-TIPO
                    MOVE 5,80 TO WS-TAXA
                    PERFORM 2000-EXECUTAR
+               WHEN '04'
+                   PERFORM 2800-CADASTRAR-CHAVE-PIX
                WHEN '03'
                    MOVE 'PIX' TO WS-TIPO
                    MOVE ZEROS TO WS-TAXA
@@ -274,6 +307,25 @@
 
        2600-LOCALIZAR-DESTINO-PIX.
            MOVE 'N' TO WS-ACHOU-DEST
+      *    Chave aleatoria: busca direta em BANKPIX.DAT
+           IF WS-PIX-TIPO = 'A'
+               MOVE WS-PIX-CHAVE TO PIX-REC-CHAVE
+               READ ARQPIX KEY IS PIX-REC-CHAVE
+               IF FS-PIX-OK AND PIX-REC-STATUS = 'A'
+                   MOVE PIX-REC-CONTA TO TRF-CONTA-NUM
+                   READ ARQCONTAS KEY IS TRF-CONTA-NUM
+                   IF FS-OK
+                       MOVE 'S' TO WS-ACHOU-DEST
+                       MOVE REG-CONTA TO WS-DES-BUF
+                       MOVE TRF-CONTA-NUM TO WS-DES-NUM
+                       MOVE TRF-CONTA-SALDO TO WS-DES-SALDO
+                   END-IF
+               END-IF
+           END-IF
+           IF WS-ACHOU-DEST = 'S'
+               GO TO 2600-VALIDAR-DESTINO
+           END-IF
+      *    Busca por CPF, Email ou Telefone via scan
            MOVE ZEROS TO TRF-CONTA-NUM
            START ARQCONTAS KEY >= TRF-CONTA-NUM
            PERFORM UNTIL FS-EOF OR WS-ACHOU-DEST = 'S'
@@ -305,6 +357,7 @@
                MOVE 2 TO LS-CODIGO
                EXIT PARAGRAPH
            END-IF
+       2600-VALIDAR-DESTINO.
            MOVE WS-DES-BUF TO REG-CONTA
            IF TRF-CONTA-STATUS NOT = 'A'
                DISPLAY 'CONTA DESTINO INATIVA'
@@ -316,7 +369,7 @@
        2700-EXECUTAR-PIX.
            DISPLAY 'Conta Origem: '
            ACCEPT WS-ORG-NUM
-           DISPLAY 'Tipo de chave PIX (C=CPF E=Email T=Telefone): '
+           DISPLAY 'Tipo de chave PIX (C=CPF E=Email T=Tel A=Aleat): '
            ACCEPT WS-PIX-TIPO
            DISPLAY 'Chave PIX: '
            ACCEPT WS-PIX-CHAVE
@@ -369,3 +422,38 @@
            MOVE WS-VALOR TO WS-VAL-DISP
            DISPLAY 'PIX EFETUADO: R$ ' WS-VAL-DISP
            MOVE 0 TO LS-CODIGO.
+
+       2800-CADASTRAR-CHAVE-PIX.
+           DISPLAY 'Conta para cadastrar chave PIX: '
+           ACCEPT WS-ORG-NUM
+           PERFORM 2100-LER-ORIGEM
+           IF LS-CODIGO NOT = 0
+               EXIT PARAGRAPH
+           END-IF
+      *    Gera chave aleatoria: timestamp + 2 numeros pseudoaleatorios
+           MOVE FUNCTION CURRENT-DATE(1:14) TO WS-PIX-TS
+           MOVE FUNCTION CURRENT-DATE(1:8) TO WS-PIX-SEED
+           COMPUTE WS-PIX-RN1 = FUNCTION INTEGER(
+               FUNCTION RANDOM(WS-PIX-SEED) * 999999999)
+           COMPUTE WS-PIX-RN2 = FUNCTION INTEGER(
+               FUNCTION RANDOM * 999999999)
+           MOVE WS-PIX-RN1 TO WS-PIX-RN1X
+           MOVE WS-PIX-RN2 TO WS-PIX-RN2X
+           MOVE SPACES TO PIX-REC-CHAVE
+           STRING WS-PIX-TS(1:8) '-' WS-PIX-TS(9:6)
+                  '-' WS-PIX-RN1X '-' WS-PIX-RN2X
+                  DELIMITED SIZE INTO PIX-REC-CHAVE
+           MOVE WS-ORG-NUM TO PIX-REC-CONTA
+           MOVE 'A' TO PIX-REC-STATUS
+           WRITE REG-PIX
+           IF FS-PIX-DUP
+               DISPLAY 'CHAVE JA EXISTENTE, TENTE NOVAMENTE'
+               MOVE 22 TO LS-CODIGO
+           ELSE IF FS-PIX-OK
+               DISPLAY 'CHAVE PIX ALEATORIA CADASTRADA:'
+               DISPLAY PIX-REC-CHAVE
+               MOVE 0 TO LS-CODIGO
+           ELSE
+               DISPLAY 'ERRO AO CADASTRAR CHAVE: ' FS-PIX
+               MOVE 9999 TO LS-CODIGO
+           END-IF.
