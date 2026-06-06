@@ -251,6 +251,9 @@
            DISPLAY ' B. Cartoes Bancarios'
            DISPLAY ' C. Agendamentos'
            DISPLAY ' D. Seguranca e Autenticacao'
+           DISPLAY ' E. Cambio e Moedas Estrangeiras'
+           DISPLAY ' F. Seguros'
+           DISPLAY ' G. Consorcio'
            DISPLAY ' H. Ajuda e Suporte'
            DISPLAY ' 0. Sair'
            DISPLAY '================================================'.
@@ -290,6 +293,12 @@
                    CALL 'BANKSCHD' USING WS-RETORNO
                WHEN 'D' 'd'
                    CALL 'BANKAUTH' USING WS-RETORNO
+               WHEN 'E' 'e'
+                   CALL 'BANKFX' USING WS-RETORNO
+               WHEN 'F' 'f'
+                   CALL 'BANKSEG' USING WS-RETORNO
+               WHEN 'G' 'g'
+                   CALL 'BANKCONS' USING WS-RETORNO
                WHEN 'H' 'h'
                    CALL 'BANKHELP' USING WS-RETORNO
                WHEN '0'
