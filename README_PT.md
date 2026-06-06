@@ -41,11 +41,11 @@
 
 <br/>
 
-![Módulos](https://img.shields.io/badge/Módulos-10-005CA5?style=flat-square)
-![Operações](https://img.shields.io/badge/Operações-35%2B-10B981?style=flat-square)
-![Arquivos ISAM](https://img.shields.io/badge/Arquivos%20ISAM-3-FF6B35?style=flat-square)
+![Módulos](https://img.shields.io/badge/Módulos-15-005CA5?style=flat-square)
+![Operações](https://img.shields.io/badge/Operações-65%2B-10B981?style=flat-square)
+![Arquivos ISAM](https://img.shields.io/badge/Arquivos%20ISAM-7-FF6B35?style=flat-square)
 ![Testes E2E](https://img.shields.io/badge/Testes%20E2E-Automatizados-8B5CF6?style=flat-square)
-![Linhas COBOL](https://img.shields.io/badge/Linhas%20COBOL-3500%2B-FCC624?style=flat-square)
+![Linhas COBOL](https://img.shields.io/badge/Linhas%20COBOL-5500%2B-FCC624?style=flat-square)
 
 </div>
 
@@ -75,6 +75,12 @@
 - [BANKQRY — Consultas](#-bankqry--consultas-e-extratos)
 - [BANKREP — Relatórios](#-bankrep--relatórios)
 - [BANKADM — Administração](#-bankadm--administração)
+- [BANKLOAN — Empréstimos](#-bankloan--empréstimos-e-financiamentos)
+- [BANKCARD — Cartões](#-bankcard--gestão-de-cartões)
+- [BANKSCHD — Agendamentos](#-bankschd--agendamentos)
+- [BANKAUTH — Autenticação](#-bankauth--autenticação-e-2fa)
+- [BANKHELP — Ajuda](#-bankhelp--central-de-ajuda)
+- [bank\_export — Exportação](#-bank_export--exportação-multi-formato)
 
 </td>
 <td valign="top" width="50%">
@@ -119,7 +125,8 @@ O sistema processa **depósitos, saques, transferências TED/DOC/PIX, pagamentos
 | 📊 **Relatórios** | Balancetes, movimentação diária, relatórios regulatórios BCB |
 | 🔐 **Segurança** | Validação CPF algoritmo real, bloqueio de contas, controle de status |
 | 📈 **Investimentos** | CDB, LCI, LCA, Tesouro Direto e Fundos com cálculo real de IR |
-| 🖥️ **GUI** | Interface gráfica moderna Python/tkinter com fluxos guiados |
+| 🖥️ **GUI** | Python/tkinter com fluxos guiados, temas claro/escuro, Dashboard Canvas, gamificação, toasts, onboarding, barra de busca e painel de configurações |
+| 📤 **Exportação** | Motor de exportação multi-formato: CSV, TXT, JSON, XML, HTML, Markdown, Excel, PDF |
 | 🧪 **Qualidade** | Testes de regressão de aceitação E2E automatizados com pseudo-terminal |
 
 ---
@@ -309,25 +316,35 @@ bank_system/
 │   ├── BANKACCT.cob          # Gestão de contas bancárias
 │   ├── BANKTRAN.cob          # Processamento de transações
 │   ├── BANKTRF.cob           # Transferências avançadas (TED/DOC/PIX multi-chave)
-│   ├── BANKPAY.cob           # Pagamentos e boletos com validação Módulo 10
+│   ├── BANKPAY.cob           # Pagamentos, boletos e emissão (Módulo 10)
 │   ├── BANKINV.cob           # Investimentos e simulações financeiras
 │   ├── BANKCRM.cob           # Gestão de clientes (CRM)
 │   ├── BANKQRY.cob           # Consultas e extratos (read-only)
 │   ├── BANKREP.cob           # Relatórios gerenciais e regulatórios
-│   └── BANKADM.cob           # Módulo administrativo
+│   ├── BANKADM.cob           # Módulo administrativo
+│   ├── BANKLOAN.cob          # Empréstimos e financiamentos (fórmula PMT, 4 tipos)
+│   ├── BANKCARD.cob          # Cartões (débito/crédito, virtual, parcelamentos)
+│   ├── BANKSCHD.cob          # Agendamentos de pagamentos/transferências (recorrência)
+│   ├── BANKAUTH.cob          # Autenticação, 2FA, PIN, gamificação
+│   └── BANKHELP.cob          # Central de ajuda, FAQ, termos, privacidade
 │
 ├── 📎 COBOL Copybooks
-│   └── BANKDATA.cpy          # Estruturas de dados compartilhadas
+│   └── BANKDATA.cpy          # Estruturas de dados compartilhadas (todos os módulos)
 │
 ├── 💾 Data Files (ISAM/Sequential)
 │   ├── BANKACCT.DAT          # Arquivo de contas (indexed)
 │   ├── BANKTRAN.DAT          # Arquivo de transações (indexed)
 │   ├── BANKCUST.DAT          # Arquivo de clientes (indexed)
+│   ├── BANKEMPREST.DAT       # Arquivo de empréstimos (indexed)
+│   ├── BANKCART.DAT          # Arquivo de cartões (indexed)
+│   ├── BANKAGEND.DAT         # Arquivo de agendamentos (indexed)
+│   ├── BANKBOL.DAT           # Arquivo de boletos emitidos (indexed)
 │   ├── BANKAUDT.LOG          # Trilha de auditoria (sequential append)
 │   └── BANKREP.TXT           # Relatórios gerados (sequential extend)
 │
 ├── 🐍 Python Frontend
-│   ├── bank_gui.py               # Interface gráfica tkinter
+│   ├── bank_gui.py               # Interface gráfica tkinter (tema, dashboard, gamificação)
+│   ├── bank_export.py            # Motor de exportação multi-formato
 │   ├── acceptance_regression.py  # Testes E2E automatizados via pty
 │   └── finance_regression.py     # Testes de regressão financeira
 │
@@ -337,15 +354,11 @@ bank_system/
 └── 📦 Binaries (gerados pelo make)
     └── bin/
         ├── bankmain          # Executável principal
-        ├── BANKACCT.so       # Dynamic module
-        ├── BANKTRAN.so
-        ├── BANKTRF.so
-        ├── BANKPAY.so
-        ├── BANKINV.so
-        ├── BANKCRM.so
-        ├── BANKQRY.so
-        ├── BANKREP.so
-        └── BANKADM.so
+        ├── BANKACCT.so  BANKTRAN.so  BANKTRF.so  BANKPAY.so
+        ├── BANKINV.so   BANKCRM.so   BANKQRY.so  BANKREP.so
+        ├── BANKADM.so   BANKLOAN.so  BANKCARD.so BANKSCHD.so
+        ├── BANKAUTH.so  BANKHELP.so
+        └── (15 shared objects no total)
 ```
 
 ---
@@ -378,6 +391,11 @@ bank_system/
 ║  7. Gestao de Clientes               ║
 ║  8. Relatorios                       ║
 ║  9. Administracao                    ║
+║  A. Emprestimos e Financiamentos     ║
+║  B. Cartoes Bancarios                ║
+║  C. Agendamentos                     ║
+║  D. Seguranca e Autenticacao         ║
+║  H. Ajuda e Suporte                  ║
 ║  0. Sair                             ║
 ╚══════════════════════════════════════╝
 ```
@@ -582,6 +600,112 @@ valor_liq   = valor_bruto - imposto
 
 > [!WARNING]
 > A operação **Limpar Log** apaga permanentemente a trilha de auditoria. Em produção real, o log deve ser imutável e arquivado externamente.
+
+---
+
+### 💰 BANKLOAN — Empréstimos e Financiamentos
+
+**Papel:** Ciclo completo de crédito — simulação, contratação, pagamento de parcelas e quitação antecipada.
+
+| Operação | Código | Descrição |
+|----------|--------|-----------|
+| Solicitar | `01` | Seleção de tipo → taxa → fórmula PMT → crédito na conta |
+| Consultar | `02` | Busca por ID do empréstimo |
+| Pagar Parcela | `03` | Valida status `'A'`, desconta PMT, atualiza saldo, marca `'Q'` ao quitar |
+| Simular | `04` | Exibe total + juros sem gravar arquivos |
+| Listar por Conta | `05` | Scan sequencial filtrado por conta |
+| Quitar Antecipado | `06` | Paga saldo devedor total de uma vez |
+
+**Tipos de empréstimo:** Pessoal 1,99%/mês · Consignado 1,49%/mês · Imobiliário 0,79%/mês · Veículo 1,69%/mês
+
+**Fórmula PMT:** `PMT = PV × i×(1+i)^n / ((1+i)^n − 1)` calculada iterativamente.
+
+---
+
+### 💳 BANKCARD — Gestão de Cartões
+
+**Papel:** Ciclo completo de cartões — emissão, compras, faturas, cartão virtual e parcelamentos.
+
+| Operação | Código | Descrição |
+|----------|--------|-----------|
+| Emitir | `01` | Cria cartão débito ou crédito (16 dígitos, bandeira VISA/MASTER) |
+| Consultar | `02` | Dados completos e limite disponível |
+| Bloquear/Desbloquear | `03`/`04` | Alterna status `'A'`↔`'B'` |
+| Alterar Limite | `05` | Modifica limite de crédito |
+| Fatura | `06` | Fatura atual com itens |
+| Pagar Fatura | `07` | Total ou parcial |
+| Cartão Virtual | `A` | Número determinístico da conta (prefixo `4567...`), CVV fixo, validade 12/2030 |
+| Compra Débito | `B` | Debita direto no saldo da conta |
+| Compra Crédito | `C` | Debita do limite disponível, soma à fatura |
+| Compra Parcelada | `D` | 2–24 parcelas; bloqueia limite total, lança 1ª parcela na fatura |
+
+---
+
+### 📅 BANKSCHD — Agendamentos
+
+**Papel:** Transferências e pagamentos agendados com suporte a recorrência.
+
+| Operação | Código | Descrição |
+|----------|--------|-----------|
+| Agendar Transferência | `01` | TED/DOC/PIX com data futura e recorrência |
+| Agendar Pagamento | `02` | Tipo BOL com descrição |
+| Listar Agendados | `03` | Todos os itens pendentes/processados da conta |
+| Cancelar | `04` | Apenas se status `'P'` (pendente) |
+| Processar Vencidos | `05` | Scan completo — executa todos com `DT_AGEND ≤ HOJE` |
+
+**Recorrência:** `U`=único / `M`=mensal (+30 dias) / `S`=semanal (+7 dias)
+
+---
+
+### 🔐 BANKAUTH — Autenticação e 2FA
+
+**Papel:** Login com CPF+senha, bloqueio por tentativas, 2FA, troca de PIN e recompensas de gamificação.
+
+| Operação | Código | Descrição |
+|----------|--------|-----------|
+| Login | `01` | CPF + senha, máx 3 tentativas, verificação de status da conta |
+| Alterar Senha | `02` | Atual + nova + confirmação, valida igualdade, REWRITE no registro |
+| 2FA | `03` | Código de 6 dígitos baseado em horário (HHMMSS MOD 899999 + 100000) |
+| Recuperar Acesso | `04` | Exibe e-mail cadastrado, orienta contato com admin |
+| Pontos e Badges | `05` | Níveis BRONZE / PRATA / OURO / PLATINA |
+
+**Gamificação:** BRONZE (0–999 pts) → PRATA (1.000) → OURO (5.000) → PLATINA (10.000+)
+
+---
+
+### ❓ BANKHELP — Central de Ajuda
+
+**Papel:** Documentação interna — sem dependências externas.
+
+| Tópico | Código | Conteúdo |
+|--------|--------|---------|
+| FAQ | `01` | 8 perguntas/respostas sobre contas, transferências, cartões, boletos, exportação, senhas |
+| Guia Rápido | `02` | Navegação por todos os 15 módulos |
+| Termos de Uso | `03` | Políticas, usos proibidos, responsabilidade |
+| Política de Privacidade | `04` | Dados coletados, LGPD, direitos do titular |
+| Fale Conosco | `05` | 0800, SAC 24h, Ouvidoria, e-mail, endereço |
+| Sobre | `06` | Versão, 15 módulos listados, arquivos de dados, arquitetura |
+
+---
+
+### 📤 bank_export — Exportação Multi-Formato
+
+**Papel:** Motor Python puro que analisa a saída stdout do COBOL e exporta em múltiplos formatos.
+
+| Formato | Biblioteca | Recursos |
+|---------|-----------|---------|
+| CSV | stdlib | Headers, separador ponto-e-vírgula |
+| TXT | stdlib | Saída COBOL bruta verbatim |
+| JSON | stdlib | Array de objetos de transação |
+| XML | stdlib | Raiz `<transactions>` com filhos `<transaction>` |
+| HTML | stdlib | Tabela CSS responsiva com branding bancário |
+| Markdown | stdlib | Formato de tabela GFM |
+| Excel (.xlsx) | openpyxl | Cabeçalho estilizado, freeze panes, auto-largura, aba Info |
+| PDF | fpdf2 | A4 paisagem, linhas zebradas, rodapé com número de página |
+
+```bash
+make export-deps   # pip install openpyxl fpdf2
+```
 
 ---
 
@@ -1173,7 +1297,7 @@ flowchart TD
 
 | # | Limitação | Impacto | Recomendação |
 |---|-----------|---------|--------------|
-| 🔴 1 | **Sem autenticação** — `SENHA-HASH (X(64))` existe no schema mas nunca é preenchido ou verificado | Qualquer operador acessa qualquer conta | Integrar módulo C de hashing (bcrypt/Argon2) via `CALL` |
+| 🟡 1 | **Autenticação parcial** — `BANKAUTH.cob` implementa login CPF+senha (máx 3 tentativas), 2FA e troca de PIN, mas a senha é comparada em texto simples (primeiros 8 chars) | Funcional para demos; produção exige SHA-256 via módulo C | Integrar módulo C de hashing (bcrypt/Argon2) via `CALL` |
 | 🔴 2 | **Transferências não atômicas** — débito e crédito são dois REWRITEs independentes | Risco de perda de fundos se o processo morrer entre os dois escritas | Implementar journaling antes-depois ou adaptar 2-Phase Commit |
 | 🟡 3 | **Session ID previsível** — gerado com `RANDOM(DATA_ATUAL)` — mesma semente no mesmo dia | Sessões do mesmo dia têm IDs idênticos | Usar `/dev/urandom` via módulo utilitário em C |
 | 🟡 4 | **Log de auditoria deletável** — `3000-LIMPAR-LOG` em BANKADM trunca `BANKAUDT.LOG` | Um operador pode apagar evidências de fraude | Remover a operação do menu ou tornar o log append-only com permissões restritivas |
