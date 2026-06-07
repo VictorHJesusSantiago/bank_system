@@ -9,7 +9,7 @@ COBENV   = env CFLAGS= CPPFLAGS= COB_CFLAGS="$(COB_CFLAGS_SAFE)"
 
 .PHONY: all clean install run run-gui acceptance acceptance-fast acceptance-finance test test-fast export-deps
 
-all: dirs bankacct banktran bankinv bankrep bankqry banktrf bankpay bankcrm bankadm bankloan bankcard bankschd bankauth bankhelp bankfx bankseg bankcons bankprev bankdeb bankcap banklim banknotif bankmain
+all: dirs bankacct banktran bankinv bankrep bankqry banktrf bankpay bankcrm bankadm bankloan bankcard bankschd bankauth bankhelp bankfx bankseg bankcons bankprev bankdeb bankcap banklim banknotif banktax bankchq bankfgts bankcob bankovd bankmain
 
 dirs:
 	mkdir -p $(BINDIR)
@@ -102,7 +102,27 @@ banknotif:
 	$(COBENV) $(COBC) -m $(COBFLAGS) \
 		BANKNOTIF.cob -o $(BINDIR)/BANKNOTIF.so
 
-bankmain: bankacct banktran bankinv bankrep bankqry banktrf bankpay bankcrm bankadm bankloan bankcard bankschd bankauth bankhelp bankfx bankseg bankcons bankprev bankdeb bankcap banklim banknotif
+banktax:
+	$(COBENV) $(COBC) -m $(COBFLAGS) \
+		BANKTAX.cob -o $(BINDIR)/BANKTAX.so
+
+bankchq:
+	$(COBENV) $(COBC) -m $(COBFLAGS) \
+		BANKCHQ.cob -o $(BINDIR)/BANKCHQ.so
+
+bankfgts:
+	$(COBENV) $(COBC) -m $(COBFLAGS) \
+		BANKFGTS.cob -o $(BINDIR)/BANKFGTS.so
+
+bankcob:
+	$(COBENV) $(COBC) -m $(COBFLAGS) \
+		BANKCOB.cob -o $(BINDIR)/BANKCOB.so
+
+bankovd:
+	$(COBENV) $(COBC) -m $(COBFLAGS) \
+		BANKOVD.cob -o $(BINDIR)/BANKOVD.so
+
+bankmain: bankacct banktran bankinv bankrep bankqry banktrf bankpay bankcrm bankadm bankloan bankcard bankschd bankauth bankhelp bankfx bankseg bankcons bankprev bankdeb bankcap banklim banknotif banktax bankchq bankfgts bankcob bankovd
 	$(COBENV) $(COBC) -x $(COBFLAGS) \
 		BANKMAIN.cob \
 		$(BINDIR)/BANKACCT.so \
@@ -127,6 +147,11 @@ bankmain: bankacct banktran bankinv bankrep bankqry banktrf bankpay bankcrm bank
 		$(BINDIR)/BANKCAP.so \
 		$(BINDIR)/BANKLIM.so \
 		$(BINDIR)/BANKNOTIF.so \
+		$(BINDIR)/BANKTAX.so \
+		$(BINDIR)/BANKCHQ.so \
+		$(BINDIR)/BANKFGTS.so \
+		$(BINDIR)/BANKCOB.so \
+		$(BINDIR)/BANKOVD.so \
 		-o $(BINDIR)/bankmain
 
 clean:

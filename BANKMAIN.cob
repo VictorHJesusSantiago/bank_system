@@ -259,6 +259,11 @@
            DISPLAY ' K. Titulo de Capitalizacao'
            DISPLAY ' L. Gestao de Limites de Credito'
            DISPLAY ' M. Notificacoes e Alertas'
+           DISPLAY ' N. Informe de Rendimentos (IR)'
+           DISPLAY ' O. Talao de Cheques'
+           DISPLAY ' P. FGTS'
+           DISPLAY ' Q. Cobranca Bancaria'
+           DISPLAY ' R. Cheque Especial / Credito Rotativo'
            DISPLAY ' H. Ajuda e Suporte'
            DISPLAY ' 0. Sair'
            DISPLAY '================================================'.
@@ -314,6 +319,16 @@
                    CALL 'BANKLIM' USING WS-RETORNO
                WHEN 'M' 'm'
                    CALL 'BANKNOTIF' USING WS-RETORNO
+               WHEN 'N' 'n'
+                   CALL 'BANKTAX' USING WS-RETORNO
+               WHEN 'O' 'o'
+                   CALL 'BANKCHQ' USING WS-RETORNO
+               WHEN 'P' 'p'
+                   CALL 'BANKFGTS' USING WS-RETORNO
+               WHEN 'Q' 'q'
+                   CALL 'BANKCOB' USING WS-RETORNO
+               WHEN 'R' 'r'
+                   CALL 'BANKOVD' USING WS-RETORNO
                WHEN 'H' 'h'
                    CALL 'BANKHELP' USING WS-RETORNO
                WHEN '0'
