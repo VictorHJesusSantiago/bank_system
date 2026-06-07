@@ -264,6 +264,11 @@
            DISPLAY ' P. FGTS'
            DISPLAY ' Q. Cobranca Bancaria'
            DISPLAY ' R. Cheque Especial / Credito Rotativo'
+           DISPLAY ' S. Caixinhas / Cofrinhos'
+           DISPLAY ' T. Credito Consignado'
+           DISPLAY ' U. Score de Credito'
+           DISPLAY ' V. Cashback e Fidelidade'
+           DISPLAY ' W. Renegociacao de Dividas'
            DISPLAY ' H. Ajuda e Suporte'
            DISPLAY ' 0. Sair'
            DISPLAY '================================================'.
@@ -329,6 +334,16 @@
                    CALL 'BANKCOB' USING WS-RETORNO
                WHEN 'R' 'r'
                    CALL 'BANKOVD' USING WS-RETORNO
+               WHEN 'S' 's'
+                   CALL 'BANKPOUP' USING WS-RETORNO
+               WHEN 'T' 't'
+                   CALL 'BANKCONSIG' USING WS-RETORNO
+               WHEN 'U' 'u'
+                   CALL 'BANKSCORE' USING WS-RETORNO
+               WHEN 'V' 'v'
+                   CALL 'BANKCASHBACK' USING WS-RETORNO
+               WHEN 'W' 'w'
+                   CALL 'BANKRENEG' USING WS-RETORNO
                WHEN 'H' 'h'
                    CALL 'BANKHELP' USING WS-RETORNO
                WHEN '0'

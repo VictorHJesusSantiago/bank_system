@@ -9,7 +9,7 @@ COBENV   = env CFLAGS= CPPFLAGS= COB_CFLAGS="$(COB_CFLAGS_SAFE)"
 
 .PHONY: all clean install run run-gui acceptance acceptance-fast acceptance-finance test test-fast export-deps
 
-all: dirs bankacct banktran bankinv bankrep bankqry banktrf bankpay bankcrm bankadm bankloan bankcard bankschd bankauth bankhelp bankfx bankseg bankcons bankprev bankdeb bankcap banklim banknotif banktax bankchq bankfgts bankcob bankovd bankmain
+all: dirs bankacct banktran bankinv bankrep bankqry banktrf bankpay bankcrm bankadm bankloan bankcard bankschd bankauth bankhelp bankfx bankseg bankcons bankprev bankdeb bankcap banklim banknotif banktax bankchq bankfgts bankcob bankovd bankpoup bankconsig bankscore bankcashback bankreneg bankmain
 
 dirs:
 	mkdir -p $(BINDIR)
@@ -122,7 +122,27 @@ bankovd:
 	$(COBENV) $(COBC) -m $(COBFLAGS) \
 		BANKOVD.cob -o $(BINDIR)/BANKOVD.so
 
-bankmain: bankacct banktran bankinv bankrep bankqry banktrf bankpay bankcrm bankadm bankloan bankcard bankschd bankauth bankhelp bankfx bankseg bankcons bankprev bankdeb bankcap banklim banknotif banktax bankchq bankfgts bankcob bankovd
+bankpoup:
+	$(COBENV) $(COBC) -m $(COBFLAGS) \
+		BANKPOUP.cob -o $(BINDIR)/BANKPOUP.so
+
+bankconsig:
+	$(COBENV) $(COBC) -m $(COBFLAGS) \
+		BANKCONSIG.cob -o $(BINDIR)/BANKCONSIG.so
+
+bankscore:
+	$(COBENV) $(COBC) -m $(COBFLAGS) \
+		BANKSCORE.cob -o $(BINDIR)/BANKSCORE.so
+
+bankcashback:
+	$(COBENV) $(COBC) -m $(COBFLAGS) \
+		BANKCASHBACK.cob -o $(BINDIR)/BANKCASHBACK.so
+
+bankreneg:
+	$(COBENV) $(COBC) -m $(COBFLAGS) \
+		BANKRENEG.cob -o $(BINDIR)/BANKRENEG.so
+
+bankmain: bankacct banktran bankinv bankrep bankqry banktrf bankpay bankcrm bankadm bankloan bankcard bankschd bankauth bankhelp bankfx bankseg bankcons bankprev bankdeb bankcap banklim banknotif banktax bankchq bankfgts bankcob bankovd bankpoup bankconsig bankscore bankcashback bankreneg
 	$(COBENV) $(COBC) -x $(COBFLAGS) \
 		BANKMAIN.cob \
 		$(BINDIR)/BANKACCT.so \
@@ -152,6 +172,11 @@ bankmain: bankacct banktran bankinv bankrep bankqry banktrf bankpay bankcrm bank
 		$(BINDIR)/BANKFGTS.so \
 		$(BINDIR)/BANKCOB.so \
 		$(BINDIR)/BANKOVD.so \
+		$(BINDIR)/BANKPOUP.so \
+		$(BINDIR)/BANKCONSIG.so \
+		$(BINDIR)/BANKSCORE.so \
+		$(BINDIR)/BANKCASHBACK.so \
+		$(BINDIR)/BANKRENEG.so \
 		-o $(BINDIR)/bankmain
 
 clean:
