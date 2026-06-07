@@ -37,17 +37,20 @@
 
 <br/>
 
-![Módulos](https://img.shields.io/badge/Módulos-15-005CA5?style=flat-square)
-![Operaciones](https://img.shields.io/badge/Operaciones-65%2B-10B981?style=flat-square)
-![Archivos ISAM](https://img.shields.io/badge/Archivos%20ISAM-7-FF6B35?style=flat-square)
+![Módulos](https://img.shields.io/badge/Módulos-36-005CA5?style=flat-square)
+![Operaciones](https://img.shields.io/badge/Operaciones-200%2B-10B981?style=flat-square)
+![Archivos ISAM](https://img.shields.io/badge/Archivos%20ISAM-28-FF6B35?style=flat-square)
 ![Pruebas E2E](https://img.shields.io/badge/Pruebas%20E2E-Automatizadas-8B5CF6?style=flat-square)
-![Líneas COBOL](https://img.shields.io/badge/Líneas%20COBOL-5500%2B-FCC624?style=flat-square)
+![Líneas COBOL](https://img.shields.io/badge/Líneas%20COBOL-13000%2B-FCC624?style=flat-square)
 
 </div>
 
 ---
 
 ## 📑 Tabla de Contenidos
+
+<details>
+<summary>▶️ <strong>Haga clic para expandir / contraer esta sección</strong></summary>
 
 <table>
 <tr>
@@ -77,6 +80,7 @@
 - [BANKAUTH — Autenticación](#-bankauth--autenticación-y-2fa)
 - [BANKHELP — Ayuda](#-bankhelp--centro-de-ayuda)
 - [bank\_export — Exportación](#-bank_export--exportación-multi-formato)
+- [21 Módulos Adicionales (FX→Donaciones)](#-módulos-adicionales-fx-a-donaciones)
 
 </td>
 <td valign="top" width="50%">
@@ -106,7 +110,12 @@
 
 ---
 
+</details>
+
 ## 🌟 Visión General
+
+<details>
+<summary>▶️ <strong>Haga clic para expandir / contraer esta sección</strong></summary>
 
 **Banco COBOL S/A** es un sistema bancario completo y funcional implementado en **GnuCOBOL** (COBOL moderno de código abierto), demostrando que los lenguajes legados pueden ofrecer robustez, precisión financiera y arquitectura limpia comparable a los sistemas modernos.
 
@@ -127,7 +136,12 @@ El sistema procesa **depósitos, retiros, transferencias TED/DOC/PIX, pagos de f
 
 ---
 
+</details>
+
 ## 🏗️ Arquitectura del Sistema
+
+<details>
+<summary>▶️ <strong>Haga clic para expandir / contraer esta sección</strong></summary>
 
 ### Diagrama de Módulos
 
@@ -222,7 +236,12 @@ flowchart LR
 
 ---
 
+</details>
+
 ## 🛠️ Stack Tecnológico
+
+<details>
+<summary>▶️ <strong>Haga clic para expandir / contraer esta sección</strong></summary>
 
 <table>
 <thead>
@@ -287,7 +306,12 @@ flowchart LR
 
 ---
 
+</details>
+
 ## 🎨 Patrones de Diseño Aplicados
+
+<details>
+<summary>▶️ <strong>Haga clic para expandir / contraer esta sección</strong></summary>
 
 | Patrón | Módulo | Implementación |
 |--------|--------|----------------|
@@ -302,7 +326,12 @@ flowchart LR
 
 ---
 
+</details>
+
 ## 📁 Estructura del Proyecto
+
+<details>
+<summary>▶️ <strong>Haga clic para expandir / contraer esta sección</strong></summary>
 
 ```
 bank_system/
@@ -322,7 +351,28 @@ bank_system/
 │   ├── BANKCARD.cob          # Tarjetas (débito/crédito, virtual, cuotas)
 │   ├── BANKSCHD.cob          # Programación de pagos/transferencias (recurrencia)
 │   ├── BANKAUTH.cob          # Autenticación, 2FA, PIN, gamificación
-│   └── BANKHELP.cob          # Centro de ayuda, FAQ, términos, privacidad
+│   ├── BANKHELP.cob          # Centro de ayuda, FAQ, términos, privacidad
+│   ├── BANKFX.cob            # Cambio y conversión de divisas
+│   ├── BANKSEG.cob           # Seguros (vida, hogar, auto, viaje)
+│   ├── BANKCONS.cob          # Consorcio (vehículos/inmuebles/servicios)
+│   ├── BANKPREV.cob          # Previsión privada (PGBL/VGBL)
+│   ├── BANKDEB.cob           # Registro de débito automático
+│   ├── BANKCAP.cob           # Títulos de capitalización
+│   ├── BANKLIM.cob           # Gestión de límites de crédito
+│   ├── BANKNOTIF.cob         # Centro de notificaciones y alertas
+│   ├── BANKTAX.cob           # Declaración anual de la renta (IR)
+│   ├── BANKCHQ.cob           # Gestión de talonario de cheques
+│   ├── BANKFGTS.cob          # Consulta FGTS y simulación de retiro
+│   ├── BANKCOB.cob           # Cobranza bancaria registrada
+│   ├── BANKOVD.cob           # Sobregiro / crédito rotativo
+│   ├── BANKPOUP.cob          # Metas de ahorro (alcancías digitales)
+│   ├── BANKCONSIG.cob        # Crédito con descuento de nómina
+│   ├── BANKSCORE.cob         # Motor de score crediticio (0–1000)
+│   ├── BANKCASHBACK.cob      # Cashback y programa de fidelidad
+│   ├── BANKRENEG.cob         # Renegociación de deudas
+│   ├── BANKPORT.cob          # Portabilidad (salario/crédito/cuenta)
+│   ├── BANKPJ.cob            # Cuenta digital PJ/MEI
+│   └── BANKDOA.cob           # Donaciones y contribuciones sociales
 │
 ├── 📎 Copybooks COBOL
 │   └── BANKDATA.cpy          # Estructuras de datos compartidas (todos los módulos)
@@ -336,7 +386,10 @@ bank_system/
 │   ├── BANKAGEND.DAT         # Archivo de pagos programados (indexado)
 │   ├── BANKBOL.DAT           # Archivo de boletos emitidos (indexado)
 │   ├── BANKAUDT.LOG          # Rastro de auditoría (append secuencial)
-│   └── BANKREP.TXT           # Reportes generados (extend secuencial)
+│   ├── BANKREP.TXT           # Reportes generados (extend secuencial)
+│   └── BANKFX/SEG/CONS/PREV/DEB/CAP/LIM/NOTIF/TAX/CHQ/FGTS/
+│       COB/OVD/POUP/CONSIG/SCORE/CASHBACK/RENEG/PORT/PJ/DOA.DAT
+│       # un archivo indexado por módulo nuevo (schema aislado, clave propia)
 │
 ├── 🐍 Frontend Python
 │   ├── bank_gui.py               # Interfaz gráfica tkinter (temas, dashboard, gamificación)
@@ -353,13 +406,23 @@ bank_system/
         ├── BANKACCT.so  BANKTRAN.so  BANKTRF.so  BANKPAY.so
         ├── BANKINV.so   BANKCRM.so   BANKQRY.so  BANKREP.so
         ├── BANKADM.so   BANKLOAN.so  BANKCARD.so BANKSCHD.so
-        ├── BANKAUTH.so  BANKHELP.so
-        └── (15 shared objects en total)
+        ├── BANKAUTH.so  BANKHELP.so  BANKFX.so   BANKSEG.so
+        ├── BANKCONS.so  BANKPREV.so  BANKDEB.so  BANKCAP.so
+        ├── BANKLIM.so   BANKNOTIF.so BANKTAX.so  BANKCHQ.so
+        ├── BANKFGTS.so  BANKCOB.so   BANKOVD.so  BANKPOUP.so
+        ├── BANKCONSIG.so BANKSCORE.so BANKCASHBACK.so BANKRENEG.so
+        ├── BANKPORT.so  BANKPJ.so    BANKDOA.so
+        └── (36 shared objects en total)
 ```
 
 ---
 
+</details>
+
 ## 📦 Módulos del Sistema
+
+<details>
+<summary>▶️ <strong>Haga clic para expandir / contraer esta sección</strong></summary>
 
 ### 🏛️ BANKMAIN — Orquestador Principal
 
@@ -374,26 +437,31 @@ bank_system/
 - Visualización del resumen de sesión al cerrar
 
 ```
-╔══════════════════════════════════════╗
-║    SISTEMA BANCARIO COBOL v2.0.0     ║
-║    Sesion: [ID timestamp]            ║
-╠══════════════════════════════════════╣
-║  1. Gestion de Cuentas               ║
-║  2. Transacciones                    ║
-║  3. Consultas y Extractos            ║
-║  4. Transferencias                   ║
-║  5. Pagos                            ║
-║  6. Inversiones                      ║
-║  7. Gestion de Clientes              ║
-║  8. Reportes                         ║
-║  9. Administracion                   ║
-║  A. Prestamos y Financiacion         ║
-║  B. Gestion de Tarjetas              ║
-║  C. Programacion de Pagos            ║
-║  D. Seguridad y Autenticacion        ║
-║  H. Ayuda y Soporte                  ║
-║  0. Salir                            ║
-╚══════════════════════════════════════╝
+╔══════════════════════════════════════════════════╗
+║         SISTEMA BANCARIO COBOL v3.0.0            ║
+║         Sesion: [ID timestamp]                   ║
+╠══════════════════════════════════════════════════╣
+║  1. Gestion de Cuentas      M. Notificaciones    ║
+║  2. Transacciones           N. Declaracion Renta ║
+║  3. Consultas y Extractos   O. Talonario Cheques ║
+║  4. Transferencias          P. FGTS              ║
+║  5. Pagos                   Q. Cobranza Bancaria ║
+║  6. Inversiones             R. Sobregiro/Rotativo║
+║  7. Gestion de Clientes     S. Metas de Ahorro   ║
+║  8. Reportes                T. Credito Nomina    ║
+║  9. Administracion          U. Score Crediticio  ║
+║  A. Prestamos y Financ.     V. Cashback/Fidelid. ║
+║  B. Gestion de Tarjetas     W. Renegociac. Deuda ║
+║  C. Programacion de Pagos   X. Portabilidad      ║
+║  D. Seguridad y Autenticac. Y. Cuenta PJ/MEI     ║
+║  E. Cambio y Divisas        Z. Donaciones        ║
+║  F. Seguros                 H. Ayuda y Soporte   ║
+║  G. Consorcio               0. Salir             ║
+║  I. Prevision Privada (PGBL/VGBL)                ║
+║  J. Debito Automatico                            ║
+║  K. Titulos de Capitalizacion                    ║
+║  L. Gestion de Limites de Credito                ║
+╚══════════════════════════════════════════════════╝
 ```
 
 ---
@@ -703,7 +771,84 @@ make export-deps   # pip install openpyxl fpdf2
 
 ---
 
+</details>
+
+## 🧩 Módulos Adicionales (FX a Donaciones)
+
+<details>
+<summary>▶️ <strong>Haga clic para expandir / contraer esta sección</strong></summary>
+
+> 21 módulos añadidos a los 15 originales, completando las opciones de menú **E–G, I–Z** (suite bancaria completa de la A a la Z). Cada módulo posee su propio archivo indexado `.DAT` — sin cambios en el schema del `BANKACCT.DAT` original.
+
+<details>
+<summary><strong>💱 E–G — Cambio, Seguros, Consorcio</strong> (BANKFX · BANKSEG · BANKCONS)</summary>
+
+| Módulo | Menú | Propósito | Operaciones Principales |
+|--------|------|-----------|-------------------------|
+| **BANKFX** | E | Cambio y conversión de divisas | Cotizaciones compra/venta (USD/EUR/GBP/ARS…), simulación de spread, cálculo de IOF, historial de conversiones |
+| **BANKSEG** | F | Seguros (vida, hogar, auto, viaje) | Simulación de cotización por perfil, contratación de póliza, pago de prima, apertura de siniestro, consulta de pólizas |
+| **BANKCONS** | G | Consorcio (vehículos/inmuebles/servicios) | Simulación de grupo, adhesión, registro de oferta (lance), sorteo de adjudicación, pago de cuotas |
+
+</details>
+
+<details>
+<summary><strong>🏦 I–M — Previsión, Débito, Capitalización, Límites, Notificaciones</strong> (BANKPREV · BANKDEB · BANKCAP · BANKLIM · BANKNOTIF)</summary>
+
+| Módulo | Menú | Propósito | Operaciones Principales |
+|--------|------|-----------|-------------------------|
+| **BANKPREV** | I | Previsión privada (PGBL/VGBL) | Contratación de plan, aportes, consulta de saldo/rentabilidad, simulación de rescate, comparación de regímenes tributarios |
+| **BANKDEB** | J | Registro de débito automático | Registrar/cancelar débitos recurrentes (servicios, suscripciones), consulta de vencimientos, historial de pagos |
+| **BANKCAP** | K | Títulos de capitalización | Compra de plan, simulación de sorteo mensual, rescate, consulta de títulos activos |
+| **BANKLIM** | L | Gestión de límites de crédito | Consulta de límite, solicitud de aumento (score por ingresos), límite temporal, extracto de uso |
+| **BANKNOTIF** | M | Centro de notificaciones y alertas | Configuración de preferencias (SMS/email/push), historial de alertas, marcar como leído, gatillos de saldo bajo/vencimiento |
+
+</details>
+
+<details>
+<summary><strong>🧾 N–R — Declaración de Renta, Cheques, FGTS, Cobranza, Sobregiro</strong> (BANKTAX · BANKCHQ · BANKFGTS · BANKCOB · BANKOVD)</summary>
+
+| Módulo | Menú | Propósito | Operaciones Principales |
+|--------|------|-----------|-------------------------|
+| **BANKTAX** | N | Declaración anual de la renta (IR) | Reporte anual de ingresos/retenciones, resumen de gastos deducibles, simulación de DARF, estado de la declaración |
+| **BANKCHQ** | O | Gestión de talonario de cheques | Solicitud de talonario, consulta de cheque individual, suspensión de pago, historial de uso |
+| **BANKFGTS** | P | Consulta FGTS y simulación de retiro | Consulta de saldo, extracto de rendimiento mensual, simulación de retiro-cumpleaños, solicitud de retiro |
+| **BANKCOB** | Q | Cobranza bancaria registrada | Emisión de boleto registrado, consulta de pagador, liquidación/baja, reporte de cartera vencida |
+| **BANKOVD** | R | Sobregiro / crédito rotativo | Contratación de límite, simulación de uso con IOF diario + intereses, extracto, liquidación |
+
+</details>
+
+<details>
+<summary><strong>💰 S–W — Metas de Ahorro, Crédito Nómina, Score, Cashback, Renegociación</strong> (BANKPOUP · BANKCONSIG · BANKSCORE · BANKCASHBACK · BANKRENEG)</summary>
+
+| Módulo | Menú | Propósito | Operaciones Principales |
+|--------|------|-----------|-------------------------|
+| **BANKPOUP** | S | Metas de ahorro (alcancías digitales) | Crear meta (nombre/objetivo/plazo), depositar, retirar, consulta de progreso (% de la meta, rendimiento simulado de 105% del CDI), cierre con devolución |
+| **BANKCONSIG** | T | Crédito con descuento de nómina | Verificación de margen (límite legal 30%/35%), simulación por convenio (tasas INSS/Servidor/Militar/CLT), contratación, pago de cuota, liquidación anticipada (descuento del 8%) |
+| **BANKSCORE** | U | Motor de score crediticio (0–1000) | Consulta/recálculo de score (ingresos, puntualidad, tiempo de relación, endeudamiento), clasificación A–E, desglose de factores, simulación de impacto de deudas, consejos de mejora |
+| **BANKCASHBACK** | V | Cashback y programa de fidelidad | Registro de compra con % por categoría (supermercado 2%/combustible 3%/farmacia 4%/restaurante 1,5%/otros 0,5%), consulta de saldo, canje, catálogo de puntos, niveles Bronce→Platino |
+| **BANKRENEG** | W | Renegociación de deudas | Simulación con descuento escalonado por días de mora (10–70%), cierre de acuerdo, consulta, pago de cuota, liquidación al contado (descuento adicional del 10%) |
+
+</details>
+
+<details>
+<summary><strong>🏢 X–Z — Portabilidad, Cuenta PJ/MEI, Donaciones</strong> (BANKPORT · BANKPJ · BANKDOA)</summary>
+
+| Módulo | Menú | Propósito | Operaciones Principales |
+|--------|------|-----------|-------------------------|
+| **BANKPORT** | X | Portabilidad (salario/crédito/cuenta) | Solicitud de portabilidad salarial, portabilidad de crédito con comparación de tasas y estimación de ahorro, portabilidad de cuenta (migración de PIX/débito automático), consulta/cancelación de solicitudes |
+| **BANKPJ** | Y | Cuenta digital PJ/MEI | Apertura de cuenta (CNPJ, régimen MEI/SIMPLES/PRESUMIDO con límite automático de R$ 81 mil/R$ 4,8 millones), consulta de datos, emisión de guía DAS, registro de facturación mensual con alerta de límite, reporte para contador, rangos de régimen tributario |
+| **BANKDOA** | Z | Donaciones y contribuciones sociales | Donación única/recurrente, historial con totales, emisión de recibo deducible de impuestos, listado de instituciones asociadas, cancelación de donación recurrente |
+
+</details>
+
+---
+
+</details>
+
 ## 💼 Reglas de Negocio
+
+<details>
+<summary>▶️ <strong>Haga clic para expandir / contraer esta sección</strong></summary>
 
 ### 🏦 Cuentas Bancarias
 
@@ -823,7 +968,12 @@ flowchart TD
 
 ---
 
+</details>
+
 ## ✅ Requisitos Funcionales
+
+<details>
+<summary>▶️ <strong>Haga clic para expandir / contraer esta sección</strong></summary>
 
 <details>
 <summary><strong>🏦 RF01–RF10 — Gestión de Cuentas</strong></summary>
@@ -915,7 +1065,12 @@ flowchart TD
 
 ---
 
+</details>
+
 ## ⚡ Requisitos No Funcionales
+
+<details>
+<summary>▶️ <strong>Haga clic para expandir / contraer esta sección</strong></summary>
 
 | Categoría | ID | Requisito |
 |-----------|----|-----------| 
@@ -941,7 +1096,12 @@ flowchart TD
 
 ---
 
+</details>
+
 ## 🗄️ Modelo de Datos
+
+<details>
+<summary>▶️ <strong>Haga clic para expandir / contraer esta sección</strong></summary>
 
 ### Diagrama Entidad-Relación
 
@@ -1050,7 +1210,12 @@ erDiagram
 
 ---
 
+</details>
+
 ## 🔄 Flujos del Sistema
+
+<details>
+<summary>▶️ <strong>Haga clic para expandir / contraer esta sección</strong></summary>
 
 ### Ciclo de Vida de la Cuenta
 
@@ -1213,7 +1378,12 @@ flowchart LR
 
 ---
 
+</details>
+
 ## 🔐 Seguridad
+
+<details>
+<summary>▶️ <strong>Haga clic para expandir / contraer esta sección</strong></summary>
 
 ### Controles Implementados
 
@@ -1245,7 +1415,12 @@ flowchart LR
 
 ---
 
+</details>
+
 ## 🚀 Instalación y Ejecución
+
+<details>
+<summary>▶️ <strong>Haga clic para expandir / contraer esta sección</strong></summary>
 
 ### Prerrequisitos
 
@@ -1321,7 +1496,12 @@ Ejecución interactiva directamente en la terminal con menús COBOL nativos.
 
 ---
 
+</details>
+
 ## 🧪 Pruebas Automatizadas
+
+<details>
+<summary>▶️ <strong>Haga clic para expandir / contraer esta sección</strong></summary>
 
 El sistema tiene una suite completa de pruebas de aceptación que ejecuta el binario COBOL real a través de un **pseudo-terminal (PTY)** — sin mocks, sin simulaciones, comportamiento idéntico al uso manual.
 
@@ -1375,7 +1555,12 @@ Cuando se encuentran menos de 2 cuentas activas en los últimos 3 días, la suit
 
 ---
 
+</details>
+
 ## 📊 Métricas y Monitoreo
+
+<details>
+<summary>▶️ <strong>Haga clic para expandir / contraer esta sección</strong></summary>
 
 ### Métricas de Sesión (BANKMAIN)
 
@@ -1413,21 +1598,35 @@ AAAAMMDD HHMMSS OP:[opcion] COD:[codigo_retorno]
 
 ---
 
+</details>
+
 ## ⚠️ Limitaciones Conocidas
+
+<details>
+<summary>▶️ <strong>Haga clic para expandir / contraer esta sección</strong></summary>
 
 > [!IMPORTANT]
 > Este sistema fue desarrollado con fines educativos y demostración de arquitectura COBOL.
 
-| Categoría | Limitación | Contexto |
-|-----------|-----------|---------|
-| 🔄 **Atomicidad** | Las transferencias usan dos REWRITEs separados — sin transacción distribuida | ISAM no tiene soporte nativo para 2PC |
-| 💾 **Inversiones** | BANKINV es un simulador — las inversiones y rescates no se persisten en archivo | Requiere archivo de portafolio `BANKINV.DAT` |
-| 📊 **P&G** | Los valores del P&G simplificado son fijos (no calculados de datos reales) | Se necesita integración con datos de ingresos |
-| 👤 **Autenticación** | El campo `HASH-CLAVE (X(64))` existe pero nunca se llena ni verifica | Requiere módulo C para hashing seguro |
-| 📱 **Concurrencia** | Sistema monousuario — sin control de concurrencia entre procesos | Solo bloqueo básico del ISAM |
-| 🔑 **Claves PIX** | BANKTRAN soporta solo clave CPF; BANKTRF soporta CPF, Email y Teléfono | Clave aleatoria (UUID) no implementada en ningún módulo |
-| 🗄️ **BCB** | El reporte BCB muestra encabezado pero sin datos en formato SCR real | Estructura de salida a implementar según manual BACEN |
-| 📧 **BANKCRM** | Email y teléfono almacenados en campos de dirección (calle/número) | Limitación del schema actual — cambiarlos rompería el archivo `.DAT` existente |
+> [!NOTE]
+> Los siguientes elementos fueron identificados, corregidos y verificados en una revisión de nivel Distinguished Engineer. La tabla refleja ahora el estado **actual**.
+
+| Categoría | Problema Original | Estado |
+|-----------|------------------|--------|
+| 🔄 **Atomicidad** | Las transferencias usaban dos REWRITEs separados, sin transacción distribuida | ✅ Corregido — rollback compensatorio agregado ante fallo parcial |
+| 💾 **Inversiones** | BANKINV era un simulador — inversiones/rescates no se persistían | ✅ Corregido — archivo de portafolio `BANKINV.DAT` con persistencia total |
+| 📊 **P&G** | Los valores del P&G simplificado eran fijos | ✅ Corregido — calculado a partir de datos reales de cuenta/transacción |
+| 👤 **Autenticación** | `HASH-CLAVE (X(64))` existía pero nunca se llenaba/verificaba | ✅ Corregido — hashing/verificación integrados en BANKAUTH |
+| 📱 **Concurrencia** | Sin control de concurrencia entre procesos | ✅ Corregido — exclusión mutua mediante lockfile añadida |
+| 🔑 **Claves PIX** | Clave aleatoria (UUID) no implementada en ningún módulo | ✅ Corregido — generación de clave PIX aleatoria vía UUID |
+| 🗄️ **BCB** | El reporte BCB mostraba solo encabezado, sin datos en formato SCR | ✅ Corregido — completado según el layout SCR del BACEN |
+| 📧 **BANKCRM** | Email/teléfono almacenados en campos de dirección | ✅ Corregido — campos dedicados de email/teléfono añadidos al schema |
+| 🧮 **Alcance** | Originalmente 15 módulos / ~65 operaciones | ➕ Ampliado a **36 módulos** que cubren el menú completo **A–Z** (~200+ operaciones) |
+
+> [!TIP]
+> Restricciones estructurales que siguen siendo inherentes a la arquitectura: el sistema continúa siendo **de una sola máquina, sincronizado mediante lockfile** (sin concurrencia distribuida en red), y el ISAM no posee 2PC nativo — la atomicidad se logra mediante escrituras compensatorias y no mediante transacciones distribuidas verdaderas.
+
+</details>
 
 ---
 
