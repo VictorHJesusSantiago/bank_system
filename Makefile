@@ -9,7 +9,7 @@ COBENV   = env CFLAGS= CPPFLAGS= COB_CFLAGS="$(COB_CFLAGS_SAFE)"
 
 .PHONY: all clean install run run-gui acceptance acceptance-fast acceptance-finance test test-fast export-deps
 
-all: dirs bankacct banktran bankinv bankrep bankqry banktrf bankpay bankcrm bankadm bankloan bankcard bankschd bankauth bankhelp bankfx bankseg bankcons bankprev bankdeb bankcap banklim banknotif banktax bankchq bankfgts bankcob bankovd bankpoup bankconsig bankscore bankcashback bankreneg bankmain
+all: dirs bankacct banktran bankinv bankrep bankqry banktrf bankpay bankcrm bankadm bankloan bankcard bankschd bankauth bankhelp bankfx bankseg bankcons bankprev bankdeb bankcap banklim banknotif banktax bankchq bankfgts bankcob bankovd bankpoup bankconsig bankscore bankcashback bankreneg bankport bankpj bankdoa bankmain
 
 dirs:
 	mkdir -p $(BINDIR)
@@ -142,7 +142,19 @@ bankreneg:
 	$(COBENV) $(COBC) -m $(COBFLAGS) \
 		BANKRENEG.cob -o $(BINDIR)/BANKRENEG.so
 
-bankmain: bankacct banktran bankinv bankrep bankqry banktrf bankpay bankcrm bankadm bankloan bankcard bankschd bankauth bankhelp bankfx bankseg bankcons bankprev bankdeb bankcap banklim banknotif banktax bankchq bankfgts bankcob bankovd bankpoup bankconsig bankscore bankcashback bankreneg
+bankport:
+	$(COBENV) $(COBC) -m $(COBFLAGS) \
+		BANKPORT.cob -o $(BINDIR)/BANKPORT.so
+
+bankpj:
+	$(COBENV) $(COBC) -m $(COBFLAGS) \
+		BANKPJ.cob -o $(BINDIR)/BANKPJ.so
+
+bankdoa:
+	$(COBENV) $(COBC) -m $(COBFLAGS) \
+		BANKDOA.cob -o $(BINDIR)/BANKDOA.so
+
+bankmain: bankacct banktran bankinv bankrep bankqry banktrf bankpay bankcrm bankadm bankloan bankcard bankschd bankauth bankhelp bankfx bankseg bankcons bankprev bankdeb bankcap banklim banknotif banktax bankchq bankfgts bankcob bankovd bankpoup bankconsig bankscore bankcashback bankreneg bankport bankpj bankdoa
 	$(COBENV) $(COBC) -x $(COBFLAGS) \
 		BANKMAIN.cob \
 		$(BINDIR)/BANKACCT.so \
@@ -177,6 +189,9 @@ bankmain: bankacct banktran bankinv bankrep bankqry banktrf bankpay bankcrm bank
 		$(BINDIR)/BANKSCORE.so \
 		$(BINDIR)/BANKCASHBACK.so \
 		$(BINDIR)/BANKRENEG.so \
+		$(BINDIR)/BANKPORT.so \
+		$(BINDIR)/BANKPJ.so \
+		$(BINDIR)/BANKDOA.so \
 		-o $(BINDIR)/bankmain
 
 clean:

@@ -269,6 +269,9 @@
            DISPLAY ' U. Score de Credito'
            DISPLAY ' V. Cashback e Fidelidade'
            DISPLAY ' W. Renegociacao de Dividas'
+           DISPLAY ' X. Portabilidade (Salario/Credito/Conta)'
+           DISPLAY ' Y. Conta Digital PJ / MEI'
+           DISPLAY ' Z. Doacoes e Contribuicoes Sociais'
            DISPLAY ' H. Ajuda e Suporte'
            DISPLAY ' 0. Sair'
            DISPLAY '================================================'.
@@ -344,6 +347,12 @@
                    CALL 'BANKCASHBACK' USING WS-RETORNO
                WHEN 'W' 'w'
                    CALL 'BANKRENEG' USING WS-RETORNO
+               WHEN 'X' 'x'
+                   CALL 'BANKPORT' USING WS-RETORNO
+               WHEN 'Y' 'y'
+                   CALL 'BANKPJ' USING WS-RETORNO
+               WHEN 'Z' 'z'
+                   CALL 'BANKDOA' USING WS-RETORNO
                WHEN 'H' 'h'
                    CALL 'BANKHELP' USING WS-RETORNO
                WHEN '0'
