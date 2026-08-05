@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """Finance-only acceptance regression for the COBOL banking system."""
 
-import sys
-
 from acceptance_regression import (
     discover_active_accounts,
     make_valid_barcode,
@@ -37,7 +35,7 @@ def main() -> int:
     for name, inputs, token in cases:
         output = run_session(inputs)
         ok = token in output
-        print(f"[{ 'PASS' if ok else 'FAIL' }] {name}")
+        print(f"[{'PASS' if ok else 'FAIL'}] {name}")
         if not ok:
             print(f"  expected token: {token}")
             return 1

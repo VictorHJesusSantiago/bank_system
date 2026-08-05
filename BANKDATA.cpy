@@ -1,12 +1,4 @@
-      *================================================================
-      * BANKDATA.CPY - Estruturas de Dados Compartilhadas
-      * Sistema Bancário COBOL - Copybook Principal
-      * Versão: 2.0 | Arquitetura: MVC em Camadas
-      *================================================================
 
-      *----------------------------------------------------------------
-      * ESTRUTURA DE CONTA BANCÁRIA
-      *----------------------------------------------------------------
        01  WS-CONTA.
            05  WS-CONTA-NUM         PIC 9(10).
            05  WS-CONTA-AGENCIA     PIC 9(4).
@@ -31,9 +23,6 @@
            05  WS-CONTA-DT-ATUALIZACAO PIC 9(8).
            05  WS-CONTA-SENHA-HASH  PIC X(64).
 
-      *----------------------------------------------------------------
-      * ESTRUTURA DE TRANSAÇÃO
-      *----------------------------------------------------------------
        01  WS-TRANSACAO.
            05  WS-TRANS-ID          PIC 9(15).
            05  WS-TRANS-CONTA-ORG   PIC 9(10).
@@ -67,9 +56,6 @@
            05  WS-TRANS-NSU         PIC 9(12).
            05  WS-TRANS-CANAL       PIC X(10).
 
-      *----------------------------------------------------------------
-      * ESTRUTURA DE CLIENTE
-      *----------------------------------------------------------------
        01  WS-CLIENTE.
            05  WS-CLI-ID            PIC 9(10).
            05  WS-CLI-NOME          PIC X(60).
@@ -101,9 +87,6 @@
                88  CLI-BLOQUEADO    VALUE 'B'.
            05  WS-CLI-SCORE-CREDITO PIC 9(4).
 
-      *----------------------------------------------------------------
-      * ESTRUTURA DE RETORNO PADRÃO
-      *----------------------------------------------------------------
        01  WS-RETORNO.
            05  WS-RET-CODIGO        PIC 9(4).
                88  SUCESSO          VALUE 0000.
@@ -116,9 +99,6 @@
            05  WS-RET-MENSAGEM      PIC X(100).
            05  WS-RET-TIMESTAMP     PIC X(26).
 
-      *----------------------------------------------------------------
-      * ESTRUTURA DE INVESTIMENTO
-      *----------------------------------------------------------------
        01  WS-INVESTIMENTO.
            05  WS-INV-ID            PIC 9(10).
            05  WS-INV-CONTA         PIC 9(10).
@@ -136,9 +116,6 @@
            05  WS-INV-DT-VENCTO     PIC 9(8).
            05  WS-INV-RENTABILIDADE PIC S9(5)V99 COMP-3.
 
-      *----------------------------------------------------------------
-      * ESTRUTURA DE EMPRESTIMO
-      *----------------------------------------------------------------
        01  WS-EMPRESTIMO.
            05  WS-EMP-ID            PIC 9(10).
            05  WS-EMP-CONTA         PIC 9(10).
@@ -161,9 +138,6 @@
                88  EMP-ATRASO       VALUE 'T'.
                88  EMP-CANCELADO    VALUE 'C'.
 
-      *----------------------------------------------------------------
-      * ESTRUTURA DE CARTAO BANCARIO
-      *----------------------------------------------------------------
        01  WS-CARTAO.
            05  WS-CART-NUMERO       PIC 9(16).
            05  WS-CART-CONTA        PIC 9(10).
@@ -184,9 +158,6 @@
                88  CART-CANCELADO   VALUE 'C'.
            05  WS-CART-BANDEIRA     PIC X(10).
 
-      *----------------------------------------------------------------
-      * ESTRUTURA DE AGENDAMENTO
-      *----------------------------------------------------------------
        01  WS-AGENDAMENTO.
            05  WS-AGEND-ID          PIC 9(10).
            05  WS-AGEND-CONTA       PIC 9(10).
@@ -210,9 +181,6 @@
                88  AGEND-MENSAL     VALUE 'M'.
                88  AGEND-SEMANAL    VALUE 'S'.
 
-      *----------------------------------------------------------------
-      * ESTRUTURA DE BOLETO EMITIDO
-      *----------------------------------------------------------------
        01  WS-BOLETO.
            05  WS-BOL-ID            PIC 9(10).
            05  WS-BOL-CONTA         PIC 9(10).
