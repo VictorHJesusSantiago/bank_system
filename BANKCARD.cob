@@ -1,8 +1,3 @@
-      *===============================================================
-      * BANKCARD.COB - Modulo de Cartoes Bancarios
-      * Sistema Bancario COBOL
-      * Versao: 1.0
-      *===============================================================
        IDENTIFICATION DIVISION.
        PROGRAM-ID. BANKCARD.
 
@@ -32,6 +27,10 @@
                ACCESS MODE IS DYNAMIC
                RECORD KEY IS CARD-TRANS-ID
                FILE STATUS IS FS-TRANS.
+
+           SELECT ARQBRIDGE ASSIGN TO WS-BR-OUTFILE
+               ORGANIZATION IS LINE SEQUENTIAL
+               FILE STATUS IS FS-BRIDGE.
 
        DATA DIVISION.
        FILE SECTION.
@@ -82,6 +81,9 @@
            05  CARD-TRANS-NSU        PIC 9(12).
            05  CARD-TRANS-CANAL      PIC X(10).
 
+       FD  ARQBRIDGE.
+       01  REG-BRIDGE                PIC X(200).
+
        WORKING-STORAGE SECTION.
        01  WS-CTRL.
            05  FS-CONTAS             PIC XX.
@@ -94,10 +96,30 @@
                88  FS-NFD-CART       VALUE '23'.
            05  FS-TRANS              PIC XX.
                88  FS-OK-TRANS       VALUE '00'.
+           05  FS-BRIDGE             PIC XX.
+               88  FS-BRIDGE-OK      VALUE '00'.
+               88  FS-BRIDGE-EOF     VALUE '10'.
            05  WS-OPCAO              PIC X(2).
            05  WS-CONTINUAR          PIC X VALUE 'S'.
                88  CONTINUAR         VALUE 'S'.
                88  PARAR             VALUE 'N'.
+
+       01  WS-BRIDGE.
+           05  WS-BR-OUTFILE          PIC X(40).
+           05  WS-BR-CMD              PIC X(250).
+           05  WS-BR-CONTA-E          PIC Z(9)9.
+           05  WS-BR-ID-E             PIC Z(11)9.
+           05  WS-BR-VALOR-INT-N      PIC 9(11).
+           05  WS-BR-VALOR-INT-E      PIC Z(10)9.
+           05  WS-BR-VALOR-DEC        PIC 99.
+           05  WS-BR-VALOR-STR        PIC X(20).
+           05  WS-BR-LINE             PIC X(200).
+           05  WS-BR-KEY              PIC X(30).
+           05  WS-BR-VAL              PIC X(160).
+           05  WS-BR-OK               PIC 9 VALUE 0.
+           05  WS-BR-ERROR            PIC X(150) VALUE SPACES.
+           05  WS-BR-SALDO-STR        PIC X(30).
+           05  WS-BR-ID-STR           PIC X(21).
 
        01  WS-DADOS.
            05  WS-CONTA-NUM          PIC 9(10).
@@ -134,6 +156,7 @@
            05  WS-COMP-VALOR         PIC S9(13)V99 COMP-3.
            05  WS-COMP-DESCR         PIC X(60).
            05  WS-COMP-PARC          PIC 9(2).
+           05  WS-COMP-PARC-REST     PIC Z9.
            05  WS-COMP-PARC-VAL      PIC S9(13)V99 COMP-3.
            05  WS-COMP-IDX           PIC 9(2).
            05  WS-COMP-EXIB          PIC ZZZ.ZZZ.ZZZ.ZZ9,99-.
@@ -269,7 +292,6 @@
            END-IF.
 
        2200-GERAR-NUMERO.
-      *    16 digitos: data(8) || conta(8 ultimos digitos)
            COMPUTE WS-CART-GERADO =
                FUNCTION NUMVAL(WS-ID-DT) * 100000000 +
                FUNCTION MOD(WS-CONTA-NUM 100000000).
@@ -436,13 +458,10 @@
                MOVE 1 TO LS-CODIGO
                EXIT PARAGRAPH
            END-IF
-           MOVE WS-CONTA-BUF TO REG-CONTA-CARD
-           SUBTRACT WS-VALOR-PAG FROM CARD-CONTA-SALDO
-           MOVE FUNCTION CURRENT-DATE(1:8) TO CARD-CONTA-DT-ATUA
-           REWRITE REG-CONTA-CARD
-           IF NOT FS-OK-CONTAS
-               DISPLAY 'ERRO CONTA: ' FS-CONTAS
-               MOVE 9 TO LS-CODIGO
+           PERFORM 8050-DEBITAR-RAZAO
+           IF WS-BR-OK NOT = 1
+               DISPLAY 'FALHA NO RAZAO CENTRAL: ' WS-BR-ERROR
+               MOVE 9998 TO LS-CODIGO
                EXIT PARAGRAPH
            END-IF
            SUBTRACT WS-VALOR-PAG FROM CART-FATURA-ATU
@@ -469,6 +488,95 @@
            MOVE WS-VALOR-PAG TO WS-VAL-EXIB
            DISPLAY 'FATURA PAGA: R$ ' WS-VAL-EXIB
            MOVE 0 TO LS-CODIGO.
+
+       8050-DEBITAR-RAZAO.
+           MOVE WS-CONTA-NUM TO WS-BR-CONTA-E
+           MOVE SPACES TO WS-BR-ID-STR
+           STRING FUNCTION CURRENT-DATE(1:15) '-'
+                  WS-CART-NUM-SEL(10:6) DELIMITED SIZE
+                  INTO WS-BR-ID-STR
+           COMPUTE WS-BR-VALOR-INT-N =
+               FUNCTION INTEGER-PART(WS-VALOR-PAG)
+           COMPUTE WS-BR-VALOR-DEC =
+               FUNCTION INTEGER(
+                   (WS-VALOR-PAG - WS-BR-VALOR-INT-N) * 100)
+           MOVE WS-BR-VALOR-INT-N TO WS-BR-VALOR-INT-E
+           MOVE SPACES TO WS-BR-VALOR-STR
+           STRING FUNCTION TRIM(WS-BR-VALOR-INT-E) DELIMITED SIZE
+                  '.' DELIMITED SIZE
+                  WS-BR-VALOR-DEC DELIMITED SIZE
+                  INTO WS-BR-VALOR-STR
+           MOVE SPACES TO WS-BR-OUTFILE
+           STRING 'BANKTMPC-' FUNCTION CURRENT-DATE(1:15) '.OUT'
+                  DELIMITED SIZE INTO WS-BR-OUTFILE
+           MOVE SPACES TO WS-BR-CMD
+           STRING 'python3 bank_core_cli.py settle CARD '
+                  'CARD_BILL_PAYMENT '
+                  FUNCTION TRIM(WS-BR-CONTA-E) ' '
+                  FUNCTION TRIM(WS-BR-VALOR-STR) ' '
+                  FUNCTION TRIM(WS-BR-ID-STR)
+                  ' --cobol-out ' FUNCTION TRIM(WS-BR-OUTFILE)
+                  DELIMITED SIZE INTO WS-BR-CMD
+           CALL 'SYSTEM' USING WS-BR-CMD
+           MOVE 0 TO WS-BR-OK
+           MOVE SPACES TO WS-BR-ERROR
+           OPEN INPUT ARQBRIDGE
+           IF FS-BRIDGE-OK
+               PERFORM UNTIL FS-BRIDGE-EOF
+                   READ ARQBRIDGE INTO WS-BR-LINE
+                   IF NOT FS-BRIDGE-EOF
+                       MOVE SPACES TO WS-BR-KEY WS-BR-VAL
+                       UNSTRING WS-BR-LINE DELIMITED BY '='
+                           INTO WS-BR-KEY WS-BR-VAL
+                       IF FUNCTION TRIM(WS-BR-KEY) = 'OK'
+                           IF FUNCTION TRIM(WS-BR-VAL) = '1'
+                               MOVE 1 TO WS-BR-OK
+                           END-IF
+                       END-IF
+                       IF FUNCTION TRIM(WS-BR-KEY) = 'ERROR'
+                           MOVE FUNCTION TRIM(WS-BR-VAL) TO WS-BR-ERROR
+                       END-IF
+                   END-IF
+               END-PERFORM
+               CLOSE ARQBRIDGE
+           END-IF
+           IF WS-BR-OK NOT = 1
+               EXIT PARAGRAPH
+           END-IF
+           MOVE SPACES TO WS-BR-OUTFILE
+           STRING 'BANKTMPCS-' FUNCTION CURRENT-DATE(1:15) '.OUT'
+                  DELIMITED SIZE INTO WS-BR-OUTFILE
+           MOVE SPACES TO WS-BR-CMD
+           STRING 'python3 bank_core_cli.py account '
+                  FUNCTION TRIM(WS-BR-CONTA-E)
+                  ' --cobol-out ' FUNCTION TRIM(WS-BR-OUTFILE)
+                  DELIMITED SIZE INTO WS-BR-CMD
+           CALL 'SYSTEM' USING WS-BR-CMD
+           IF RETURN-CODE = 0
+               OPEN INPUT ARQBRIDGE
+               IF FS-BRIDGE-OK
+                   PERFORM UNTIL FS-BRIDGE-EOF
+                       READ ARQBRIDGE INTO WS-BR-LINE
+                       IF NOT FS-BRIDGE-EOF
+                           MOVE SPACES TO WS-BR-KEY WS-BR-VAL
+                           UNSTRING WS-BR-LINE DELIMITED BY '='
+                               INTO WS-BR-KEY WS-BR-VAL
+                           IF FUNCTION TRIM(WS-BR-KEY) =
+                              'LEDGER_BALANCE'
+                               MOVE FUNCTION TRIM(WS-BR-VAL)
+                                   TO WS-BR-SALDO-STR
+                               MOVE WS-CONTA-BUF TO REG-CONTA-CARD
+                               COMPUTE CARD-CONTA-SALDO =
+                                   FUNCTION NUMVAL(WS-BR-SALDO-STR)
+                               MOVE FUNCTION CURRENT-DATE(1:8) TO
+                                   CARD-CONTA-DT-ATUA
+                               REWRITE REG-CONTA-CARD
+                           END-IF
+                       END-IF
+                   END-PERFORM
+                   CLOSE ARQBRIDGE
+               END-IF
+           END-IF.
 
        9000-LISTAR.
            DISPLAY 'Conta: '
@@ -500,13 +608,6 @@
            END-PERFORM
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
-      * A000 — CARTAO VIRTUAL FIXO
-      * Numero derivado deterministicamente da conta — inalteravel.
-      * Prefixo 4567 (identificador virtual) + 12 digitos da conta
-      * com transformacao modular. CVV = conta MOD 900 + 100.
-      * Validade fixa: 12/2030.
-      *================================================================
        A000-CARTAO-VIRTUAL.
            DISPLAY 'Conta: '
            ACCEPT WS-CONTA-NUM
@@ -514,7 +615,6 @@
            IF LS-CODIGO NOT = 0
                EXIT PARAGRAPH
            END-IF
-      *    Numero virtual: 4567 || MOD(conta * 9999991, 10^12)
            COMPUTE WS-VIRT-AUX =
                FUNCTION MOD(WS-CONTA-NUM * 9999991 99999999999)
            COMPUTE WS-VIRT-NUMERO =
@@ -538,10 +638,6 @@
            DISPLAY '========================================'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
-      * B000 — COMPRA NO DEBITO
-      * Debita diretamente do saldo da conta vinculada ao cartao.
-      *================================================================
        B000-COMPRA-DEBITO.
            DISPLAY 'Numero do Cartao Debito: '
            ACCEPT WS-CART-NUM-SEL
@@ -607,10 +703,6 @@
            DISPLAY 'COMPRA DEBITO APROVADA: R$ ' WS-COMP-EXIB
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
-      * C000 — COMPRA NO CREDITO
-      * Debita do limite disponivel e adiciona a fatura atual.
-      *================================================================
        C000-COMPRA-CREDITO.
            DISPLAY 'Numero do Cartao Credito: '
            ACCEPT WS-CART-NUM-SEL
@@ -673,11 +765,6 @@
            DISPLAY 'Fatura atual  : R$ ' WS-FAT-EXIB
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
-      * D000 — COMPRA PARCELADA
-      * Divide o valor em N parcelas e adiciona cada parcela a fatura.
-      * Limite bloqueado pelo valor total no ato da compra.
-      *================================================================
        D000-COMPRA-PARCELADA.
            DISPLAY 'Numero do Cartao Credito: '
            ACCEPT WS-CART-NUM-SEL
@@ -735,7 +822,6 @@
                MOVE 0 TO LS-CODIGO
                EXIT PARAGRAPH
            END-IF
-      *    Bloqueia o limite total e adiciona 1a parcela a fatura
            SUBTRACT WS-COMP-VALOR FROM CART-LIMITE-DISP
            ADD WS-COMP-PARC-VAL TO CART-FATURA-ATU
            REWRITE REG-CARTAO
@@ -744,7 +830,6 @@
                MOVE 9 TO LS-CODIGO
                EXIT PARAGRAPH
            END-IF
-      *    Registra a compra parcelada como transacao
            ADD 1 TO WS-TRANS-ID
            MOVE WS-TRANS-ID    TO CARD-TRANS-ID
            MOVE CART-CONTA     TO CARD-TRANS-ORIG
@@ -765,6 +850,7 @@
            MOVE WS-COMP-PARC-VAL TO WS-COMP-PARC-EXIB
            DISPLAY 'PARCELAMENTO APROVADO!'
            DISPLAY 'Fatura este mes: R$ ' WS-COMP-PARC-EXIB
-           DISPLAY 'Proximas parcelas: ' WS-COMP-PARC - 1
+           COMPUTE WS-COMP-PARC-REST = WS-COMP-PARC - 1
+           DISPLAY 'Proximas parcelas: ' WS-COMP-PARC-REST
                    ' x R$ ' WS-COMP-PARC-EXIB
            MOVE 0 TO LS-CODIGO.

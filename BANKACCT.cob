@@ -1,13 +1,6 @@
-      *================================================================
-      * BANKACCT.COB - Módulo de Gestão de Contas
-      * Sistema Bancário COBOL
-      * Padrão: Repository Pattern + Business Rules Layer
-      * Versão: 2.0
-      *================================================================
        IDENTIFICATION DIVISION.
        PROGRAM-ID. BANKACCT.
 
-      *----------------------------------------------------------------
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
        SPECIAL-NAMES.
@@ -22,7 +15,10 @@
                ALTERNATE RECORD KEY IS REG-CONTA-CPF WITH DUPLICATES
                FILE STATUS IS FS-CONTAS.
 
-      *----------------------------------------------------------------
+           SELECT ARQBRIDGE ASSIGN TO WS-BR-OUTFILE
+               ORGANIZATION IS LINE SEQUENTIAL
+               FILE STATUS IS FS-BRIDGE.
+
        DATA DIVISION.
        FILE SECTION.
        FD  ARQCONTAS.
@@ -42,7 +38,9 @@
            05  REG-CONTA-DT-ATUALIZACAO PIC 9(8).
            05  REG-CONTA-SENHA-HASH  PIC X(64).
 
-      *----------------------------------------------------------------
+       FD  ARQBRIDGE.
+       01  REG-BRIDGE                PIC X(200).
+
        WORKING-STORAGE SECTION.
        COPY BANKDATA.
 
@@ -52,6 +50,24 @@
                88  FS-EOF           VALUE '10'.
                88  FS-DUPLICADO     VALUE '22'.
                88  FS-NAO-ENCONTRADO VALUE '23'.
+           05  FS-BRIDGE             PIC XX.
+               88  FS-BRIDGE-OK      VALUE '00'.
+               88  FS-BRIDGE-EOF     VALUE '10'.
+
+       01  WS-BRIDGE.
+           05  WS-BR-OUTFILE          PIC X(40).
+           05  WS-BR-CMD              PIC X(250).
+           05  WS-BR-NUM-E            PIC Z(9)9.
+           05  WS-BR-CPF-T            PIC X(11).
+           05  WS-BR-LIMITE-INT-N     PIC 9(11).
+           05  WS-BR-LIMITE-INT-E     PIC Z(10)9.
+           05  WS-BR-LIMITE-DEC       PIC 99.
+           05  WS-BR-LIMITE-STR       PIC X(20).
+           05  WS-BR-LINE             PIC X(200).
+           05  WS-BR-KEY              PIC X(30).
+           05  WS-BR-VAL              PIC X(160).
+           05  WS-BR-OK               PIC 9 VALUE 0.
+           05  WS-BR-SALDO-STR        PIC X(30).
            05  WS-OPCAO-ACCT        PIC X(2).
            05  WS-NOVO-NUM          PIC 9(10).
            05  WS-CONTINUAR         PIC X VALUE 'S'.
@@ -80,18 +96,14 @@
            05  WS-LIMITE-MAX        PIC S9(11)V99 COMP-3 VALUE 50000,00.
            05  WS-TAXA-MANUT        PIC 9(3)V99 COMP-3 VALUE 12,90.
 
-      *----------------------------------------------------------------
        LINKAGE SECTION.
        01  LS-RETORNO.
            05  LS-CODIGO            PIC 9(4).
            05  LS-MENSAGEM          PIC X(100).
 
-      *----------------------------------------------------------------
        PROCEDURE DIVISION USING LS-RETORNO.
 
-      *================================================================
        0000-PRINCIPAL SECTION.
-      *================================================================
        0000-INICIO.
            OPEN I-O ARQCONTAS
            PERFORM 1000-MENU-CONTAS UNTIL ACCT-PARAR
@@ -99,9 +111,7 @@
            MOVE 0 TO LS-CODIGO
            GOBACK.
 
-      *================================================================
        1000-MENU-CONTAS SECTION.
-      *================================================================
        1000-INICIO.
            DISPLAY '======================================='
            DISPLAY '      GESTAO DE CONTAS'
@@ -133,9 +143,7 @@
                    DISPLAY 'OPCAO INVALIDA'
            END-EVALUATE.
 
-      *================================================================
        2000-ABRIR-CONTA SECTION.
-      *================================================================
        2000-INICIO.
            DISPLAY '--- ABERTURA DE CONTA ---'
            PERFORM 2100-COLETAR-DADOS
@@ -174,10 +182,8 @@
            PERFORM 2220-VALIDAR-TIPO-CONTA.
 
        2210-VALIDAR-CPF.
-      *    Algoritmo de validacao de CPF (ambos os digitos verificadores)
            MOVE 'S' TO WS-CPF-VALIDO
 
-      *    Rejeita sequencias invalidas (todos digitos iguais)
            IF WS-CONTA-CPF = '00000000000' OR
               WS-CONTA-CPF = '11111111111' OR
               WS-CONTA-CPF = '22222222222' OR
@@ -191,7 +197,6 @@
                MOVE 'N' TO WS-CPF-VALIDO
            END-IF
 
-      *    Calcula primeiro digito verificador
            IF WS-CPF-VALIDO = 'S'
                MOVE 0 TO WS-SOMA-CPF
                PERFORM VARYING WS-IDX FROM 1 BY 1 UNTIL WS-IDX > 9
@@ -211,7 +216,6 @@
                END-IF
            END-IF
 
-      *    Calcula segundo digito verificador
            IF WS-CPF-VALIDO = 'S'
                MOVE 0 TO WS-SOMA-CPF
                PERFORM VARYING WS-IDX FROM 1 BY 1 UNTIL WS-IDX > 10
@@ -245,12 +249,10 @@
            END-IF.
 
        2400-GERAR-NUMERO-CONTA.
-      *    Gera numero sequencial unico
            MOVE FUNCTION CURRENT-DATE(1:8) TO WS-DATA-ATUAL
            COMPUTE WS-NOVO-NUM = WS-DATA-ATUAL * 100 +
                                  WS-CTR-CONTAS
            MOVE WS-NOVO-NUM TO WS-CONTA-NUM
-      *    Calcula digito verificador da conta
            COMPUTE WS-CONTA-DIGITO =
                FUNCTION MOD(WS-CONTA-NUM 10)
            ADD 1 TO WS-CTR-CONTAS.
@@ -269,9 +271,44 @@
            IF FS-OK
                MOVE 0 TO LS-CODIGO
                DISPLAY 'CONTA CRIADA COM SUCESSO!'
+               PERFORM 2700-REGISTRAR-CONTA-RAZAO
            ELSE
                MOVE 9999 TO LS-CODIGO
                DISPLAY 'ERRO AO CRIAR CONTA: ' FS-CONTAS
+           END-IF.
+
+       2700-REGISTRAR-CONTA-RAZAO.
+           MOVE WS-CONTA-NUM TO WS-BR-NUM-E
+           MOVE WS-CONTA-CPF TO WS-BR-CPF-T
+           COMPUTE WS-BR-LIMITE-INT-N =
+               FUNCTION ABS(FUNCTION INTEGER-PART(WS-CONTA-LIMITE))
+           COMPUTE WS-BR-LIMITE-DEC =
+               FUNCTION ABS(FUNCTION INTEGER(
+                   (WS-CONTA-LIMITE -
+                    FUNCTION INTEGER-PART(WS-CONTA-LIMITE))
+                   * 100))
+           MOVE WS-BR-LIMITE-INT-N TO WS-BR-LIMITE-INT-E
+           MOVE SPACES TO WS-BR-LIMITE-STR
+           STRING FUNCTION TRIM(WS-BR-LIMITE-INT-E) DELIMITED SIZE
+                  '.' DELIMITED SIZE
+                  WS-BR-LIMITE-DEC DELIMITED SIZE
+                  INTO WS-BR-LIMITE-STR
+
+           MOVE SPACES TO WS-BR-OUTFILE
+           STRING 'BANKTMPC-' WS-CONTA-NUM '.OUT' DELIMITED SIZE
+               INTO WS-BR-OUTFILE
+           MOVE SPACES TO WS-BR-CMD
+           STRING 'python3 bank_core_cli.py create-account '
+                  FUNCTION TRIM(WS-BR-NUM-E) ' '
+                  FUNCTION TRIM(WS-BR-CPF-T)
+                  ' --kind ' WS-CONTA-TIPO
+                  ' --balance 0'
+                  ' --overdraft ' FUNCTION TRIM(WS-BR-LIMITE-STR)
+                  ' --cobol-out ' FUNCTION TRIM(WS-BR-OUTFILE)
+                  DELIMITED SIZE INTO WS-BR-CMD
+           CALL 'SYSTEM' USING WS-BR-CMD
+           IF RETURN-CODE NOT = 0
+               DISPLAY 'AVISO: FALHA AO REGISTRAR CONTA NO RAZAO'
            END-IF.
 
        2600-EXIBIR-CONFIRMACAO.
@@ -284,9 +321,7 @@
            DISPLAY 'Tipo: ' WS-CONTA-TIPO
            DISPLAY '================================='.
 
-      *================================================================
        3000-CONSULTAR-CONTA SECTION.
-      *================================================================
        3000-INICIO.
            DISPLAY 'Numero da Conta: '
            ACCEPT WS-CONTA-NUM
@@ -304,6 +339,7 @@
            END-IF.
 
        3100-EXIBIR-CONTA.
+           PERFORM 3200-BUSCAR-SALDO-RAZAO
            MOVE WS-CONTA-SALDO TO WS-SALDO-DISPLAY
            MOVE WS-CONTA-LIMITE TO WS-LIMITE-DISPLAY
            DISPLAY '================================='
@@ -321,9 +357,42 @@
            DISPLAY 'Abertura: ' WS-CONTA-DT-ABERTURA
            DISPLAY '================================='.
 
-      *================================================================
+       3200-BUSCAR-SALDO-RAZAO.
+           MOVE WS-CONTA-NUM TO WS-BR-NUM-E
+           MOVE SPACES TO WS-BR-OUTFILE
+           STRING 'BANKTMPQ-' WS-CONTA-NUM '.OUT' DELIMITED SIZE
+               INTO WS-BR-OUTFILE
+           MOVE SPACES TO WS-BR-CMD
+           STRING 'python3 bank_core_cli.py account '
+                  FUNCTION TRIM(WS-BR-NUM-E)
+                  ' --cobol-out ' FUNCTION TRIM(WS-BR-OUTFILE)
+                  DELIMITED SIZE INTO WS-BR-CMD
+           CALL 'SYSTEM' USING WS-BR-CMD
+           MOVE 0 TO WS-BR-OK
+           IF RETURN-CODE = 0
+               OPEN INPUT ARQBRIDGE
+               IF FS-BRIDGE-OK
+                   PERFORM UNTIL FS-BRIDGE-EOF
+                       READ ARQBRIDGE INTO WS-BR-LINE
+                       IF NOT FS-BRIDGE-EOF
+                           MOVE SPACES TO WS-BR-KEY WS-BR-VAL
+                           UNSTRING WS-BR-LINE DELIMITED BY '='
+                               INTO WS-BR-KEY WS-BR-VAL
+                           IF FUNCTION TRIM(WS-BR-KEY) =
+                              'LEDGER_BALANCE'
+                               MOVE FUNCTION TRIM(WS-BR-VAL)
+                                   TO WS-BR-SALDO-STR
+                               COMPUTE WS-CONTA-SALDO =
+                                   FUNCTION NUMVAL(WS-BR-SALDO-STR)
+                               MOVE 1 TO WS-BR-OK
+                           END-IF
+                       END-IF
+                   END-PERFORM
+                   CLOSE ARQBRIDGE
+               END-IF
+           END-IF.
+
        4000-ATUALIZAR-CONTA SECTION.
-      *================================================================
        4000-INICIO.
            DISPLAY 'Numero da Conta para Atualizar: '
            ACCEPT WS-CONTA-NUM
@@ -353,9 +422,7 @@
                DISPLAY 'ERRO AO ATUALIZAR: ' FS-CONTAS
            END-IF.
 
-      *================================================================
        5000-BLOQ-DESBLOQ-CONTA SECTION.
-      *================================================================
        5000-INICIO.
            DISPLAY 'Numero da Conta: '
            ACCEPT WS-CONTA-NUM
@@ -381,9 +448,7 @@
                END-EVALUATE
            END-IF.
 
-      *================================================================
        6000-ENCERRAR-CONTA SECTION.
-      *================================================================
        6000-INICIO.
            DISPLAY 'Numero da Conta para Encerrar: '
            ACCEPT WS-CONTA-NUM
@@ -402,9 +467,7 @@
                END-IF
            END-IF.
 
-      *================================================================
        7000-LISTAR-CONTAS SECTION.
-      *================================================================
        7000-INICIO.
            MOVE ZEROS TO WS-CTR-LISTA
            MOVE ZEROS TO WS-TOTAL-SALDOS
@@ -429,9 +492,7 @@
            MOVE WS-TOTAL-SALDOS TO WS-SALDO-DISPLAY
            DISPLAY 'Saldo Total: R$ ' WS-SALDO-DISPLAY.
 
-      *================================================================
        8000-BUSCAR-POR-CPF SECTION.
-      *================================================================
        8000-INICIO.
            DISPLAY 'CPF (somente numeros): '
            ACCEPT WS-CONTA-CPF
@@ -443,9 +504,7 @@
            ELSE
                DISPLAY 'NENHUMA CONTA ENCONTRADA PARA ESTE CPF'.
 
-      *================================================================
        8500-APLICAR-TARIFAS SECTION.
-      *================================================================
        8500-INICIO.
            DISPLAY 'APLICANDO TARIFAS DE MANUTENCAO...'
            MOVE ZEROS TO REG-CONTA-NUM
@@ -455,7 +514,6 @@
                IF NOT FS-EOF
                    MOVE REG-CONTA TO WS-CONTA
                    IF CONTA-ATIVA AND CONTA-CORRENTE
-      *                Aplica tarifa somente se nao ultrapassar o limite
                        IF (WS-CONTA-SALDO - WS-TAXA-MANUT) >=
                           WS-CONTA-LIMITE
                            SUBTRACT WS-TAXA-MANUT
@@ -468,13 +526,9 @@
            END-PERFORM
            DISPLAY 'TARIFAS APLICADAS!'.
 
-      *================================================================
        8800-RELATORIO-CONTAS SECTION.
-      *================================================================
        8800-INICIO.
            CALL 'BANKREP' USING LS-RETORNO.
 
-      *================================================================
        9999-FIM.
-      *================================================================
            EXIT PROGRAM.

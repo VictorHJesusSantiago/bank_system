@@ -1,6 +1,3 @@
-      *===============================================================
-      * BANKADM.COB - Modulo Administrativo
-      *===============================================================
        IDENTIFICATION DIVISION.
        PROGRAM-ID. BANKADM.
 
