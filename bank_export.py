@@ -18,42 +18,51 @@ from typing import Any
 try:
     import openpyxl
     from openpyxl.styles import Alignment, Font, PatternFill
+
     HAS_EXCEL = True
 except ImportError:
     HAS_EXCEL = False
 
 try:
     from fpdf import FPDF
+
     HAS_PDF = True
 except ImportError:
     HAS_PDF = False
 
-# ---------------------------------------------------------------------------
-# Constantes
-# ---------------------------------------------------------------------------
 
 HEADERS = ["Data", "Hora", "Tipo", "Valor (R$)", "Status", "Descricao"]
 
 _TIPO_LABEL: dict[str, str] = {
-    "DEP": "Deposito",    "SAQ": "Saque",      "TED": "TED",
-    "DOC": "DOC",         "PIX": "PIX",         "PAG": "Pagamento",
-    "EMP": "Emprestimo",  "PMT": "Parcela",     "FAT": "Fatura",
-    "AGN": "Agendado",    "TAR": "Tarifa",      "REN": "Rendimento",
-    "BOL": "Boleto",      "TRF": "Transferencia",
+    "DEP": "Deposito",
+    "SAQ": "Saque",
+    "TED": "TED",
+    "DOC": "DOC",
+    "PIX": "PIX",
+    "PAG": "Pagamento",
+    "EMP": "Emprestimo",
+    "PMT": "Parcela",
+    "FAT": "Fatura",
+    "AGN": "Agendado",
+    "TAR": "Tarifa",
+    "REN": "Rendimento",
+    "BOL": "Boleto",
+    "TRF": "Transferencia",
 }
 
 _STATUS_LABEL: dict[str, str] = {
-    "E": "Efetivada", "P": "Pendente",
-    "X": "Estornada", "C": "Cancelada",
+    "E": "Efetivada",
+    "P": "Pendente",
+    "X": "Estornada",
+    "C": "Cancelada",
     "F": "Falhou",
 }
 
-# Padrões de linha que indicam uma transação no output COBOL
 _PAT_PIPE = re.compile(
-    r"(\d{8})"               # data AAAAMMDD
-    r"(?:\s*[|\s]\s*(\d{6}))?"  # hora HHMMSS (opcional)
-    r"\s*[|\s]\s*([A-Z]{2,3})"  # tipo
-    r".*?R\$\s*([\d.,]+-?)"  # valor
+    r"(\d{8})"
+    r"(?:\s*[|\s]\s*(\d{6}))?"
+    r"\s*[|\s]\s*([A-Z]{2,3})"
+    r".*?R\$\s*([\d.,]+-?)"
     r".*?([PEXCF])\s*$",
     re.IGNORECASE,
 )
@@ -66,9 +75,7 @@ _PAT_FIELDS = re.compile(
     re.IGNORECASE,
 )
 
-# ---------------------------------------------------------------------------
-# Parser
-# ---------------------------------------------------------------------------
+
 
 def parse_extrato_lines(text: str) -> list[dict[str, Any]]:
     """Converte linhas brutas do COBOL em lista de dicts de transação."""
@@ -78,7 +85,6 @@ def parse_extrato_lines(text: str) -> list[dict[str, Any]]:
         if not line:
             continue
 
-        # Formato pipe-delimitado: data | tipo | desc | valor | status
         if "|" in line:
             parts = [p.strip() for p in line.split("|")]
             tipo = ""
@@ -88,27 +94,34 @@ def parse_extrato_lines(text: str) -> list[dict[str, Any]]:
                     break
             if tipo:
                 valor = next((p for p in parts if re.search(r"\d+[.,]\d{2}", p)), "")
-                data  = next((p for p in parts if re.fullmatch(r"\d{8}", p)), "")
+                data = next((p for p in parts if re.fullmatch(r"\d{8}", p)), "")
                 status = next((p for p in parts if p.upper() in _STATUS_LABEL), "")
-                descr  = next((p for p in parts if len(p) > 4 and p not in (tipo, data, status, valor)), line)
-                records.append({
-                    "data": data, "hora": "", "tipo": tipo,
-                    "valor": valor, "status": status.upper(), "descricao": descr,
-                })
+                descr = next((p for p in parts if len(p) > 4 and p not in (tipo, data, status, valor)), line)
+                records.append(
+                    {
+                        "data": data,
+                        "hora": "",
+                        "tipo": tipo,
+                        "valor": valor,
+                        "status": status.upper(),
+                        "descricao": descr,
+                    }
+                )
                 continue
 
-        # Formato compacto com regex
         m = _PAT_PIPE.search(line) or _PAT_FIELDS.search(line)
         if m:
             g = m.groups()
-            records.append({
-                "data":     g[0],
-                "hora":     g[1] if len(g) > 4 else "",
-                "tipo":     (g[2] if len(g) > 4 else g[1]).upper(),
-                "valor":    g[3] if len(g) > 4 else g[2],
-                "status":   (g[4] if len(g) > 4 else g[3]).upper(),
-                "descricao": line,
-            })
+            records.append(
+                {
+                    "data": g[0],
+                    "hora": g[1] if len(g) > 4 else "",
+                    "tipo": (g[2] if len(g) > 4 else g[1]).upper(),
+                    "valor": g[3] if len(g) > 4 else g[2],
+                    "status": (g[4] if len(g) > 4 else g[3]).upper(),
+                    "descricao": line,
+                }
+            )
 
     return records
 
@@ -141,9 +154,7 @@ def _fmt_time(t: str) -> str:
         return t
 
 
-# ---------------------------------------------------------------------------
-# Exportadores
-# ---------------------------------------------------------------------------
+
 
 def export_csv(records: list[dict], path: Path) -> bool:
     with open(path, "w", newline="", encoding="utf-8-sig") as f:
@@ -156,9 +167,11 @@ def export_csv(records: list[dict], path: Path) -> bool:
 def export_txt(records: list[dict], path: Path, raw: str = "") -> bool:
     with open(path, "w", encoding="utf-8") as f:
         f.write("=" * 100 + "\n")
-        f.write(f"  EXTRATO BANCARIO — Sistema Bancario COBOL\n")
-        f.write(f"  Exportado em: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}"
-                f"   |   {len(records)} transacao(oes)\n")
+        f.write("  EXTRATO BANCARIO — Sistema Bancario COBOL\n")
+        f.write(
+            f"  Exportado em: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}"
+            f"   |   {len(records)} transacao(oes)\n"
+        )
         f.write("=" * 100 + "\n\n")
         if raw:
             f.write(raw)
@@ -202,8 +215,7 @@ def export_xml(records: list[dict], path: Path) -> bool:
 
 def export_html(records: list[dict], path: Path) -> bool:
     rows_html = "\n".join(
-        "    <tr>" + "".join(f"<td>{c}</td>" for c in row) + "</tr>"
-        for row in _humanize(records)
+        "    <tr>" + "".join(f"<td>{c}</td>" for c in row) + "</tr>" for row in _humanize(records)
     )
     header_html = "".join(f"<th>{h}</th>" for h in HEADERS)
     ts = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
@@ -253,9 +265,7 @@ def export_markdown(records: list[dict], path: Path) -> bool:
     lines = [
         "# Extrato Bancário",
         "",
-        f"> **Sistema:** Banco COBOL v2.0  |  "
-        f"**Exportado:** {ts}  |  "
-        f"**Transações:** {len(records)}",
+        f"> **Sistema:** Banco COBOL v2.0  |  **Exportado:** {ts}  |  **Transações:** {len(records)}",
         "",
         "| " + " | ".join(HEADERS) + " |",
         "|" + "|".join(":---" for _ in HEADERS) + "|",
@@ -273,7 +283,6 @@ def export_excel(records: list[dict], path: Path) -> bool:
     ws = wb.active
     ws.title = "Extrato"
 
-    # Header
     header_fill = PatternFill("solid", fgColor="1A3C6E")
     header_font = Font(bold=True, color="FFFFFF", size=10)
     ws.append(HEADERS)
@@ -283,7 +292,6 @@ def export_excel(records: list[dict], path: Path) -> bool:
         cell.alignment = Alignment(horizontal="center", vertical="center")
     ws.row_dimensions[1].height = 22
 
-    # Data rows
     alt_fill = PatternFill("solid", fgColor="F0F4FF")
     for idx, row in enumerate(_humanize(records), start=2):
         ws.append(row)
@@ -291,15 +299,12 @@ def export_excel(records: list[dict], path: Path) -> bool:
             for cell in ws[idx]:
                 cell.fill = alt_fill
 
-    # Auto-width
     for col in ws.columns:
         width = max(len(str(cell.value or "")) for cell in col)
         ws.column_dimensions[col[0].column_letter].width = min(width + 4, 60)
 
-    # Freeze header
     ws.freeze_panes = "A2"
 
-    # Meta sheet
     ms = wb.create_sheet("Info")
     ms["A1"] = "Sistema"
     ms["B1"] = "Banco COBOL v2.0"
@@ -320,7 +325,6 @@ def export_pdf(records: list[dict], path: Path) -> bool:
     pdf.add_page()
     pdf.set_auto_page_break(auto=True, margin=12)
 
-    # Header
     pdf.set_font("Helvetica", "B", 16)
     pdf.set_text_color(26, 60, 110)
     pdf.cell(0, 10, "Extrato Bancário", ln=True, align="C")
@@ -328,13 +332,17 @@ def export_pdf(records: list[dict], path: Path) -> bool:
     pdf.set_font("Helvetica", "", 9)
     pdf.set_text_color(100, 100, 100)
     ts = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-    pdf.cell(0, 6, f"Sistema Bancário COBOL v2.0   |   Exportado: {ts}   |   {len(records)} transações",
-             ln=True, align="C")
+    pdf.cell(
+        0,
+        6,
+        f"Sistema Bancário COBOL v2.0   |   Exportado: {ts}   |   {len(records)} transações",
+        ln=True,
+        align="C",
+    )
     pdf.ln(4)
 
-    # Table header
     col_w = [26, 18, 24, 30, 24, 0]
-    page_w = 277 - 20  # A4 landscape minus margins
+    page_w = 277 - 20
     col_w[-1] = page_w - sum(col_w[:-1])
 
     pdf.set_font("Helvetica", "B", 9)
@@ -344,7 +352,6 @@ def export_pdf(records: list[dict], path: Path) -> bool:
         pdf.cell(w, 8, h, border=1, fill=True, align="C")
     pdf.ln()
 
-    # Rows
     pdf.set_font("Helvetica", "", 8)
     for idx, row in enumerate(_humanize(records)):
         if idx % 2 == 0:
@@ -356,7 +363,6 @@ def export_pdf(records: list[dict], path: Path) -> bool:
             pdf.cell(w, 7, str(cell)[:35], border=1, fill=True)
         pdf.ln()
 
-    # Footer
     pdf.set_y(-15)
     pdf.set_font("Helvetica", "I", 8)
     pdf.set_text_color(150, 150, 150)
@@ -366,19 +372,16 @@ def export_pdf(records: list[dict], path: Path) -> bool:
     return True
 
 
-# ---------------------------------------------------------------------------
-# Dispatcher
-# ---------------------------------------------------------------------------
 
 EXPORTERS: dict[str, Any] = {
-    "csv":  export_csv,
-    "txt":  export_txt,
+    "csv": export_csv,
+    "txt": export_txt,
     "json": export_json,
-    "xml":  export_xml,
+    "xml": export_xml,
     "html": export_html,
-    "md":   export_markdown,
+    "md": export_markdown,
     "xlsx": export_excel,
-    "pdf":  export_pdf,
+    "pdf": export_pdf,
 }
 
 AVAILABLE_FORMATS = list(EXPORTERS.keys())
@@ -421,9 +424,7 @@ def export_all(
     return export_formats(records, AVAILABLE_FORMATS, out_dir, stem, raw_text)
 
 
-# ---------------------------------------------------------------------------
-# CLI
-# ---------------------------------------------------------------------------
+
 
 def main() -> None:
     if len(sys.argv) < 2:

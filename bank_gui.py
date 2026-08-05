@@ -20,43 +20,101 @@ from bank_export import (
 )
 
 LIGHT_THEME = {
-    "bg": "#f5f5f5", "fg": "#1a1a1a", "entry_bg": "#ffffff",
-    "btn_bg": "#e0e0e0", "btn_fg": "#1a1a1a", "frame_bg": "#f5f5f5",
-    "output_bg": "#ffffff", "output_fg": "#1a1a1a",
-    "highlight": "#1565c0", "toast_bg": "#323232", "toast_fg": "#ffffff",
+    "bg": "#f5f5f5",
+    "fg": "#1a1a1a",
+    "entry_bg": "#ffffff",
+    "btn_bg": "#e0e0e0",
+    "btn_fg": "#1a1a1a",
+    "frame_bg": "#f5f5f5",
+    "output_bg": "#ffffff",
+    "output_fg": "#1a1a1a",
+    "highlight": "#1565c0",
+    "toast_bg": "#323232",
+    "toast_fg": "#ffffff",
 }
 DARK_THEME = {
-    "bg": "#1e1e2e", "fg": "#cdd6f4", "entry_bg": "#313244",
-    "btn_bg": "#45475a", "btn_fg": "#cdd6f4", "frame_bg": "#181825",
-    "output_bg": "#11111b", "output_fg": "#a6e3a1",
-    "highlight": "#89b4fa", "toast_bg": "#cba6f7", "toast_fg": "#1e1e2e",
+    "bg": "#1e1e2e",
+    "fg": "#cdd6f4",
+    "entry_bg": "#313244",
+    "btn_bg": "#45475a",
+    "btn_fg": "#cdd6f4",
+    "frame_bg": "#181825",
+    "output_bg": "#11111b",
+    "output_fg": "#a6e3a1",
+    "highlight": "#89b4fa",
+    "toast_bg": "#cba6f7",
+    "toast_fg": "#1e1e2e",
 }
 
 CATEGORY_COLORS = {
-    "DEP": "#4caf50", "SAQ": "#f44336", "TRF": "#2196f3",
-    "PIX": "#9c27b0", "PAG": "#ff9800", "EMP": "#795548",
-    "PMT": "#607d8b", "CRT": "#e91e63", "DEB": "#00bcd4",
-    "AGN": "#8bc34a", "FAT": "#ff5722", "BLT": "#ffc107",
+    "DEP": "#4caf50",
+    "SAQ": "#f44336",
+    "TRF": "#2196f3",
+    "PIX": "#9c27b0",
+    "PAG": "#ff9800",
+    "EMP": "#795548",
+    "PMT": "#607d8b",
+    "CRT": "#e91e63",
+    "DEB": "#00bcd4",
+    "AGN": "#8bc34a",
+    "FAT": "#ff5722",
+    "BLT": "#ffc107",
 }
 
 ONBOARDING_STEPS = [
-    ("Bem-vindo ao Banco COBOL!", "Este sistema bancario oferece conta corrente,\npoupanca, transferencias, cartoes, emprestimos e muito mais."),
-    ("Primeiros passos", "Clique em 'Iniciar' para abrir uma sessao COBOL.\nUse os botoes de navegacao para acessar os modulos."),
-    ("Operacoes guiadas", "Os formularios abaixo facilitam operacoes comuns.\nPreencha os campos e clique em Executar."),
-    ("Exportacao de extratos", "Exporte seu historico em CSV, PDF, Excel, XML, JSON\ne outros formatos pelo painel de Exportacao."),
-    ("Seguranca e dicas", "Ative o 2FA em Seguranca > 2FA.\nNunca compartilhe sua senha. Pronto para comecar!"),
+    (
+        "Bem-vindo ao Banco COBOL!",
+        "Este sistema bancario oferece conta corrente,\npoupanca, transferencias, cartoes, emprestimos e muito mais.",
+    ),
+    (
+        "Primeiros passos",
+        "Clique em 'Iniciar' para abrir uma sessao COBOL.\nUse os botoes de navegacao para acessar os modulos.",
+    ),
+    (
+        "Operacoes guiadas",
+        "Os formularios abaixo facilitam operacoes comuns.\nPreencha os campos e clique em Executar.",
+    ),
+    (
+        "Exportacao de extratos",
+        "Exporte seu historico em CSV, PDF, Excel, XML, JSON\ne outros formatos pelo painel de Exportacao.",
+    ),
+    (
+        "Seguranca e dicas",
+        "Ative o 2FA em Seguranca > 2FA.\nNunca compartilhe sua senha. Pronto para comecar!",
+    ),
 ]
 
 LANG_LABELS = {
-    "pt": {"start": "Iniciar", "stop": "Parar", "clear": "Limpar", "send": "Enviar",
-           "status_stopped": "Status: parado", "status_running": "Status: executando",
-           "input_label": "Entrada", "output_label": "Saida do Sistema"},
-    "en": {"start": "Start", "stop": "Stop", "clear": "Clear", "send": "Send",
-           "status_stopped": "Status: stopped", "status_running": "Status: running",
-           "input_label": "Input", "output_label": "System Output"},
-    "es": {"start": "Iniciar", "stop": "Detener", "clear": "Limpiar", "send": "Enviar",
-           "status_stopped": "Estado: detenido", "status_running": "Estado: ejecutando",
-           "input_label": "Entrada", "output_label": "Salida del Sistema"},
+    "pt": {
+        "start": "Iniciar",
+        "stop": "Parar",
+        "clear": "Limpar",
+        "send": "Enviar",
+        "status_stopped": "Status: parado",
+        "status_running": "Status: executando",
+        "input_label": "Entrada",
+        "output_label": "Saida do Sistema",
+    },
+    "en": {
+        "start": "Start",
+        "stop": "Stop",
+        "clear": "Clear",
+        "send": "Send",
+        "status_stopped": "Status: stopped",
+        "status_running": "Status: running",
+        "input_label": "Input",
+        "output_label": "System Output",
+    },
+    "es": {
+        "start": "Iniciar",
+        "stop": "Detener",
+        "clear": "Limpiar",
+        "send": "Enviar",
+        "status_stopped": "Estado: detenido",
+        "status_running": "Estado: ejecutando",
+        "input_label": "Entrada",
+        "output_label": "Salida del Sistema",
+    },
 }
 
 
@@ -99,7 +157,9 @@ class BankGuiApp:
         self.status_var = tk.StringVar(value="Status: parado")
         tk.Label(top, textvariable=self.status_var, anchor="w").pack(side=tk.LEFT)
         self.gamif_var = tk.StringVar(value="BRONZE | 0 pts")
-        tk.Label(top, textvariable=self.gamif_var, fg="#ff9800", font=("Courier", 9, "bold")).pack(side=tk.LEFT, padx=12)
+        tk.Label(top, textvariable=self.gamif_var, fg="#ff9800", font=("Courier", 9, "bold")).pack(
+            side=tk.LEFT, padx=12
+        )
 
         controls = tk.Frame(top)
         controls.pack(side=tk.RIGHT)
@@ -107,7 +167,9 @@ class BankGuiApp:
         tk.Button(controls, text="Parar", width=10, command=self.stop_session).pack(side=tk.LEFT, padx=4)
         tk.Button(controls, text="Limpar", width=10, command=self.clear_output).pack(side=tk.LEFT, padx=4)
         tk.Button(controls, text="Tema", width=8, command=self.toggle_theme).pack(side=tk.LEFT, padx=4)
-        tk.Button(controls, text="Dashboard", width=10, command=self.show_dashboard).pack(side=tk.LEFT, padx=4)
+        tk.Button(controls, text="Dashboard", width=10, command=self.show_dashboard).pack(
+            side=tk.LEFT, padx=4
+        )
         tk.Button(controls, text="Config", width=8, command=self.show_settings).pack(side=tk.LEFT, padx=4)
 
         app_panel = tk.LabelFrame(self.root, text="Painel de Acoes", padx=10, pady=8)
@@ -127,7 +189,9 @@ class BankGuiApp:
             ("Seguranca", "D"),
             ("Ajuda", "H"),
         ]:
-            tk.Button(nav, text=label, width=16, command=lambda c=cmd: self.send_input(c)).pack(side=tk.LEFT, padx=3)
+            tk.Button(nav, text=label, width=16, command=lambda c=cmd: self.send_input(c)).pack(
+                side=tk.LEFT, padx=3
+            )
 
         contas = tk.LabelFrame(app_panel, text="Atalhos de Contas", padx=8, pady=6)
         contas.pack(fill=tk.X)
@@ -154,9 +218,9 @@ class BankGuiApp:
         entry = tk.Entry(input_box, textvariable=self.input_var)
         entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
         entry.bind("<Return>", lambda _e: self.send_input(self.input_var.get()))
-        tk.Button(input_box, text="Enviar", width=10, command=lambda: self.send_input(self.input_var.get())).pack(
-            side=tk.LEFT, padx=(8, 0)
-        )
+        tk.Button(
+            input_box, text="Enviar", width=10, command=lambda: self.send_input(self.input_var.get())
+        ).pack(side=tk.LEFT, padx=(8, 0))
 
         guided = tk.LabelFrame(self.root, text="Fluxo Guiado", padx=10, pady=8)
         guided.pack(fill=tk.X, padx=12, pady=(0, 8))
@@ -175,7 +239,6 @@ class BankGuiApp:
         self._build_auth_form(guided)
         self._build_help_form(guided)
 
-        # Search bar above output
         search_bar = tk.Frame(self.root)
         search_bar.pack(fill=tk.X, padx=12, pady=(0, 4))
         tk.Label(search_bar, text="Buscar:").pack(side=tk.LEFT)
@@ -207,18 +270,26 @@ class BankGuiApp:
         tk.Label(frame, text="CPF").grid(row=0, column=2, sticky="w")
         tk.Entry(frame, textvariable=self.open_cpf_var, width=16).grid(row=0, column=3, padx=4)
         tk.Label(frame, text="Tipo").grid(row=0, column=4, sticky="w")
-        tk.OptionMenu(frame, self.open_tipo_var, "CC", "CP", "CS", "CI").grid(row=0, column=5, padx=4, sticky="w")
+        tk.OptionMenu(frame, self.open_tipo_var, "CC", "CP", "CS", "CI").grid(
+            row=0, column=5, padx=4, sticky="w"
+        )
 
         tk.Label(frame, text="Agencia").grid(row=1, column=0, sticky="w")
-        tk.Entry(frame, textvariable=self.open_agencia_var, width=10).grid(row=1, column=1, padx=4, sticky="w")
-        tk.Label(frame, text="Email").grid(row=1, column=2, sticky="w")
-        tk.Entry(frame, textvariable=self.open_email_var, width=28).grid(row=1, column=3, padx=4, columnspan=2, sticky="we")
-        tk.Label(frame, text="Telefone").grid(row=1, column=5, sticky="w")
-        tk.Entry(frame, textvariable=self.open_telefone_var, width=16).grid(row=1, column=6, padx=4, sticky="w")
-
-        tk.Checkbutton(frame, text="Voltar ao menu principal apos abrir", variable=self.open_back_to_main_var).grid(
-            row=2, column=0, columnspan=4, sticky="w", pady=(6, 0)
+        tk.Entry(frame, textvariable=self.open_agencia_var, width=10).grid(
+            row=1, column=1, padx=4, sticky="w"
         )
+        tk.Label(frame, text="Email").grid(row=1, column=2, sticky="w")
+        tk.Entry(frame, textvariable=self.open_email_var, width=28).grid(
+            row=1, column=3, padx=4, columnspan=2, sticky="we"
+        )
+        tk.Label(frame, text="Telefone").grid(row=1, column=5, sticky="w")
+        tk.Entry(frame, textvariable=self.open_telefone_var, width=16).grid(
+            row=1, column=6, padx=4, sticky="w"
+        )
+
+        tk.Checkbutton(
+            frame, text="Voltar ao menu principal apos abrir", variable=self.open_back_to_main_var
+        ).grid(row=2, column=0, columnspan=4, sticky="w", pady=(6, 0))
         tk.Button(frame, text="Executar Abertura", width=18, command=self.open_account_flow).grid(
             row=2, column=5, columnspan=2, padx=4, pady=(6, 0), sticky="e"
         )
@@ -232,9 +303,9 @@ class BankGuiApp:
 
         tk.Label(frame, text="Numero da Conta").grid(row=0, column=0, sticky="w")
         tk.Entry(frame, textvariable=self.consult_num_var, width=20).grid(row=0, column=1, padx=4, sticky="w")
-        tk.Checkbutton(frame, text="Voltar ao menu principal apos consultar", variable=self.consult_back_to_main_var).grid(
-            row=0, column=2, padx=8, sticky="w"
-        )
+        tk.Checkbutton(
+            frame, text="Voltar ao menu principal apos consultar", variable=self.consult_back_to_main_var
+        ).grid(row=0, column=2, padx=8, sticky="w")
         tk.Button(frame, text="Executar Consulta", width=18, command=self.consult_account_flow).grid(
             row=0, column=3, padx=4, sticky="e"
         )
@@ -254,9 +325,9 @@ class BankGuiApp:
         val_dep.grid(row=0, column=3, padx=4, sticky="w")
         tk.Label(val_dep, text="R$").pack(side=tk.LEFT)
         tk.Entry(val_dep, textvariable=self.dep_valor_var, width=16).pack(side=tk.LEFT, padx=(3, 0))
-        tk.Checkbutton(frame, text="Voltar ao menu principal apos operacao", variable=self.dep_back_to_main_var).grid(
-            row=0, column=4, padx=8, sticky="w"
-        )
+        tk.Checkbutton(
+            frame, text="Voltar ao menu principal apos operacao", variable=self.dep_back_to_main_var
+        ).grid(row=0, column=4, padx=8, sticky="w")
         tk.Button(frame, text="Executar Deposito", width=18, command=self.deposit_flow).grid(
             row=0, column=5, padx=4, sticky="e"
         )
@@ -276,9 +347,9 @@ class BankGuiApp:
         val_saq.grid(row=0, column=3, padx=4, sticky="w")
         tk.Label(val_saq, text="R$").pack(side=tk.LEFT)
         tk.Entry(val_saq, textvariable=self.saq_valor_var, width=16).pack(side=tk.LEFT, padx=(3, 0))
-        tk.Checkbutton(frame, text="Voltar ao menu principal apos operacao", variable=self.saq_back_to_main_var).grid(
-            row=0, column=4, padx=8, sticky="w"
-        )
+        tk.Checkbutton(
+            frame, text="Voltar ao menu principal apos operacao", variable=self.saq_back_to_main_var
+        ).grid(row=0, column=4, padx=8, sticky="w")
         tk.Button(frame, text="Executar Saque", width=18, command=self.withdraw_flow).grid(
             row=0, column=5, padx=4, sticky="e"
         )
@@ -311,11 +382,13 @@ class BankGuiApp:
         tk.Label(frame, text="PIX Tipo").grid(row=1, column=0, sticky="w")
         tk.OptionMenu(frame, self.trf_pix_tipo_var, "C", "E", "T").grid(row=1, column=1, padx=4, sticky="w")
         tk.Label(frame, text="PIX Chave").grid(row=1, column=2, sticky="w")
-        tk.Entry(frame, textvariable=self.trf_pix_chave_var, width=24).grid(row=1, column=3, columnspan=3, padx=4, sticky="we")
-
-        tk.Checkbutton(frame, text="Voltar ao menu principal apos operacao", variable=self.trf_back_to_main_var).grid(
-            row=1, column=6, columnspan=2, padx=8, sticky="w"
+        tk.Entry(frame, textvariable=self.trf_pix_chave_var, width=24).grid(
+            row=1, column=3, columnspan=3, padx=4, sticky="we"
         )
+
+        tk.Checkbutton(
+            frame, text="Voltar ao menu principal apos operacao", variable=self.trf_back_to_main_var
+        ).grid(row=1, column=6, columnspan=2, padx=8, sticky="w")
         tk.Button(frame, text="Executar Transferencia", width=18, command=self.transfer_flow).grid(
             row=1, column=8, padx=6, sticky="e"
         )
@@ -339,9 +412,9 @@ class BankGuiApp:
         tk.Label(val_pay, text="R$").pack(side=tk.LEFT)
         tk.Entry(val_pay, textvariable=self.pay_valor_var, width=16).pack(side=tk.LEFT, padx=(3, 0))
 
-        tk.Checkbutton(frame, text="Voltar ao menu principal apos operacao", variable=self.pay_back_to_main_var).grid(
-            row=1, column=0, columnspan=3, pady=(4, 0), sticky="w"
-        )
+        tk.Checkbutton(
+            frame, text="Voltar ao menu principal apos operacao", variable=self.pay_back_to_main_var
+        ).grid(row=1, column=0, columnspan=3, pady=(4, 0), sticky="w")
         tk.Button(frame, text="Executar Pagamento", width=18, command=self.payment_flow).grid(
             row=1, column=5, padx=6, pady=(4, 0), sticky="e"
         )
@@ -363,12 +436,12 @@ class BankGuiApp:
         tk.Label(frame, text="Prazo (dias)").grid(row=0, column=2, sticky="w")
         tk.Entry(frame, textvariable=self.inv_prazo_var, width=12).grid(row=0, column=3, padx=4, sticky="w")
 
-        tk.Checkbutton(frame, text="Confirmar aplicacao automaticamente", variable=self.inv_confirmar_var).grid(
-            row=0, column=4, padx=8, sticky="w"
-        )
-        tk.Checkbutton(frame, text="Voltar ao menu principal apos operacao", variable=self.inv_back_to_main_var).grid(
-            row=1, column=0, columnspan=4, pady=(4, 0), sticky="w"
-        )
+        tk.Checkbutton(
+            frame, text="Confirmar aplicacao automaticamente", variable=self.inv_confirmar_var
+        ).grid(row=0, column=4, padx=8, sticky="w")
+        tk.Checkbutton(
+            frame, text="Voltar ao menu principal apos operacao", variable=self.inv_back_to_main_var
+        ).grid(row=1, column=0, columnspan=4, pady=(4, 0), sticky="w")
         tk.Button(frame, text="Executar CDB", width=18, command=self.investment_cdb_flow).grid(
             row=1, column=4, padx=4, pady=(4, 0), sticky="e"
         )
@@ -387,9 +460,9 @@ class BankGuiApp:
         tk.Label(frame, text="01=Balancete, 02=Resumo, 03=Mov.Diaria, 04=Negativos").grid(
             row=0, column=2, padx=6, sticky="w"
         )
-        tk.Checkbutton(frame, text="Voltar ao menu principal apos relatorio", variable=self.rep_back_to_main_var).grid(
-            row=0, column=3, padx=8, sticky="w"
-        )
+        tk.Checkbutton(
+            frame, text="Voltar ao menu principal apos relatorio", variable=self.rep_back_to_main_var
+        ).grid(row=0, column=3, padx=8, sticky="w")
         tk.Button(frame, text="Executar Relatorio", width=18, command=self.report_flow).grid(
             row=0, column=4, padx=4, sticky="e"
         )
@@ -401,16 +474,21 @@ class BankGuiApp:
         self.exp_dir_var = tk.StringVar(value=str(Path.home() / "exports"))
         self.exp_stem_var = tk.StringVar(value="extrato")
         self._exp_fmt_vars: dict[str, tk.BooleanVar] = {
-            fmt: tk.BooleanVar(value=fmt in ("csv", "html", "txt"))
-            for fmt in AVAILABLE_FORMATS
+            fmt: tk.BooleanVar(value=fmt in ("csv", "html", "txt")) for fmt in AVAILABLE_FORMATS
         }
 
         tk.Label(frame, text="Pasta de saída").grid(row=0, column=0, sticky="w")
-        tk.Entry(frame, textvariable=self.exp_dir_var, width=36).grid(row=0, column=1, padx=4, sticky="we", columnspan=3)
-        tk.Button(frame, text="…", width=3,
-                  command=lambda: self.exp_dir_var.set(
-                      filedialog.askdirectory(initialdir=self.exp_dir_var.get()) or self.exp_dir_var.get()
-                  )).grid(row=0, column=4, padx=2)
+        tk.Entry(frame, textvariable=self.exp_dir_var, width=36).grid(
+            row=0, column=1, padx=4, sticky="we", columnspan=3
+        )
+        tk.Button(
+            frame,
+            text="…",
+            width=3,
+            command=lambda: self.exp_dir_var.set(
+                filedialog.askdirectory(initialdir=self.exp_dir_var.get()) or self.exp_dir_var.get()
+            ),
+        ).grid(row=0, column=4, padx=2)
 
         tk.Label(frame, text="Nome base").grid(row=0, column=5, sticky="w", padx=(10, 0))
         tk.Entry(frame, textvariable=self.exp_stem_var, width=18).grid(row=0, column=6, padx=4, sticky="w")
@@ -423,12 +501,26 @@ class BankGuiApp:
 
         btn_frame = tk.Frame(frame)
         btn_frame.grid(row=2, column=0, columnspan=7, sticky="e", pady=(4, 0))
-        tk.Button(btn_frame, text="Selecionar Tudo", width=14,
-                  command=lambda: [v.set(True) for v in self._exp_fmt_vars.values()]).pack(side=tk.LEFT, padx=3)
-        tk.Button(btn_frame, text="Limpar Seleção", width=14,
-                  command=lambda: [v.set(False) for v in self._exp_fmt_vars.values()]).pack(side=tk.LEFT, padx=3)
-        tk.Button(btn_frame, text="Exportar Saída Atual", width=20,
-                  bg="#1a3c6e", fg="white", command=self.export_flow).pack(side=tk.LEFT, padx=6)
+        tk.Button(
+            btn_frame,
+            text="Selecionar Tudo",
+            width=14,
+            command=lambda: [v.set(True) for v in self._exp_fmt_vars.values()],
+        ).pack(side=tk.LEFT, padx=3)
+        tk.Button(
+            btn_frame,
+            text="Limpar Seleção",
+            width=14,
+            command=lambda: [v.set(False) for v in self._exp_fmt_vars.values()],
+        ).pack(side=tk.LEFT, padx=3)
+        tk.Button(
+            btn_frame,
+            text="Exportar Saída Atual",
+            width=20,
+            bg="#1a3c6e",
+            fg="white",
+            command=self.export_flow,
+        ).pack(side=tk.LEFT, padx=6)
 
     def _build_loan_form(self, parent: tk.Widget) -> None:
         frame = tk.LabelFrame(parent, text="Emprestimos", padx=8, pady=6)
@@ -452,11 +544,15 @@ class BankGuiApp:
         tk.Label(frame, text="Conta").grid(row=1, column=0, sticky="w")
         tk.Entry(frame, textvariable=self.loan_conta_var, width=14).grid(row=1, column=1, padx=4, sticky="w")
         tk.Label(frame, text="Tipo").grid(row=1, column=2, sticky="w")
-        tk.OptionMenu(frame, self.loan_tipo_var, "PES", "CON", "IMO", "VEI").grid(row=1, column=3, padx=4, sticky="w")
+        tk.OptionMenu(frame, self.loan_tipo_var, "PES", "CON", "IMO", "VEI").grid(
+            row=1, column=3, padx=4, sticky="w"
+        )
         tk.Label(frame, text="Valor").grid(row=1, column=4, sticky="w")
         tk.Entry(frame, textvariable=self.loan_valor_var, width=14).grid(row=1, column=5, padx=4, sticky="w")
         tk.Label(frame, text="Parcelas").grid(row=1, column=6, sticky="w")
-        tk.Entry(frame, textvariable=self.loan_parcelas_var, width=8).grid(row=1, column=7, padx=4, sticky="w")
+        tk.Entry(frame, textvariable=self.loan_parcelas_var, width=8).grid(
+            row=1, column=7, padx=4, sticky="w"
+        )
         tk.Label(frame, text="ID Empr").grid(row=2, column=0, sticky="w")
         tk.Entry(frame, textvariable=self.loan_id_var, width=14).grid(row=2, column=1, padx=4, sticky="w")
         tk.Checkbutton(frame, text="Voltar ao menu principal", variable=self.loan_back_var).grid(
@@ -482,10 +578,10 @@ class BankGuiApp:
         tk.OptionMenu(frame, self.card_op_var, "01", "02", "03", "04", "05", "06", "07", "08").grid(
             row=0, column=1, padx=4, sticky="w"
         )
-        tk.Label(frame, text="01=Emitir 02=Consultar 03=Bloquear 04=Desbloquear"
-                 " 05=Limite 06=Fatura 07=Pagar 08=Listar").grid(
-            row=0, column=2, padx=6, sticky="w", columnspan=5
-        )
+        tk.Label(
+            frame,
+            text="01=Emitir 02=Consultar 03=Bloquear 04=Desbloquear 05=Limite 06=Fatura 07=Pagar 08=Listar",
+        ).grid(row=0, column=2, padx=6, sticky="w", columnspan=5)
         tk.Label(frame, text="Conta").grid(row=1, column=0, sticky="w")
         tk.Entry(frame, textvariable=self.card_conta_var, width=14).grid(row=1, column=1, padx=4, sticky="w")
         tk.Label(frame, text="Tipo").grid(row=1, column=2, sticky="w")
@@ -527,7 +623,9 @@ class BankGuiApp:
         tk.Label(frame, text="Conta").grid(row=1, column=0, sticky="w")
         tk.Entry(frame, textvariable=self.schd_conta_var, width=14).grid(row=1, column=1, padx=4, sticky="w")
         tk.Label(frame, text="Tipo").grid(row=1, column=2, sticky="w")
-        tk.OptionMenu(frame, self.schd_tipo_var, "TED", "DOC", "PIX", "BOL").grid(row=1, column=3, padx=4, sticky="w")
+        tk.OptionMenu(frame, self.schd_tipo_var, "TED", "DOC", "PIX", "BOL").grid(
+            row=1, column=3, padx=4, sticky="w"
+        )
         tk.Label(frame, text="Destino").grid(row=1, column=4, sticky="w")
         tk.Entry(frame, textvariable=self.schd_dest_var, width=14).grid(row=1, column=5, padx=4, sticky="w")
         tk.Label(frame, text="Valor").grid(row=1, column=6, sticky="w")
@@ -667,8 +765,26 @@ class BankGuiApp:
                 self.process.stdin.write(value + "\n")
                 self.process.stdin.flush()
             self._append_output(f"[VOCE] {value}\n")
-            if value in ("1","2","3","4","5","6","7","8","A","B","C","D","H",
-                         "a","b","c","d","h"):
+            if value in (
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "A",
+                "B",
+                "C",
+                "D",
+                "H",
+                "a",
+                "b",
+                "c",
+                "d",
+                "h",
+            ):
                 self._add_points(10)
         except Exception as exc:
             messagebox.showerror("Erro", f"Falha ao enviar entrada: {exc}")
@@ -980,7 +1096,6 @@ class BankGuiApp:
                 messagebox.showwarning("Agendamento", "Informe o ID do agendamento.")
                 return
             steps.append(agend_id)
-        # op 05: no extra input needed
 
         if self.schd_back_var.get():
             steps.extend(["00", "0"])
@@ -1014,7 +1129,9 @@ class BankGuiApp:
         tk.Checkbutton(frame, text="Voltar ao menu principal", variable=self.auth_back_var).grid(
             row=1, column=0, columnspan=3, sticky="w"
         )
-        tk.Button(frame, text="Executar", width=14, command=self.auth_flow).grid(row=1, column=3, padx=4, sticky="e")
+        tk.Button(frame, text="Executar", width=14, command=self.auth_flow).grid(
+            row=1, column=3, padx=4, sticky="e"
+        )
 
     def _build_help_form(self, parent: tk.Widget) -> None:
         frame = tk.LabelFrame(parent, text="Ajuda e Suporte", padx=8, pady=6)
@@ -1022,14 +1139,18 @@ class BankGuiApp:
         self.help_op_var = tk.StringVar(value="01")
         self.help_back_var = tk.BooleanVar(value=True)
         tk.Label(frame, text="Topico").grid(row=0, column=0, sticky="w")
-        tk.OptionMenu(frame, self.help_op_var, "01", "02", "03", "04", "05", "06").grid(row=0, column=1, padx=4)
+        tk.OptionMenu(frame, self.help_op_var, "01", "02", "03", "04", "05", "06").grid(
+            row=0, column=1, padx=4
+        )
         tk.Label(frame, text="01=FAQ 02=Guia 03=Termos 04=Privacidade 05=Suporte 06=Sobre").grid(
             row=0, column=2, padx=6, sticky="w", columnspan=4
         )
         tk.Checkbutton(frame, text="Voltar ao menu principal", variable=self.help_back_var).grid(
             row=1, column=0, columnspan=3, sticky="w"
         )
-        tk.Button(frame, text="Consultar", width=14, command=self.help_flow).grid(row=1, column=3, padx=4, sticky="e")
+        tk.Button(frame, text="Consultar", width=14, command=self.help_flow).grid(
+            row=1, column=3, padx=4, sticky="e"
+        )
 
     def _add_points(self, pts: int) -> None:
         self._gamification_points += pts
@@ -1072,8 +1193,13 @@ class BankGuiApp:
         toast.geometry(f"320x44+{rx + rw - 340}+{ry}")
         t = self._theme
         tk.Label(
-            toast, text=message, bg=t["toast_bg"], fg=t["toast_fg"],
-            font=("Courier", 10), padx=16, pady=10,
+            toast,
+            text=message,
+            bg=t["toast_bg"],
+            fg=t["toast_fg"],
+            font=("Courier", 10),
+            padx=16,
+            pady=10,
         ).pack(fill=tk.BOTH, expand=True)
         toast.after(duration_ms, toast.destroy)
 
@@ -1099,19 +1225,37 @@ class BankGuiApp:
             next_btn.configure(text="Concluir" if i == len(ONBOARDING_STEPS) - 1 else "Proximo")
 
         tk.Label(win, textvariable=title_var, font=("Courier", 13, "bold"), pady=16).pack()
-        tk.Label(win, textvariable=body_var, font=("Courier", 10), wraplength=440, justify="left", padx=20).pack(fill=tk.X)
+        tk.Label(
+            win, textvariable=body_var, font=("Courier", 10), wraplength=440, justify="left", padx=20
+        ).pack(fill=tk.X)
         prog_var = tk.StringVar()
         tk.Label(win, textvariable=prog_var, font=("Courier", 9), fg="#888").pack(pady=8)
 
         btns = tk.Frame(win)
         btns.pack(pady=12)
-        prev_btn = tk.Button(btns, text="Anterior", width=12,
-                             command=lambda: (_show_step(step_idx[0] - 1), prog_var.set(f"Passo {step_idx[0]+1}/{len(ONBOARDING_STEPS)}")))
+        prev_btn = tk.Button(
+            btns,
+            text="Anterior",
+            width=12,
+            command=lambda: (
+                _show_step(step_idx[0] - 1),
+                prog_var.set(f"Passo {step_idx[0] + 1}/{len(ONBOARDING_STEPS)}"),
+            ),
+        )
         prev_btn.pack(side=tk.LEFT, padx=8)
-        next_btn = tk.Button(btns, text="Proximo", width=12,
-                             command=lambda: (win.destroy() if step_idx[0] == len(ONBOARDING_STEPS) - 1
-                                             else (_show_step(step_idx[0] + 1),
-                                                   prog_var.set(f"Passo {step_idx[0]+1}/{len(ONBOARDING_STEPS)}"))))
+        next_btn = tk.Button(
+            btns,
+            text="Proximo",
+            width=12,
+            command=lambda: (
+                win.destroy()
+                if step_idx[0] == len(ONBOARDING_STEPS) - 1
+                else (
+                    _show_step(step_idx[0] + 1),
+                    prog_var.set(f"Passo {step_idx[0] + 1}/{len(ONBOARDING_STEPS)}"),
+                )
+            ),
+        )
         next_btn.pack(side=tk.LEFT, padx=8)
 
         _show_step(0)
@@ -1136,14 +1280,14 @@ class BankGuiApp:
         canvas.pack(padx=10, pady=10)
 
         if not totals:
-            canvas.create_text(310, 180, text="Nenhuma transacao detectada na saida.",
-                               fill="#cdd6f4", font=("Courier", 12))
+            canvas.create_text(
+                310, 180, text="Nenhuma transacao detectada na saida.", fill="#cdd6f4", font=("Courier", 12)
+            )
             return
 
         max_val = max(totals.values()) or 1.0
         bar_w = min(50, 560 // max(len(totals), 1))
         margin_left = 50
-        margin_bottom = 40
         chart_h = 280
 
         for i, (cat, val) in enumerate(sorted(totals.items())):
@@ -1154,7 +1298,9 @@ class BankGuiApp:
             color = CATEGORY_COLORS.get(cat, "#90a4ae")
             canvas.create_rectangle(x0, y0, x0 + bar_w, y1, fill=color, outline="")
             canvas.create_text(x0 + bar_w // 2, y1 + 14, text=cat, fill="#cdd6f4", font=("Courier", 8))
-            canvas.create_text(x0 + bar_w // 2, y0 - 10, text=f"{val:,.0f}", fill="#cdd6f4", font=("Courier", 7))
+            canvas.create_text(
+                x0 + bar_w // 2, y0 - 10, text=f"{val:,.0f}", fill="#cdd6f4", font=("Courier", 7)
+            )
 
         canvas.create_text(320, 375, text="Categoria de Transacao", fill="#888", font=("Courier", 9))
         canvas.create_text(14, 150, text="Valor (R$)", fill="#888", font=("Courier", 9), angle=90)
@@ -1176,8 +1322,12 @@ class BankGuiApp:
         theme_var = tk.StringVar(value=self._theme_name)
         theme_frame = tk.Frame(win)
         theme_frame.pack()
-        tk.Radiobutton(theme_frame, text="Claro", variable=theme_var, value="light").pack(side=tk.LEFT, padx=8)
-        tk.Radiobutton(theme_frame, text="Escuro", variable=theme_var, value="dark").pack(side=tk.LEFT, padx=8)
+        tk.Radiobutton(theme_frame, text="Claro", variable=theme_var, value="light").pack(
+            side=tk.LEFT, padx=8
+        )
+        tk.Radiobutton(theme_frame, text="Escuro", variable=theme_var, value="dark").pack(
+            side=tk.LEFT, padx=8
+        )
 
         def _apply() -> None:
             self._lang = lang_var.get()
