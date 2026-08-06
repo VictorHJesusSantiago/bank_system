@@ -1,7 +1,3 @@
-      *================================================================
-      * BANKDEB.COB - Debito Automatico
-      * Sistema Bancario COBOL
-      *================================================================
        IDENTIFICATION DIVISION.
        PROGRAM-ID. BANKDEB.
 
@@ -16,6 +12,10 @@
                ACCESS MODE IS DYNAMIC
                RECORD KEY IS DEB-ID
                FILE STATUS IS FS-DEB.
+
+           SELECT ARQBRIDGE ASSIGN TO WS-BR-OUTFILE
+               ORGANIZATION IS LINE SEQUENTIAL
+               FILE STATUS IS FS-BRIDGE.
 
        DATA DIVISION.
        FILE SECTION.
@@ -35,6 +35,9 @@
            05  DEB-CTR-EXECUCOES     PIC 9(6).
            05  DEB-CTR-FALHAS        PIC 9(4).
 
+       FD  ARQBRIDGE.
+       01  REG-BRIDGE                PIC X(200).
+
        WORKING-STORAGE SECTION.
        COPY BANKDATA.
 
@@ -43,10 +46,28 @@
                88  FS-DEB-OK         VALUE '00'.
                88  FS-DEB-EOF        VALUE '10'.
                88  FS-DEB-NFD        VALUE '23'.
+           05  FS-BRIDGE             PIC XX.
+               88  FS-BRIDGE-OK      VALUE '00'.
+               88  FS-BRIDGE-EOF     VALUE '10'.
            05  WS-OPCAO              PIC X(2).
            05  WS-CONTINUAR          PIC X VALUE 'S'.
                88  DEB-PARAR         VALUE 'N'.
            05  WS-DEB-SEQ            PIC 9(12) VALUE ZEROS.
+
+       01  WS-BRIDGE.
+           05  WS-BR-OUTFILE          PIC X(40).
+           05  WS-BR-CMD              PIC X(250).
+           05  WS-BR-CONTA-E          PIC Z(9)9.
+           05  WS-BR-ID-E             PIC Z(11)9.
+           05  WS-BR-VALOR-INT-N      PIC 9(11).
+           05  WS-BR-VALOR-INT-E      PIC Z(10)9.
+           05  WS-BR-VALOR-DEC        PIC 99.
+           05  WS-BR-VALOR-STR        PIC X(20).
+           05  WS-BR-LINE             PIC X(200).
+           05  WS-BR-KEY              PIC X(30).
+           05  WS-BR-VAL              PIC X(160).
+           05  WS-BR-OK               PIC 9 VALUE 0.
+           05  WS-BR-ERROR            PIC X(150) VALUE SPACES.
 
        01  WS-DEB-CALC.
            05  WS-DEB-CONTA-NUM      PIC 9(10).
@@ -84,9 +105,7 @@
                MOVE ZEROS TO WS-DEB-SEQ
            END-IF.
 
-      *================================================================
        1000-MENU SECTION.
-      *================================================================
        1000-INICIO.
            DISPLAY '========================================'
            DISPLAY '        DEBITO AUTOMATICO'
@@ -113,9 +132,7 @@
                WHEN OTHER DISPLAY 'OPCAO INVALIDA'
            END-EVALUATE.
 
-      *================================================================
        2000-CADASTRAR SECTION.
-      *================================================================
        2000-INICIO.
            DISPLAY '--- CADASTRAR DEBITO AUTOMATICO ---'
            DISPLAY 'Conta para debito: '
@@ -161,9 +178,7 @@
                DISPLAY 'CANCELADO'
            END-IF.
 
-      *================================================================
        3000-CONSULTAR SECTION.
-      *================================================================
        3000-INICIO.
            DISPLAY 'Conta: '
            ACCEPT WS-DEB-CONTA-NUM
@@ -194,9 +209,7 @@
            DISPLAY '========================================'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        4000-SUSPENDER SECTION.
-      *================================================================
        4000-INICIO.
            DISPLAY 'ID do debito: '
            ACCEPT WS-DEB-ID-SEL
@@ -227,9 +240,7 @@
            DISPLAY 'DEBITO REATIVADO: ' DEB-BENEFICIARIO(1:30)
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        5000-CANCELAR SECTION.
-      *================================================================
        5000-INICIO.
            DISPLAY 'ID do debito: '
            ACCEPT WS-DEB-ID-SEL
@@ -252,9 +263,7 @@
                DISPLAY 'CANCELAMENTO ABORTADO'
            END-IF.
 
-      *================================================================
        6000-HISTORICO SECTION.
-      *================================================================
        6000-INICIO.
            DISPLAY 'ID do debito: '
            ACCEPT WS-DEB-ID-SEL
@@ -276,9 +285,7 @@
            DISPLAY '========================================'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        7000-EXECUTAR-PENDENTES SECTION.
-      *================================================================
        7000-INICIO.
            DISPLAY 'Conta para processar debitos: '
            ACCEPT WS-DEB-CONTA-NUM
@@ -293,7 +300,13 @@
                        MOVE DEB-VALOR TO WS-DIS
                        DISPLAY 'Debitando: ' DEB-BENEFICIARIO(1:30)
                                ' R$ ' WS-DIS
-                       ADD 1 TO DEB-CTR-EXECUCOES
+                       PERFORM 7100-DEBITAR-RAZAO
+                       IF WS-BR-OK = 1
+                           ADD 1 TO DEB-CTR-EXECUCOES
+                       ELSE
+                           ADD 1 TO DEB-CTR-FALHAS
+                           DISPLAY 'FALHA NO RAZAO: ' WS-BR-ERROR
+                       END-IF
                        MOVE FUNCTION CURRENT-DATE(1:8)
                            TO DEB-DT-ULT-EXEC
                        REWRITE REG-DEB
@@ -303,7 +316,53 @@
            DISPLAY 'PROCESSAMENTO CONCLUIDO'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
+       7100-DEBITAR-RAZAO.
+           MOVE DEB-CONTA TO WS-BR-CONTA-E
+           MOVE DEB-ID TO WS-BR-ID-E
+           COMPUTE WS-BR-VALOR-INT-N =
+               FUNCTION INTEGER-PART(DEB-VALOR)
+           COMPUTE WS-BR-VALOR-DEC =
+               FUNCTION INTEGER(
+                   (DEB-VALOR - WS-BR-VALOR-INT-N) * 100)
+           MOVE WS-BR-VALOR-INT-N TO WS-BR-VALOR-INT-E
+           MOVE SPACES TO WS-BR-VALOR-STR
+           STRING FUNCTION TRIM(WS-BR-VALOR-INT-E) DELIMITED SIZE
+                  '.' DELIMITED SIZE
+                  WS-BR-VALOR-DEC DELIMITED SIZE
+                  INTO WS-BR-VALOR-STR
+           MOVE SPACES TO WS-BR-OUTFILE
+           STRING 'BANKTMPD-' DEB-ID '.OUT' DELIMITED SIZE
+               INTO WS-BR-OUTFILE
+           MOVE SPACES TO WS-BR-CMD
+           STRING 'python3 bank_core_cli.py settle DEB AUTOMATIC_DEBIT '
+                  FUNCTION TRIM(WS-BR-CONTA-E) ' '
+                  FUNCTION TRIM(WS-BR-VALOR-STR) ' '
+                  FUNCTION TRIM(WS-BR-ID-E)
+                  ' --cobol-out ' FUNCTION TRIM(WS-BR-OUTFILE)
+                  DELIMITED SIZE INTO WS-BR-CMD
+           CALL 'SYSTEM' USING WS-BR-CMD
+           MOVE 0 TO WS-BR-OK
+           MOVE SPACES TO WS-BR-ERROR
+           OPEN INPUT ARQBRIDGE
+           IF FS-BRIDGE-OK
+               PERFORM UNTIL FS-BRIDGE-EOF
+                   READ ARQBRIDGE INTO WS-BR-LINE
+                   IF NOT FS-BRIDGE-EOF
+                       MOVE SPACES TO WS-BR-KEY WS-BR-VAL
+                       UNSTRING WS-BR-LINE DELIMITED BY '='
+                           INTO WS-BR-KEY WS-BR-VAL
+                       IF FUNCTION TRIM(WS-BR-KEY) = 'OK'
+                           IF FUNCTION TRIM(WS-BR-VAL) = '1'
+                               MOVE 1 TO WS-BR-OK
+                           END-IF
+                       END-IF
+                       IF FUNCTION TRIM(WS-BR-KEY) = 'ERROR'
+                           MOVE FUNCTION TRIM(WS-BR-VAL) TO WS-BR-ERROR
+                       END-IF
+                   END-IF
+               END-PERFORM
+               CLOSE ARQBRIDGE
+           END-IF.
+
        9999-FIM.
-      *================================================================
            EXIT PROGRAM.

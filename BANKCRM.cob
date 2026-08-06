@@ -1,6 +1,3 @@
-      *===============================================================
-      * BANKCRM.COB - Modulo de Gestao de Clientes
-      *===============================================================
        IDENTIFICATION DIVISION.
        PROGRAM-ID. BANKCRM.
 

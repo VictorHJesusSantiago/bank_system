@@ -1,7 +1,3 @@
-      *================================================================
-      * BANKDOA.COB - Doacoes e Contribuicoes Sociais
-      * Sistema Bancario COBOL
-      *================================================================
        IDENTIFICATION DIVISION.
        PROGRAM-ID. BANKDOA.
 
@@ -17,6 +13,10 @@
                RECORD KEY IS DOA-ID
                FILE STATUS IS FS-DOA.
 
+           SELECT ARQBRIDGE ASSIGN TO WS-BR-OUTFILE
+               ORGANIZATION IS LINE SEQUENTIAL
+               FILE STATUS IS FS-BRIDGE.
+
        DATA DIVISION.
        FILE SECTION.
        FD  ARQDOA.
@@ -30,6 +30,9 @@
            05  DOA-DATA              PIC 9(8).
            05  DOA-STATUS            PIC X(1).
 
+       FD  ARQBRIDGE.
+       01  REG-BRIDGE                PIC X(200).
+
        WORKING-STORAGE SECTION.
        COPY BANKDATA.
 
@@ -38,10 +41,29 @@
                88  FS-DOA-OK         VALUE '00'.
                88  FS-DOA-EOF        VALUE '10'.
                88  FS-DOA-NFD        VALUE '23'.
+           05  FS-BRIDGE             PIC XX.
+               88  FS-BRIDGE-OK      VALUE '00'.
+               88  FS-BRIDGE-EOF     VALUE '10'.
            05  WS-OPCAO              PIC X(2).
            05  WS-CONTINUAR          PIC X VALUE 'S'.
                88  DOA-PARAR         VALUE 'N'.
            05  WS-DOA-SEQ            PIC 9(15) VALUE ZEROS.
+
+       01  WS-BRIDGE.
+           05  WS-BR-OUTFILE          PIC X(40).
+           05  WS-BR-CMD              PIC X(250).
+           05  WS-BR-CONTA-E          PIC Z(9)9.
+           05  WS-BR-ID-E             PIC Z(14)9.
+           05  WS-BR-VALOR-INT-N      PIC 9(11).
+           05  WS-BR-VALOR-INT-E      PIC Z(10)9.
+           05  WS-BR-VALOR-DEC        PIC 99.
+           05  WS-BR-VALOR-STR        PIC X(20).
+           05  WS-BR-LINE             PIC X(200).
+           05  WS-BR-KEY              PIC X(30).
+           05  WS-BR-VAL              PIC X(160).
+           05  WS-BR-OK               PIC 9 VALUE 0.
+           05  WS-BR-ERROR            PIC X(150) VALUE SPACES.
+           05  WS-BR-KIND             PIC X(20).
 
        01  WS-DOA-CALC.
            05  WS-DOA-CONTA-NUM      PIC 9(10).
@@ -80,9 +102,7 @@
                MOVE ZEROS TO WS-DOA-SEQ
            END-IF.
 
-      *================================================================
        1000-MENU SECTION.
-      *================================================================
        1000-INICIO.
            DISPLAY '========================================'
            DISPLAY '   DOACOES E CONTRIBUICOES SOCIAIS'
@@ -107,9 +127,7 @@
                WHEN OTHER DISPLAY 'OPCAO INVALIDA'
            END-EVALUATE.
 
-      *================================================================
        2000-DOAR SECTION.
-      *================================================================
        2000-INICIO.
            DISPLAY '--- FAZER DOACAO ---'
            DISPLAY 'Conta: '
@@ -127,6 +145,13 @@
            MOVE 'UNICA' TO DOA-TIPO
            MOVE FUNCTION CURRENT-DATE(1:8) TO DOA-DATA
            MOVE 'C' TO DOA-STATUS
+           MOVE 'DONATION' TO WS-BR-KIND
+           PERFORM 2100-DEBITAR-RAZAO
+           IF WS-BR-OK NOT = 1
+               DISPLAY 'FALHA NO RAZAO CENTRAL: ' WS-BR-ERROR
+               MOVE 9998 TO LS-CODIGO
+               EXIT SECTION
+           END-IF
            WRITE REG-DOA
            IF FS-DOA-OK
                MOVE DOA-VALOR TO WS-DIS
@@ -140,9 +165,54 @@
                MOVE 9999 TO LS-CODIGO
            END-IF.
 
-      *================================================================
+       2100-DEBITAR-RAZAO.
+           MOVE DOA-CONTA TO WS-BR-CONTA-E
+           MOVE DOA-ID TO WS-BR-ID-E
+           COMPUTE WS-BR-VALOR-INT-N = FUNCTION INTEGER-PART(DOA-VALOR)
+           COMPUTE WS-BR-VALOR-DEC =
+               FUNCTION INTEGER((DOA-VALOR - WS-BR-VALOR-INT-N) * 100)
+           MOVE WS-BR-VALOR-INT-N TO WS-BR-VALOR-INT-E
+           MOVE SPACES TO WS-BR-VALOR-STR
+           STRING FUNCTION TRIM(WS-BR-VALOR-INT-E) DELIMITED SIZE
+                  '.' DELIMITED SIZE
+                  WS-BR-VALOR-DEC DELIMITED SIZE
+                  INTO WS-BR-VALOR-STR
+           MOVE SPACES TO WS-BR-OUTFILE
+           STRING 'BANKTMPO-' DOA-ID '.OUT' DELIMITED SIZE
+               INTO WS-BR-OUTFILE
+           MOVE SPACES TO WS-BR-CMD
+           STRING 'python3 bank_core_cli.py settle DOA '
+                  FUNCTION TRIM(WS-BR-KIND) ' '
+                  FUNCTION TRIM(WS-BR-CONTA-E) ' '
+                  FUNCTION TRIM(WS-BR-VALOR-STR) ' '
+                  FUNCTION TRIM(WS-BR-ID-E)
+                  ' --cobol-out ' FUNCTION TRIM(WS-BR-OUTFILE)
+                  DELIMITED SIZE INTO WS-BR-CMD
+           CALL 'SYSTEM' USING WS-BR-CMD
+           MOVE 0 TO WS-BR-OK
+           MOVE SPACES TO WS-BR-ERROR
+           OPEN INPUT ARQBRIDGE
+           IF FS-BRIDGE-OK
+               PERFORM UNTIL FS-BRIDGE-EOF
+                   READ ARQBRIDGE INTO WS-BR-LINE
+                   IF NOT FS-BRIDGE-EOF
+                       MOVE SPACES TO WS-BR-KEY WS-BR-VAL
+                       UNSTRING WS-BR-LINE DELIMITED BY '='
+                           INTO WS-BR-KEY WS-BR-VAL
+                       IF FUNCTION TRIM(WS-BR-KEY) = 'OK'
+                           IF FUNCTION TRIM(WS-BR-VAL) = '1'
+                               MOVE 1 TO WS-BR-OK
+                           END-IF
+                       END-IF
+                       IF FUNCTION TRIM(WS-BR-KEY) = 'ERROR'
+                           MOVE FUNCTION TRIM(WS-BR-VAL) TO WS-BR-ERROR
+                       END-IF
+                   END-IF
+               END-PERFORM
+               CLOSE ARQBRIDGE
+           END-IF.
+
        3000-RECORRENTE SECTION.
-      *================================================================
        3000-INICIO.
            DISPLAY '--- CONFIGURAR DOACAO RECORRENTE ---'
            DISPLAY 'Conta: '
@@ -173,9 +243,7 @@
                MOVE 9999 TO LS-CODIGO
            END-IF.
 
-      *================================================================
        4000-HISTORICO SECTION.
-      *================================================================
        4000-INICIO.
            DISPLAY 'Conta: '
            ACCEPT WS-DOA-CONTA-NUM
@@ -207,9 +275,7 @@
            DISPLAY '========================================'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        5000-RECIBO SECTION.
-      *================================================================
        5000-INICIO.
            DISPLAY 'Numero do comprovante: '
            ACCEPT WS-DOA-ID-SEL
@@ -236,9 +302,7 @@
            DISPLAY '========================================'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        6000-PARCEIRAS SECTION.
-      *================================================================
        6000-INICIO.
            DISPLAY '========================================'
            DISPLAY ' INSTITUICOES PARCEIRAS EM DESTAQUE'
@@ -252,9 +316,7 @@
            DISPLAY '========================================'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        7000-CANCELAR SECTION.
-      *================================================================
        7000-INICIO.
            DISPLAY 'ID da Doacao Recorrente: '
            ACCEPT WS-DOA-ID-SEL
@@ -281,7 +343,5 @@
                DISPLAY 'OPERACAO ABORTADA'
            END-IF.
 
-      *================================================================
        9999-FIM.
-      *================================================================
            EXIT PROGRAM.
