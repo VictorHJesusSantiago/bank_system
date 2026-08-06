@@ -1,7 +1,3 @@
-      *===============================================================
-      * BANKHELP.COB - Central de Ajuda, FAQ, Termos e Suporte
-      * Sistema Bancario COBOL v2.0
-      *===============================================================
        IDENTIFICATION DIVISION.
        PROGRAM-ID. BANKHELP.
 

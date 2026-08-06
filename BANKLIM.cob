@@ -1,7 +1,3 @@
-      *================================================================
-      * BANKLIM.COB - Gestao de Limites de Credito
-      * Sistema Bancario COBOL
-      *================================================================
        IDENTIFICATION DIVISION.
        PROGRAM-ID. BANKLIM.
 
@@ -71,6 +67,7 @@
            05  WS-LIM-CONTA-NUM      PIC 9(10).
            05  WS-LIM-NOVO           PIC S9(11)V99 COMP-3.
            05  WS-LIM-MOTIVO         PIC X(60).
+           05  WS-LIM-TIPO-HIST      PIC X(1).
            05  WS-DIS                PIC ZZZ.ZZZ.ZZZ,99-.
            05  WS-LIMH-ID-BASE       PIC 9(15).
 
@@ -97,9 +94,7 @@
            MOVE 0 TO LS-CODIGO
            GOBACK.
 
-      *================================================================
        1000-MENU SECTION.
-      *================================================================
        1000-INICIO.
            DISPLAY '========================================'
            DISPLAY '      GESTAO DE LIMITES DE CREDITO'
@@ -124,9 +119,7 @@
                WHEN OTHER DISPLAY 'OPCAO INVALIDA'
            END-EVALUATE.
 
-      *================================================================
        2000-CONSULTAR SECTION.
-      *================================================================
        2000-INICIO.
            DISPLAY 'Numero da conta: '
            ACCEPT WS-LIM-CONTA-NUM
@@ -152,9 +145,7 @@
            DISPLAY '========================================'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        3000-SOLICITAR-AUMENTO SECTION.
-      *================================================================
        3000-INICIO.
            DISPLAY 'Numero da conta: '
            ACCEPT WS-LIM-CONTA-NUM
@@ -183,7 +174,8 @@
            DISPLAY 'Confirmar? (S/N): '
            ACCEPT WS-OPCAO
            IF WS-OPCAO = 'S'
-               PERFORM 9700-GRAVAR-HIST USING 'A'
+               MOVE 'A' TO WS-LIM-TIPO-HIST
+               PERFORM 9700-GRAVAR-HIST
                MOVE WS-LIM-NOVO TO LIM-CONTA-LIMITE
                MOVE FUNCTION CURRENT-DATE(1:8) TO LIM-CONTA-DT-ATUA
                REWRITE REG-CONTA
@@ -198,9 +190,7 @@
                DISPLAY 'SOLICITACAO CANCELADA'
            END-IF.
 
-      *================================================================
        4000-REDUZIR SECTION.
-      *================================================================
        4000-INICIO.
            DISPLAY 'Numero da conta: '
            ACCEPT WS-LIM-CONTA-NUM
@@ -215,16 +205,15 @@
            DISPLAY 'Limite atual: R$ ' WS-DIS
            DISPLAY 'Novo limite (menor valor): '
            ACCEPT WS-LIM-NOVO
-           PERFORM 9700-GRAVAR-HIST USING 'R'
+           MOVE 'R' TO WS-LIM-TIPO-HIST
+           PERFORM 9700-GRAVAR-HIST
            MOVE WS-LIM-NOVO TO LIM-CONTA-LIMITE
            MOVE FUNCTION CURRENT-DATE(1:8) TO LIM-CONTA-DT-ATUA
            REWRITE REG-CONTA
            DISPLAY 'LIMITE REDUZIDO COM SUCESSO'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        5000-EMERGENCIAL SECTION.
-      *================================================================
        5000-INICIO.
            DISPLAY '--- LIMITE EMERGENCIAL (expira em 24h) ---'
            DISPLAY 'Numero da conta: '
@@ -245,7 +234,8 @@
            ACCEPT WS-OPCAO
            IF WS-OPCAO = 'S'
                MOVE 'EMERGENCIAL 24H' TO WS-LIM-MOTIVO
-               PERFORM 9700-GRAVAR-HIST USING 'E'
+               MOVE 'E' TO WS-LIM-TIPO-HIST
+               PERFORM 9700-GRAVAR-HIST
                MOVE WS-LIM-NOVO TO LIM-CONTA-LIMITE
                REWRITE REG-CONTA
                DISPLAY 'LIMITE EMERGENCIAL ATIVADO!'
@@ -255,9 +245,7 @@
                DISPLAY 'CANCELADO'
            END-IF.
 
-      *================================================================
        6000-BLOQUEAR SECTION.
-      *================================================================
        6000-INICIO.
            DISPLAY 'Numero da conta: '
            ACCEPT WS-LIM-CONTA-NUM
@@ -273,7 +261,8 @@
            IF WS-OPCAO = 'S'
                MOVE 'BLOQUEIO' TO WS-LIM-MOTIVO
                MOVE ZEROS TO WS-LIM-NOVO
-               PERFORM 9700-GRAVAR-HIST USING 'B'
+               MOVE 'B' TO WS-LIM-TIPO-HIST
+               PERFORM 9700-GRAVAR-HIST
                MOVE ZEROS TO LIM-CONTA-LIMITE
                REWRITE REG-CONTA
                DISPLAY 'LIMITE BLOQUEADO TEMPORARIAMENTE'
@@ -282,9 +271,7 @@
                DISPLAY 'CANCELADO'
            END-IF.
 
-      *================================================================
        7000-HISTORICO SECTION.
-      *================================================================
        7000-INICIO.
            DISPLAY 'Numero da conta: '
            ACCEPT WS-LIM-CONTA-NUM
@@ -309,10 +296,7 @@
            DISPLAY '========================================'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        9700-GRAVAR-HIST.
-      *================================================================
-       9700-GRAVAR-HIST USING WS-OPCAO.
            ADD 1 TO WS-LIMH-SEQ
            MOVE WS-LIMH-SEQ TO LIMH-ID
            MOVE WS-LIM-CONTA-NUM TO LIMH-CONTA
@@ -321,10 +305,8 @@
            MOVE WS-LIM-MOTIVO TO LIMH-MOTIVO
            MOVE FUNCTION CURRENT-DATE(1:8) TO LIMH-DATA
            MOVE FUNCTION CURRENT-DATE(9:6) TO LIMH-HORA
-           MOVE WS-OPCAO TO LIMH-TIPO
+           MOVE WS-LIM-TIPO-HIST TO LIMH-TIPO
            WRITE REG-LIMH.
 
-      *================================================================
        9999-FIM.
-      *================================================================
            EXIT PROGRAM.

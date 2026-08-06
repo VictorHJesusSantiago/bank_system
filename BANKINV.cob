@@ -1,13 +1,6 @@
-      *================================================================
-      * BANKINV.COB - Módulo de Investimentos
-      * Sistema Bancário COBOL
-      * Padrão: Strategy Pattern para Produtos Financeiros
-      * Versão: 2.0
-      *================================================================
        IDENTIFICATION DIVISION.
        PROGRAM-ID. BANKINV.
 
-      *----------------------------------------------------------------
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
        SPECIAL-NAMES.
@@ -20,7 +13,10 @@
                RECORD KEY IS REG-INV-ID
                FILE STATUS IS FS-INV.
 
-      *----------------------------------------------------------------
+           SELECT ARQBRIDGE ASSIGN TO WS-BR-OUTFILE
+               ORGANIZATION IS LINE SEQUENTIAL
+               FILE STATUS IS FS-BRIDGE.
+
        DATA DIVISION.
        FILE SECTION.
        FD  ARQINV.
@@ -35,6 +31,9 @@
            05  REG-INV-PRAZO         PIC 9(4).
            05  REG-INV-STATUS        PIC X(1).
 
+       FD  ARQBRIDGE.
+       01  REG-BRIDGE                PIC X(200).
+
        WORKING-STORAGE SECTION.
        COPY BANKDATA.
 
@@ -44,6 +43,26 @@
                88  FS-INV-EOF       VALUE '10'.
                88  FS-INV-NFD       VALUE '23'.
                88  FS-INV-DUP       VALUE '22'.
+           05  FS-BRIDGE            PIC XX.
+               88  FS-BRIDGE-OK     VALUE '00'.
+               88  FS-BRIDGE-EOF    VALUE '10'.
+
+       01  WS-BRIDGE.
+           05  WS-BR-OUTFILE          PIC X(40).
+           05  WS-BR-CMD              PIC X(250).
+           05  WS-BR-CONTA-E          PIC Z(9)9.
+           05  WS-BR-ID-E             PIC Z(9)9.
+           05  WS-BR-KIND             PIC X(24).
+           05  WS-BR-VALOR            PIC S9(13)V99 COMP-3.
+           05  WS-BR-VALOR-INT-N      PIC 9(11).
+           05  WS-BR-VALOR-INT-E      PIC Z(10)9.
+           05  WS-BR-VALOR-DEC        PIC 99.
+           05  WS-BR-VALOR-STR        PIC X(20).
+           05  WS-BR-LINE             PIC X(200).
+           05  WS-BR-KEY              PIC X(30).
+           05  WS-BR-VAL              PIC X(160).
+           05  WS-BR-OK               PIC 9 VALUE 0.
+           05  WS-BR-ERROR            PIC X(150) VALUE SPACES.
            05  WS-INV-ID-SEQ        PIC 9(10) VALUE ZEROS.
            05  WS-OPCAO-INV         PIC X(2).
            05  WS-CONTINUAR         PIC X VALUE 'S'.
@@ -79,18 +98,14 @@
            05  WS-APLIC-MIN-LCI     PIC S9(9)V99 COMP-3 VALUE 5000,00.
            05  WS-APLIC-MIN-TESOURO PIC S9(9)V99 COMP-3 VALUE 30,00.
 
-      *----------------------------------------------------------------
        LINKAGE SECTION.
        01  LS-RETORNO.
            05  LS-CODIGO            PIC 9(4).
            05  LS-MENSAGEM          PIC X(100).
 
-      *----------------------------------------------------------------
        PROCEDURE DIVISION USING LS-RETORNO.
 
-      *================================================================
        0000-PRINCIPAL SECTION.
-      *================================================================
        0000-INICIO.
            OPEN I-O ARQINV
            IF NOT FS-INV-OK
@@ -103,9 +118,7 @@
            MOVE 0 TO LS-CODIGO
            GOBACK.
 
-      *================================================================
        1000-MENU-INV SECTION.
-      *================================================================
        1000-INICIO.
            DISPLAY '======================================='
            DISPLAY '         INVESTIMENTOS'
@@ -140,11 +153,11 @@
                WHEN OTHER DISPLAY 'OPCAO INVALIDA'
            END-EVALUATE.
 
-      *================================================================
        2000-APLICAR-CDB SECTION.
-      *================================================================
        2000-INICIO.
            DISPLAY '--- CDB ---'
+           DISPLAY 'Conta para debito: '
+           ACCEPT WS-INV-CONTA
            DISPLAY 'Taxa: ' WS-PROD-CDB-PERC-CDI '% do CDI'
            DISPLAY 'Aplicacao Minima: R$ 1.000,00'
            DISPLAY 'Valor da Aplicacao: R$ '
@@ -160,18 +173,14 @@
            END-IF.
 
        2100-CALC-RENTABILIDADE-CDB.
-      *    Taxa diaria = (1 + taxa_anual)^(1/252) - 1
-      *    Usando EXP(LOG(1+r)/252) pois COBOL nao tem expoente fracionario
            COMPUTE WS-TAXA-ANUAL =
                (WS-CDI-ATUAL * WS-PROD-CDB-PERC-CDI / 100) / 100
            COMPUTE WS-TAXA-DIARIA =
                FUNCTION EXP(FUNCTION LOG(1 + WS-TAXA-ANUAL) / 252) - 1
-      *    Valor bruto
            COMPUTE WS-FATOR-ACRESC =
                (1 + WS-TAXA-DIARIA) ** WS-PRAZO-DIAS
            COMPUTE WS-VALOR-BRUTO =
                WS-INV-VALOR-APORT * WS-FATOR-ACRESC
-      *    IR regressivo CDB
            EVALUATE TRUE
                WHEN WS-PRAZO-DIAS <= 180
                    MOVE 22,50 TO WS-PERC-IMPOSTO
@@ -200,6 +209,15 @@
            DISPLAY 'Confirmar? (S/N): '
            ACCEPT WS-INV-TIPO
            IF WS-INV-TIPO = 'S'
+               MOVE 'INVESTMENT_APPLICATION' TO WS-BR-KIND
+               MOVE WS-INV-CONTA TO WS-BR-CONTA-E
+               MOVE WS-INV-VALOR-APORT TO WS-BR-VALOR
+               PERFORM 9850-MOVIMENTAR-RAZAO
+               IF WS-BR-OK NOT = 1
+                   DISPLAY 'FALHA NO RAZAO CENTRAL: ' WS-BR-ERROR
+                   MOVE 9998 TO LS-CODIGO
+                   EXIT PARAGRAPH
+               END-IF
                ADD 1 TO WS-INV-ID-SEQ
                MOVE WS-INV-ID-SEQ TO REG-INV-ID
                MOVE WS-INV-CONTA TO REG-INV-CONTA
@@ -272,10 +290,19 @@
                ELSE
                    MOVE REG-INV-VALOR-ATUAL TO WS-INV-DIS
                    DISPLAY 'Valor: R$ ' WS-INV-DIS
+                   MOVE 'INVESTMENT_REDEMPTION' TO WS-BR-KIND
+                   MOVE REG-INV-CONTA TO WS-BR-CONTA-E
+                   MOVE REG-INV-VALOR-ATUAL TO WS-BR-VALOR
+                   PERFORM 9860-CREDITAR-RESGATE
+                   IF WS-BR-OK NOT = 1
+                       DISPLAY 'FALHA NO RAZAO CENTRAL: ' WS-BR-ERROR
+                       MOVE 9998 TO LS-CODIGO
+                       EXIT PARAGRAPH
+                   END-IF
                    MOVE 'R' TO REG-INV-STATUS
                    REWRITE REG-INV
                    IF FS-INV-OK
-                       DISPLAY 'RESGATE PROCESSADO COM SUCESSO!'
+                       DISPLAY 'RESGATE CREDITADO EM CONTA COM SUCESSO!'
                        MOVE 0 TO LS-CODIGO
                    ELSE
                        DISPLAY 'ERRO NO RESGATE: ' FS-INV
@@ -331,7 +358,55 @@
            DISPLAY 'RELATORIO DE RENTABILIDADE'
            DISPLAY 'Gerado em: ' FUNCTION CURRENT-DATE(1:8).
 
-      *================================================================
+       9850-MOVIMENTAR-RAZAO.
+           COMPUTE WS-BR-VALOR-INT-N =
+               FUNCTION INTEGER-PART(WS-BR-VALOR)
+           COMPUTE WS-BR-VALOR-DEC =
+               FUNCTION INTEGER(
+                   (WS-BR-VALOR - WS-BR-VALOR-INT-N) * 100)
+           MOVE WS-BR-VALOR-INT-N TO WS-BR-VALOR-INT-E
+           MOVE SPACES TO WS-BR-VALOR-STR
+           STRING FUNCTION TRIM(WS-BR-VALOR-INT-E) DELIMITED SIZE
+                  '.' DELIMITED SIZE
+                  WS-BR-VALOR-DEC DELIMITED SIZE
+                  INTO WS-BR-VALOR-STR
+           MOVE SPACES TO WS-BR-OUTFILE
+           STRING 'BANKTMPI-' FUNCTION CURRENT-DATE(1:15) '.OUT'
+                  DELIMITED SIZE INTO WS-BR-OUTFILE
+           MOVE SPACES TO WS-BR-CMD
+           STRING 'python3 bank_core_cli.py settle INV '
+                  FUNCTION TRIM(WS-BR-KIND) ' '
+                  FUNCTION TRIM(WS-BR-CONTA-E) ' '
+                  FUNCTION TRIM(WS-BR-VALOR-STR) ' '
+                  FUNCTION CURRENT-DATE(1:15)
+                  ' --cobol-out ' FUNCTION TRIM(WS-BR-OUTFILE)
+                  DELIMITED SIZE INTO WS-BR-CMD
+           CALL 'SYSTEM' USING WS-BR-CMD
+           MOVE 0 TO WS-BR-OK
+           MOVE SPACES TO WS-BR-ERROR
+           OPEN INPUT ARQBRIDGE
+           IF FS-BRIDGE-OK
+               PERFORM UNTIL FS-BRIDGE-EOF
+                   READ ARQBRIDGE INTO WS-BR-LINE
+                   IF NOT FS-BRIDGE-EOF
+                       MOVE SPACES TO WS-BR-KEY WS-BR-VAL
+                       UNSTRING WS-BR-LINE DELIMITED BY '='
+                           INTO WS-BR-KEY WS-BR-VAL
+                       IF FUNCTION TRIM(WS-BR-KEY) = 'OK'
+                           IF FUNCTION TRIM(WS-BR-VAL) = '1'
+                               MOVE 1 TO WS-BR-OK
+                           END-IF
+                       END-IF
+                       IF FUNCTION TRIM(WS-BR-KEY) = 'ERROR'
+                           MOVE FUNCTION TRIM(WS-BR-VAL) TO WS-BR-ERROR
+                       END-IF
+                   END-IF
+               END-PERFORM
+               CLOSE ARQBRIDGE
+           END-IF.
+
+       9860-CREDITAR-RESGATE.
+           PERFORM 9850-MOVIMENTAR-RAZAO.
+
        9999-FIM.
-      *================================================================
            EXIT PROGRAM.

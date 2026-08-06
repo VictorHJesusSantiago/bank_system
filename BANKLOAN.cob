@@ -1,8 +1,3 @@
-      *===============================================================
-      * BANKLOAN.COB - Modulo de Emprestimos e Financiamentos
-      * Sistema Bancario COBOL
-      * Versao: 1.0
-      *===============================================================
        IDENTIFICATION DIVISION.
        PROGRAM-ID. BANKLOAN.
 
@@ -31,6 +26,10 @@
                ACCESS MODE IS DYNAMIC
                RECORD KEY IS LOAN-TRANS-ID
                FILE STATUS IS FS-TRANS.
+
+           SELECT ARQBRIDGE ASSIGN TO WS-BR-OUTFILE
+               ORGANIZATION IS LINE SEQUENTIAL
+               FILE STATUS IS FS-BRIDGE.
 
        DATA DIVISION.
        FILE SECTION.
@@ -80,6 +79,9 @@
            05  LOAN-TRANS-NSU        PIC 9(12).
            05  LOAN-TRANS-CANAL      PIC X(10).
 
+       FD  ARQBRIDGE.
+       01  REG-BRIDGE                PIC X(200).
+
        WORKING-STORAGE SECTION.
        01  WS-CTRL.
            05  FS-CONTAS             PIC XX.
@@ -91,10 +93,29 @@
                88  FS-NFD-EMP        VALUE '23'.
            05  FS-TRANS              PIC XX.
                88  FS-OK-TRANS       VALUE '00'.
+           05  FS-BRIDGE             PIC XX.
+               88  FS-BRIDGE-OK      VALUE '00'.
+               88  FS-BRIDGE-EOF     VALUE '10'.
            05  WS-OPCAO              PIC X(2).
            05  WS-CONTINUAR          PIC X VALUE 'S'.
                88  CONTINUAR         VALUE 'S'.
                88  PARAR             VALUE 'N'.
+
+       01  WS-BRIDGE.
+           05  WS-BR-OUTFILE          PIC X(40).
+           05  WS-BR-CMD              PIC X(250).
+           05  WS-BR-CONTA-E          PIC Z(9)9.
+           05  WS-BR-ID-STR           PIC X(21).
+           05  WS-BR-VALOR-INT-N      PIC 9(11).
+           05  WS-BR-VALOR-INT-E      PIC Z(10)9.
+           05  WS-BR-VALOR-DEC        PIC 99.
+           05  WS-BR-VALOR-STR        PIC X(20).
+           05  WS-BR-LINE             PIC X(200).
+           05  WS-BR-KEY              PIC X(30).
+           05  WS-BR-VAL              PIC X(160).
+           05  WS-BR-OK               PIC 9 VALUE 0.
+           05  WS-BR-ERROR            PIC X(150) VALUE SPACES.
+           05  WS-BR-SALDO-STR        PIC X(30).
 
        01  WS-DADOS.
            05  WS-CONTA-NUM          PIC 9(10).
@@ -116,6 +137,7 @@
            05  WS-POW-N              PIC S9(13)V9(6) COMP-3.
            05  WS-IDX                PIC 9(3).
            05  WS-PARCELA-EXIB       PIC ZZZ.ZZZ.ZZZ.ZZ9,99-.
+           05  WS-PARCELA-NUM-EXIB   PIC ZZ9.
            05  WS-VALOR-EXIB         PIC ZZZ.ZZZ.ZZZ.ZZ9,99-.
            05  WS-TOTAL-EXIB         PIC ZZZ.ZZZ.ZZZ.ZZ9,99-.
            05  WS-SALDO-EXIB         PIC ZZZ.ZZZ.ZZZ.ZZ9,99-.
@@ -262,7 +284,6 @@
            DISPLAY 'Taxa mensal: ' WS-TAXA-EXIB '%'.
 
        2300-CALCULAR-PMT.
-      *    Price: PMT = PV * i*(1+i)^n / ((1+i)^n - 1)
            COMPUTE WS-TAXA-1 = 1 + WS-TAXA
            MOVE 1 TO WS-POW-N
            PERFORM VARYING WS-IDX FROM 1 BY 1
@@ -378,7 +399,8 @@
            END-IF
            MOVE EMP-VALOR-PARCEL TO WS-PMT
            MOVE WS-PMT TO WS-PARCELA-EXIB
-           DISPLAY 'Parcela ' EMP-PARCELAS-PG + 1 '/'
+           COMPUTE WS-PARCELA-NUM-EXIB = EMP-PARCELAS-PG + 1
+           DISPLAY 'Parcela ' WS-PARCELA-NUM-EXIB '/'
                    EMP-PARCELAS-TOT ': R$ ' WS-PARCELA-EXIB
            DISPLAY 'Confirmar pagamento? (S/N): '
            ACCEPT WS-OPCAO
@@ -392,13 +414,10 @@
                MOVE 1 TO LS-CODIGO
                EXIT PARAGRAPH
            END-IF
-           MOVE WS-CONTA-BUF TO REG-CONTA-LOAN
-           SUBTRACT WS-PMT FROM LOAN-CONTA-SALDO
-           MOVE FUNCTION CURRENT-DATE(1:8) TO LOAN-CONTA-DT-ATUA
-           REWRITE REG-CONTA-LOAN
-           IF NOT FS-OK-CONTAS
-               DISPLAY 'ERRO CONTA: ' FS-CONTAS
-               MOVE 9 TO LS-CODIGO
+           PERFORM 4050-DEBITAR-RAZAO
+           IF WS-BR-OK NOT = 1
+               DISPLAY 'FALHA NO RAZAO CENTRAL: ' WS-BR-ERROR
+               MOVE 9998 TO LS-CODIGO
                EXIT PARAGRAPH
            END-IF
            ADD 1 TO EMP-PARCELAS-PG
@@ -432,6 +451,93 @@
            WRITE REG-TRANS-LOAN
            DISPLAY 'PARCELA PAGA COM SUCESSO'
            MOVE 0 TO LS-CODIGO.
+
+       4050-DEBITAR-RAZAO.
+           MOVE WS-CONTA-NUM TO WS-BR-CONTA-E
+           MOVE SPACES TO WS-BR-ID-STR
+           STRING FUNCTION CURRENT-DATE(1:15) '-'
+                  EMP-ID DELIMITED SIZE
+                  INTO WS-BR-ID-STR
+           COMPUTE WS-BR-VALOR-INT-N = FUNCTION INTEGER-PART(WS-PMT)
+           COMPUTE WS-BR-VALOR-DEC =
+               FUNCTION INTEGER((WS-PMT - WS-BR-VALOR-INT-N) * 100)
+           MOVE WS-BR-VALOR-INT-N TO WS-BR-VALOR-INT-E
+           MOVE SPACES TO WS-BR-VALOR-STR
+           STRING FUNCTION TRIM(WS-BR-VALOR-INT-E) DELIMITED SIZE
+                  '.' DELIMITED SIZE
+                  WS-BR-VALOR-DEC DELIMITED SIZE
+                  INTO WS-BR-VALOR-STR
+           MOVE SPACES TO WS-BR-OUTFILE
+           STRING 'BANKTMPL-' FUNCTION CURRENT-DATE(1:15) '.OUT'
+                  DELIMITED SIZE INTO WS-BR-OUTFILE
+           MOVE SPACES TO WS-BR-CMD
+           STRING 'python3 bank_core_cli.py settle LOAN '
+                  'LOAN_INSTALLMENT '
+                  FUNCTION TRIM(WS-BR-CONTA-E) ' '
+                  FUNCTION TRIM(WS-BR-VALOR-STR) ' '
+                  FUNCTION TRIM(WS-BR-ID-STR)
+                  ' --cobol-out ' FUNCTION TRIM(WS-BR-OUTFILE)
+                  DELIMITED SIZE INTO WS-BR-CMD
+           CALL 'SYSTEM' USING WS-BR-CMD
+           MOVE 0 TO WS-BR-OK
+           MOVE SPACES TO WS-BR-ERROR
+           OPEN INPUT ARQBRIDGE
+           IF FS-BRIDGE-OK
+               PERFORM UNTIL FS-BRIDGE-EOF
+                   READ ARQBRIDGE INTO WS-BR-LINE
+                   IF NOT FS-BRIDGE-EOF
+                       MOVE SPACES TO WS-BR-KEY WS-BR-VAL
+                       UNSTRING WS-BR-LINE DELIMITED BY '='
+                           INTO WS-BR-KEY WS-BR-VAL
+                       IF FUNCTION TRIM(WS-BR-KEY) = 'OK'
+                           IF FUNCTION TRIM(WS-BR-VAL) = '1'
+                               MOVE 1 TO WS-BR-OK
+                           END-IF
+                       END-IF
+                       IF FUNCTION TRIM(WS-BR-KEY) = 'ERROR'
+                           MOVE FUNCTION TRIM(WS-BR-VAL) TO WS-BR-ERROR
+                       END-IF
+                   END-IF
+               END-PERFORM
+               CLOSE ARQBRIDGE
+           END-IF
+           IF WS-BR-OK NOT = 1
+               EXIT PARAGRAPH
+           END-IF
+           MOVE SPACES TO WS-BR-OUTFILE
+           STRING 'BANKTMPLS-' FUNCTION CURRENT-DATE(1:15) '.OUT'
+                  DELIMITED SIZE INTO WS-BR-OUTFILE
+           MOVE SPACES TO WS-BR-CMD
+           STRING 'python3 bank_core_cli.py account '
+                  FUNCTION TRIM(WS-BR-CONTA-E)
+                  ' --cobol-out ' FUNCTION TRIM(WS-BR-OUTFILE)
+                  DELIMITED SIZE INTO WS-BR-CMD
+           CALL 'SYSTEM' USING WS-BR-CMD
+           IF RETURN-CODE = 0
+               OPEN INPUT ARQBRIDGE
+               IF FS-BRIDGE-OK
+                   PERFORM UNTIL FS-BRIDGE-EOF
+                       READ ARQBRIDGE INTO WS-BR-LINE
+                       IF NOT FS-BRIDGE-EOF
+                           MOVE SPACES TO WS-BR-KEY WS-BR-VAL
+                           UNSTRING WS-BR-LINE DELIMITED BY '='
+                               INTO WS-BR-KEY WS-BR-VAL
+                           IF FUNCTION TRIM(WS-BR-KEY) =
+                              'LEDGER_BALANCE'
+                               MOVE FUNCTION TRIM(WS-BR-VAL)
+                                   TO WS-BR-SALDO-STR
+                               MOVE WS-CONTA-BUF TO REG-CONTA-LOAN
+                               COMPUTE LOAN-CONTA-SALDO =
+                                   FUNCTION NUMVAL(WS-BR-SALDO-STR)
+                               MOVE FUNCTION CURRENT-DATE(1:8) TO
+                                   LOAN-CONTA-DT-ATUA
+                               REWRITE REG-CONTA-LOAN
+                           END-IF
+                       END-IF
+                   END-PERFORM
+                   CLOSE ARQBRIDGE
+               END-IF
+           END-IF.
 
        5000-SIMULAR.
            DISPLAY '--- SIMULACAO DE EMPRESTIMO ---'
