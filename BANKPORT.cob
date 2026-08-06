@@ -1,7 +1,3 @@
-      *================================================================
-      * BANKPORT.COB - Portabilidade (Salario, Credito e Conta)
-      * Sistema Bancario COBOL
-      *================================================================
        IDENTIFICATION DIVISION.
        PROGRAM-ID. BANKPORT.
 
@@ -82,9 +78,7 @@
                MOVE ZEROS TO WS-PORT-SEQ
            END-IF.
 
-      *================================================================
        1000-MENU SECTION.
-      *================================================================
        1000-INICIO.
            DISPLAY '========================================'
            DISPLAY '            PORTABILIDADE'
@@ -107,9 +101,7 @@
                WHEN OTHER DISPLAY 'OPCAO INVALIDA'
            END-EVALUATE.
 
-      *================================================================
        2000-SALARIO SECTION.
-      *================================================================
        2000-INICIO.
            DISPLAY '--- PORTABILIDADE DE SALARIO ---'
            DISPLAY 'Conta destino (aqui): '
@@ -138,9 +130,7 @@
                MOVE 9999 TO LS-CODIGO
            END-IF.
 
-      *================================================================
        3000-CREDITO SECTION.
-      *================================================================
        3000-INICIO.
            DISPLAY '--- PORTABILIDADE DE CREDITO/EMPRESTIMO ---'
            DISPLAY 'Conta: '
@@ -182,9 +172,7 @@
            DISPLAY 'SOLICITACAO REGISTRADA! ID: ' PORT-ID
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        4000-CONTA SECTION.
-      *================================================================
        4000-INICIO.
            DISPLAY '--- PORTABILIDADE DE CONTA (TROCA DE BANCO) ---'
            DISPLAY 'Conta destino (aqui): '
@@ -211,9 +199,7 @@
                MOVE 9999 TO LS-CODIGO
            END-IF.
 
-      *================================================================
        5000-CONSULTAR SECTION.
-      *================================================================
        5000-INICIO.
            DISPLAY 'Conta: '
            ACCEPT WS-PORT-CONTA-NUM
@@ -238,9 +224,7 @@
            DISPLAY '========================================'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        6000-CANCELAR SECTION.
-      *================================================================
        6000-INICIO.
            DISPLAY 'ID da Solicitacao: '
            ACCEPT WS-PORT-ID-SEL
@@ -267,7 +251,5 @@
                DISPLAY 'OPERACAO ABORTADA'
            END-IF.
 
-      *================================================================
        9999-FIM.
-      *================================================================
            EXIT PROGRAM.

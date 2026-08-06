@@ -1,6 +1,3 @@
-      *===============================================================
-      * BANKPAY.COB - Modulo de Pagamentos
-      *===============================================================
        IDENTIFICATION DIVISION.
        PROGRAM-ID. BANKPAY.
 
@@ -29,6 +26,10 @@
                RECORD KEY IS BOL-ID
                ALTERNATE RECORD KEY IS BOL-CONTA WITH DUPLICATES
                FILE STATUS IS FS-BOL.
+
+           SELECT ARQBRIDGE ASSIGN TO WS-BR-OUTFILE
+               ORGANIZATION IS LINE SEQUENTIAL
+               FILE STATUS IS FS-BRIDGE.
 
        DATA DIVISION.
        FILE SECTION.
@@ -76,6 +77,9 @@
            05  PAY-TRANS-NSU         PIC 9(12).
            05  PAY-TRANS-CANAL       PIC X(10).
 
+       FD  ARQBRIDGE.
+       01  REG-BRIDGE                PIC X(200).
+
        WORKING-STORAGE SECTION.
        01  WS-CTRL.
            05  FS-CONTAS             PIC XX.
@@ -86,10 +90,29 @@
                88  FS-BOL-OK         VALUE '00'.
                88  FS-BOL-EOF        VALUE '10'.
                88  FS-BOL-NFD        VALUE '23'.
+           05  FS-BRIDGE             PIC XX.
+               88  FS-BRIDGE-OK      VALUE '00'.
+               88  FS-BRIDGE-EOF     VALUE '10'.
            05  WS-OPCAO              PIC X(2).
            05  WS-CONTINUAR          PIC X VALUE 'S'.
                88  CONTINUAR         VALUE 'S'.
                88  PARAR             VALUE 'N'.
+
+       01  WS-BRIDGE.
+           05  WS-BR-OUTFILE          PIC X(40).
+           05  WS-BR-CMD              PIC X(250).
+           05  WS-BR-CONTA-E          PIC Z(9)9.
+           05  WS-BR-ID-E             PIC Z(14)9.
+           05  WS-BR-VALOR-INT-N      PIC 9(11).
+           05  WS-BR-VALOR-INT-E      PIC Z(10)9.
+           05  WS-BR-VALOR-DEC        PIC 99.
+           05  WS-BR-VALOR-STR        PIC X(20).
+           05  WS-BR-LINE             PIC X(200).
+           05  WS-BR-KEY              PIC X(30).
+           05  WS-BR-VAL              PIC X(160).
+           05  WS-BR-OK               PIC 9 VALUE 0.
+           05  WS-BR-ERROR            PIC X(150) VALUE SPACES.
+           05  WS-BR-SALDO-STR        PIC X(30).
 
        01  WS-PAG.
            05  WS-CONTA              PIC 9(10).
@@ -211,13 +234,15 @@
                EXIT PARAGRAPH
            END-IF
 
-           SUBTRACT WS-VALOR FROM WS-SALDO
-           MOVE WS-CONTA-BUF TO REG-CONTA
-           MOVE WS-SALDO TO PAY-CONTA-SALDO
-           MOVE FUNCTION CURRENT-DATE(1:8) TO PAY-CONTA-DT-ATUALIZACAO
-           REWRITE REG-CONTA
-
            MOVE FUNCTION CURRENT-DATE(1:15) TO WS-ID
+
+           PERFORM 2050-DEBITAR-RAZAO
+           IF WS-BR-OK NOT = 1
+               DISPLAY 'FALHA NO RAZAO CENTRAL: ' WS-BR-ERROR
+               MOVE 9998 TO LS-CODIGO
+               EXIT PARAGRAPH
+           END-IF
+
            MOVE WS-ID TO PAY-TRANS-ID
            MOVE WS-CONTA TO PAY-TRANS-CONTA-ORG
            MOVE ZEROS TO PAY-TRANS-CONTA-DEST
@@ -233,6 +258,92 @@
            MOVE WS-VALOR TO WS-DISP
            DISPLAY 'BOLETO PAGO: R$ ' WS-DISP
            MOVE 0 TO LS-CODIGO.
+
+       2050-DEBITAR-RAZAO.
+           MOVE WS-CONTA TO WS-BR-CONTA-E
+           MOVE WS-ID TO WS-BR-ID-E
+           COMPUTE WS-BR-VALOR-INT-N = FUNCTION INTEGER-PART(WS-VALOR)
+           COMPUTE WS-BR-VALOR-DEC =
+               FUNCTION INTEGER((WS-VALOR - WS-BR-VALOR-INT-N) * 100)
+           MOVE WS-BR-VALOR-INT-N TO WS-BR-VALOR-INT-E
+           MOVE SPACES TO WS-BR-VALOR-STR
+           STRING FUNCTION TRIM(WS-BR-VALOR-INT-E) DELIMITED SIZE
+                  '.' DELIMITED SIZE
+                  WS-BR-VALOR-DEC DELIMITED SIZE
+                  INTO WS-BR-VALOR-STR
+           MOVE SPACES TO WS-BR-OUTFILE
+           STRING 'BANKTMPP-' WS-ID '.OUT' DELIMITED SIZE
+               INTO WS-BR-OUTFILE
+           MOVE SPACES TO WS-BR-CMD
+           STRING 'python3 bank_core_cli.py settle PAY '
+                  'BOLETO_PAYMENT '
+                  FUNCTION TRIM(WS-BR-CONTA-E) ' '
+                  FUNCTION TRIM(WS-BR-VALOR-STR) ' '
+                  FUNCTION TRIM(WS-BR-ID-E)
+                  ' --cobol-out ' FUNCTION TRIM(WS-BR-OUTFILE)
+                  DELIMITED SIZE INTO WS-BR-CMD
+           CALL 'SYSTEM' USING WS-BR-CMD
+           MOVE 0 TO WS-BR-OK
+           MOVE SPACES TO WS-BR-ERROR
+           OPEN INPUT ARQBRIDGE
+           IF FS-BRIDGE-OK
+               PERFORM UNTIL FS-BRIDGE-EOF
+                   READ ARQBRIDGE INTO WS-BR-LINE
+                   IF NOT FS-BRIDGE-EOF
+                       MOVE SPACES TO WS-BR-KEY WS-BR-VAL
+                       UNSTRING WS-BR-LINE DELIMITED BY '='
+                           INTO WS-BR-KEY WS-BR-VAL
+                       IF FUNCTION TRIM(WS-BR-KEY) = 'OK'
+                           IF FUNCTION TRIM(WS-BR-VAL) = '1'
+                               MOVE 1 TO WS-BR-OK
+                           END-IF
+                       END-IF
+                       IF FUNCTION TRIM(WS-BR-KEY) = 'ERROR'
+                           MOVE FUNCTION TRIM(WS-BR-VAL) TO WS-BR-ERROR
+                       END-IF
+                   END-IF
+               END-PERFORM
+               CLOSE ARQBRIDGE
+           END-IF
+           IF WS-BR-OK = 1
+               PERFORM 2060-SINCRONIZAR-SALDO
+           END-IF.
+
+       2060-SINCRONIZAR-SALDO.
+           MOVE SPACES TO WS-BR-OUTFILE
+           STRING 'BANKTMPQ-' WS-ID '.OUT' DELIMITED SIZE
+               INTO WS-BR-OUTFILE
+           MOVE SPACES TO WS-BR-CMD
+           STRING 'python3 bank_core_cli.py account '
+                  FUNCTION TRIM(WS-BR-CONTA-E)
+                  ' --cobol-out ' FUNCTION TRIM(WS-BR-OUTFILE)
+                  DELIMITED SIZE INTO WS-BR-CMD
+           CALL 'SYSTEM' USING WS-BR-CMD
+           IF RETURN-CODE = 0
+               OPEN INPUT ARQBRIDGE
+               IF FS-BRIDGE-OK
+                   PERFORM UNTIL FS-BRIDGE-EOF
+                       READ ARQBRIDGE INTO WS-BR-LINE
+                       IF NOT FS-BRIDGE-EOF
+                           MOVE SPACES TO WS-BR-KEY WS-BR-VAL
+                           UNSTRING WS-BR-LINE DELIMITED BY '='
+                               INTO WS-BR-KEY WS-BR-VAL
+                           IF FUNCTION TRIM(WS-BR-KEY) =
+                              'LEDGER_BALANCE'
+                               MOVE FUNCTION TRIM(WS-BR-VAL)
+                                   TO WS-BR-SALDO-STR
+                               MOVE WS-CONTA-BUF TO REG-CONTA
+                               COMPUTE PAY-CONTA-SALDO =
+                                   FUNCTION NUMVAL(WS-BR-SALDO-STR)
+                               MOVE FUNCTION CURRENT-DATE(1:8) TO
+                                   PAY-CONTA-DT-ATUALIZACAO
+                               REWRITE REG-CONTA
+                           END-IF
+                       END-IF
+                   END-PERFORM
+                   CLOSE ARQBRIDGE
+               END-IF
+           END-IF.
 
        2100-VALIDAR-CODIGO-BARRAS.
            MOVE SPACES TO WS-COD-LIMPO
@@ -279,12 +390,6 @@
                MOVE 0 TO LS-CODIGO
            END-IF.
 
-      *================================================================
-      * 3000 — EMITIR BOLETO
-      * Gera um boleto com codigo de barras Modulo-10 valido.
-      * Estrutura: 4 digitos banco + 14 dados + 1 DV calculado +
-      *            25 digitos livres (conta+valor+seq) = 44 total.
-      *================================================================
        3000-EMITIR-BOLETO.
            DISPLAY 'Conta emitente: '
            ACCEPT WS-CONTA
@@ -313,8 +418,6 @@
            END-IF
            DISPLAY 'Vencimento (AAAAMMDD): '
            ACCEPT WS-BOL-VENCTO
-      *    Gera codigo de barras: banco(4) + conta(10) + valor(13) +
-      *    sequencial(16) = 43 digitos + 1 DV = 44
            STRING '0001'                 DELIMITED SIZE
                   WS-CONTA              DELIMITED SIZE
                   INTO WS-BOL-BARRAS
@@ -322,14 +425,12 @@
            COMPUTE WS-BOL-IDX =
                FUNCTION MOD(WS-BOL-ID-NOVO 99999999) + 1
            MOVE WS-BOL-IDX TO WS-BOL-BARRAS(23:8)
-      *    Preenche zeros restantes ate posicao 43
            PERFORM VARYING WS-BOL-IDX FROM 31 BY 1
                    UNTIL WS-BOL-IDX > 43
                IF WS-BOL-BARRAS(WS-BOL-IDX:1) = SPACES
                    MOVE '0' TO WS-BOL-BARRAS(WS-BOL-IDX:1)
                END-IF
            END-PERFORM
-      *    Calcula DV Modulo-10 dos 43 primeiros digitos
            MOVE ZEROS TO WS-BOL-SOMA-DV
            MOVE 2     TO WS-BOL-PESO
            PERFORM VARYING WS-BOL-IDX FROM 43 BY -1
@@ -350,7 +451,6 @@
            COMPUTE WS-BOL-DV =
                FUNCTION MOD(10 - FUNCTION MOD(WS-BOL-SOMA-DV 10) 10)
            MOVE WS-BOL-DV TO WS-BOL-BARRAS(44:1)
-      *    Persiste o boleto
            ADD 1 TO WS-BOL-ID-NOVO
            MOVE WS-BOL-ID-NOVO   TO BOL-ID
            MOVE WS-CONTA         TO BOL-CONTA
@@ -380,9 +480,6 @@
            DISPLAY '========================================'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
-      * 4000 — CONSULTAR BOLETOS DA CONTA
-      *================================================================
        4000-CONSULTAR-BOLETOS.
            DISPLAY 'Conta: '
            ACCEPT WS-CONTA

@@ -1,7 +1,3 @@
-      *================================================================
-      * BANKPJ.COB - Conta Digital PJ / MEI (Pessoa Juridica)
-      * Sistema Bancario COBOL
-      *================================================================
        IDENTIFICATION DIVISION.
        PROGRAM-ID. BANKPJ.
 
@@ -18,6 +14,10 @@
                ALTERNATE RECORD KEY IS PJ-CNPJ WITH DUPLICATES
                FILE STATUS IS FS-PJ.
 
+           SELECT ARQBRIDGE ASSIGN TO WS-BR-OUTFILE
+               ORGANIZATION IS LINE SEQUENTIAL
+               FILE STATUS IS FS-BRIDGE.
+
        DATA DIVISION.
        FILE SECTION.
        FD  ARQPJ.
@@ -33,6 +33,9 @@
            05  PJ-DT-ABERTURA        PIC 9(8).
            05  PJ-STATUS             PIC X(1).
 
+       FD  ARQBRIDGE.
+       01  REG-BRIDGE                PIC X(200).
+
        WORKING-STORAGE SECTION.
        COPY BANKDATA.
 
@@ -42,9 +45,26 @@
                88  FS-PJ-EOF         VALUE '10'.
                88  FS-PJ-NFD         VALUE '23'.
                88  FS-PJ-DUP         VALUE '22'.
+           05  FS-BRIDGE             PIC XX.
+               88  FS-BRIDGE-OK      VALUE '00'.
+               88  FS-BRIDGE-EOF     VALUE '10'.
            05  WS-OPCAO              PIC X(2).
            05  WS-CONTINUAR          PIC X VALUE 'S'.
                88  PJ-PARAR          VALUE 'N'.
+
+       01  WS-BRIDGE.
+           05  WS-BR-OUTFILE          PIC X(40).
+           05  WS-BR-CMD              PIC X(250).
+           05  WS-BR-CONTA-E          PIC Z(9)9.
+           05  WS-BR-VALOR-INT-N      PIC 9(11).
+           05  WS-BR-VALOR-INT-E      PIC Z(10)9.
+           05  WS-BR-VALOR-DEC        PIC 99.
+           05  WS-BR-VALOR-STR        PIC X(20).
+           05  WS-BR-LINE             PIC X(200).
+           05  WS-BR-KEY              PIC X(30).
+           05  WS-BR-VAL              PIC X(160).
+           05  WS-BR-OK               PIC 9 VALUE 0.
+           05  WS-BR-ERROR            PIC X(150) VALUE SPACES.
 
        01  WS-PJ-CALC.
            05  WS-PJ-CONTA-NUM       PIC 9(10).
@@ -70,9 +90,7 @@
            MOVE 0 TO LS-CODIGO
            GOBACK.
 
-      *================================================================
        1000-MENU SECTION.
-      *================================================================
        1000-INICIO.
            DISPLAY '========================================'
            DISPLAY '       CONTA DIGITAL PJ / MEI'
@@ -97,9 +115,7 @@
                WHEN OTHER DISPLAY 'OPCAO INVALIDA'
            END-EVALUATE.
 
-      *================================================================
        2000-ABRIR SECTION.
-      *================================================================
        2000-INICIO.
            DISPLAY '--- ABRIR CONTA PJ/MEI ---'
            DISPLAY 'Numero da conta: '
@@ -133,9 +149,7 @@
                MOVE 9999 TO LS-CODIGO
            END-IF.
 
-      *================================================================
        3000-CONSULTAR SECTION.
-      *================================================================
        3000-INICIO.
            DISPLAY 'Conta PJ: '
            ACCEPT WS-PJ-CONTA-NUM
@@ -160,9 +174,7 @@
            DISPLAY '========================================'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        4000-EMITIR-DAS SECTION.
-      *================================================================
        4000-INICIO.
            DISPLAY 'Conta PJ: '
            ACCEPT WS-PJ-CONTA-NUM
@@ -178,7 +190,6 @@
                MOVE 4 TO LS-CODIGO
                EXIT SECTION
            END-IF
-      *    DAS-MEI: valor fixo aproximado (INSS + ICMS/ISS)
            MOVE 75,90 TO WS-PJ-DAS
            DISPLAY '========================================'
            DISPLAY ' GUIA DAS - MEI'
@@ -189,11 +200,66 @@
            DISPLAY ' Vencimento: dia 20 do mes seguinte'
            DISPLAY ' (INSS R$ 70,60 + ICMS/ISS R$ 5,30)'
            DISPLAY '========================================'
+           DISPLAY 'Pagar agora? (S/N): '
+           ACCEPT WS-OPCAO
+           IF WS-OPCAO = 'S'
+               PERFORM 4100-DEBITAR-RAZAO
+               IF WS-BR-OK NOT = 1
+                   DISPLAY 'FALHA NO RAZAO CENTRAL: ' WS-BR-ERROR
+                   MOVE 9998 TO LS-CODIGO
+                   EXIT SECTION
+               END-IF
+               DISPLAY 'DAS PAGO COM SUCESSO!'
+           END-IF
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
+       4100-DEBITAR-RAZAO.
+           MOVE PJ-CONTA TO WS-BR-CONTA-E
+           COMPUTE WS-BR-VALOR-INT-N = FUNCTION INTEGER-PART(WS-PJ-DAS)
+           COMPUTE WS-BR-VALOR-DEC =
+               FUNCTION INTEGER((WS-PJ-DAS - WS-BR-VALOR-INT-N) * 100)
+           MOVE WS-BR-VALOR-INT-N TO WS-BR-VALOR-INT-E
+           MOVE SPACES TO WS-BR-VALOR-STR
+           STRING FUNCTION TRIM(WS-BR-VALOR-INT-E) DELIMITED SIZE
+                  '.' DELIMITED SIZE
+                  WS-BR-VALOR-DEC DELIMITED SIZE
+                  INTO WS-BR-VALOR-STR
+           MOVE SPACES TO WS-BR-OUTFILE
+           STRING 'BANKTMPJ-' FUNCTION CURRENT-DATE(1:15) '.OUT'
+                  DELIMITED SIZE INTO WS-BR-OUTFILE
+           MOVE SPACES TO WS-BR-CMD
+           STRING 'python3 bank_core_cli.py settle PJ '
+                  'BUSINESS_ACCOUNT '
+                  FUNCTION TRIM(WS-BR-CONTA-E) ' '
+                  FUNCTION TRIM(WS-BR-VALOR-STR) ' '
+                  FUNCTION CURRENT-DATE(1:15)
+                  ' --cobol-out ' FUNCTION TRIM(WS-BR-OUTFILE)
+                  DELIMITED SIZE INTO WS-BR-CMD
+           CALL 'SYSTEM' USING WS-BR-CMD
+           MOVE 0 TO WS-BR-OK
+           MOVE SPACES TO WS-BR-ERROR
+           OPEN INPUT ARQBRIDGE
+           IF FS-BRIDGE-OK
+               PERFORM UNTIL FS-BRIDGE-EOF
+                   READ ARQBRIDGE INTO WS-BR-LINE
+                   IF NOT FS-BRIDGE-EOF
+                       MOVE SPACES TO WS-BR-KEY WS-BR-VAL
+                       UNSTRING WS-BR-LINE DELIMITED BY '='
+                           INTO WS-BR-KEY WS-BR-VAL
+                       IF FUNCTION TRIM(WS-BR-KEY) = 'OK'
+                           IF FUNCTION TRIM(WS-BR-VAL) = '1'
+                               MOVE 1 TO WS-BR-OK
+                           END-IF
+                       END-IF
+                       IF FUNCTION TRIM(WS-BR-KEY) = 'ERROR'
+                           MOVE FUNCTION TRIM(WS-BR-VAL) TO WS-BR-ERROR
+                       END-IF
+                   END-IF
+               END-PERFORM
+               CLOSE ARQBRIDGE
+           END-IF.
+
        5000-FATURAMENTO SECTION.
-      *================================================================
        5000-INICIO.
            DISPLAY 'Conta PJ: '
            ACCEPT WS-PJ-CONTA-NUM
@@ -222,9 +288,7 @@
            END-IF
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        6000-RELATORIO SECTION.
-      *================================================================
        6000-INICIO.
            DISPLAY 'Conta PJ: '
            ACCEPT WS-PJ-CONTA-NUM
@@ -250,9 +314,7 @@
            DISPLAY '========================================'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        7000-ENQUADRAMENTO SECTION.
-      *================================================================
        7000-INICIO.
            DISPLAY '========================================'
            DISPLAY ' FAIXAS DE ENQUADRAMENTO TRIBUTARIO'
@@ -266,7 +328,5 @@
            DISPLAY '========================================'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        9999-FIM.
-      *================================================================
            EXIT PROGRAM.
