@@ -1,0 +1,30 @@
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+exclude = [".pytest_cache", "bin", "__pycache__"]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle
+    "F",    # pyflakes
+    "W",    # warnings
+    "B",    # bugbear — armadilhas reais (mutáveis como default, except cego)
+    "S",    # bandit — segurança
+    "DTZ",  # datetimes sem timezone: fonte comprovada de bug de limite neste projeto
+]
+ignore = [
+    "E501",  # coberto por line-length; evita ruído em SQL embutido
+]
+
+[tool.ruff.format]
+line-ending = "auto"
+
+[tool.ruff.lint.per-file-ignores]
+"bank_export.py" = ["DTZ005", "B905"]
+"bank_gui.py" = ["S110", "S603"]
+"test_suite.py" = ["S101", "S105", "S106", "S110", "S603", "DTZ005"]
+"tests/**" = ["S101", "S105", "S106", "S311", "S603", "S110", "DTZ005"]
+"acceptance_regression.py" = ["S101", "S110", "S603", "DTZ005"]
+"finance_regression.py" = ["S101"]
+"bank_core_cli.py" = ["S110"]
+"bank_advanced.py" = ["S110"]

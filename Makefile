@@ -1,5 +1,3 @@
-# Sistema Bancário COBOL - Makefile
-# Compilação com GnuCOBOL (formato fixo)
 
 COBC     = cobc
 COBFLAGS = -Wall -I .
@@ -7,9 +5,9 @@ BINDIR   = bin
 COB_CFLAGS_SAFE = -finline-functions -ggdb3 -pipe -Wdate-time -Wno-unused -fsigned-char -Wno-pointer-sign -D_FORTIFY_SOURCE=3
 COBENV   = env CFLAGS= CPPFLAGS= COB_CFLAGS="$(COB_CFLAGS_SAFE)"
 
-.PHONY: all clean install run run-gui acceptance acceptance-fast acceptance-finance test test-fast export-deps
+.PHONY: all clean install run run-gui acceptance acceptance-fast acceptance-finance test test-fast export-deps core-deps core-test core-init bankexport core-migrate core-bridge-test
 
-all: dirs bankacct banktran bankinv bankrep bankqry banktrf bankpay bankcrm bankadm bankloan bankcard bankschd bankauth bankhelp bankfx bankseg bankcons bankprev bankdeb bankcap banklim banknotif banktax bankchq bankfgts bankcob bankovd bankpoup bankconsig bankscore bankcashback bankreneg bankport bankpj bankdoa bankmain
+all: dirs bankacct banktran bankinv bankrep bankqry banktrf bankpay bankcrm bankadm bankloan bankcard bankschd bankauth bankhelp bankfx bankseg bankcons bankprev bankdeb bankcap banklim banknotif banktax bankchq bankfgts bankcob bankovd bankpoup bankconsig bankscore bankcashback bankreneg bankport bankpj bankdoa bankmain bankexport
 
 dirs:
 	mkdir -p $(BINDIR)
@@ -232,6 +230,25 @@ test: bankmain
 test-fast:
 	python3 test_suite.py
 
-# Instala dependências opcionais para xlsx e pdf
 export-deps:
 	pip3 install openpyxl fpdf2
+
+core-deps:
+	python3 -m pip install -r requirements-security.txt
+
+core-test:
+	python3 -m pytest -q tests/unit/test_bank_core.py
+
+core-init:
+	python3 bank_core_cli.py init
+
+bankexport: dirs
+	$(COBENV) $(COBC) -x $(COBFLAGS) \
+		BANKEXPORT.cob -o $(BINDIR)/bankexport
+
+core-migrate: bankexport core-init
+	./$(BINDIR)/bankexport
+	python3 bank_core_cli.py migrate-isam-dump BANKACCT.DUMP
+
+core-bridge-test:
+	python3 -m pytest -q tests/unit/test_bank_core_cli_bridge.py

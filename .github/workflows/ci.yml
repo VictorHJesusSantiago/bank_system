@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-security.txt
+          python -m pip install pytest ruff bandit pip-audit
+      - name: Lint
+        run: ruff check .
+      - name: Format check
+        run: ruff format --check .
+      - name: Static security analysis (SAST)
+        run: bandit -r . -x ./tests -ll
+      - name: Dependency vulnerabilities (SCA)
+        run: pip-audit -r requirements-security.txt
+      - name: Tests
+        run: python -m pytest -q --junitxml=junit.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pytest-results
+          path: junit.xml
+
+  cobol:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install GnuCOBOL
+        run: sudo apt-get update && sudo apt-get install -y gnucobol
+      - name: Compile all modules
+        run: make all
+      - name: COBOL-dependent tests
+        run: |
+          python -m pip install -r requirements-security.txt pytest
+          python -m pytest -q
