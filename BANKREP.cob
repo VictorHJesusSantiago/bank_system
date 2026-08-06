@@ -1,13 +1,6 @@
-      *================================================================
-      * BANKREP.COB - Módulo de Relatórios
-      * Sistema Bancário COBOL
-      * Padrão: Report Generator Pattern
-      * Versão: 2.0
-      *================================================================
        IDENTIFICATION DIVISION.
        PROGRAM-ID. BANKREP.
 
-      *----------------------------------------------------------------
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
        SPECIAL-NAMES.
@@ -31,7 +24,6 @@
                RECORD KEY IS REG-TRANS-ID
                FILE STATUS IS FS-TRANS.
 
-      *----------------------------------------------------------------
        DATA DIVISION.
        FILE SECTION.
        FD  ARQRELATORIO.
@@ -68,7 +60,6 @@
            05  REG-TRANS-NSU         PIC 9(12).
            05  REG-TRANS-CANAL       PIC X(10).
 
-      *----------------------------------------------------------------
        WORKING-STORAGE SECTION.
        COPY BANKDATA.
 
@@ -117,6 +108,8 @@
        01  WS-DISPLAY-TOTAIS.
            05  WS-DIS-SALDO-CC      PIC ZZZ.ZZZ.ZZZ.ZZZ,99-.
            05  WS-DIS-SALDO-CP      PIC ZZZ.ZZZ.ZZZ.ZZZ,99-.
+           05  WS-DIS-CONTAS-ATIVAS PIC Z(7)9.
+           05  WS-DIS-CONTAS-BLOQ   PIC Z(7)9.
            05  WS-DIS-DEPOSITOS     PIC ZZZ.ZZZ.ZZZ.ZZZ,99-.
            05  WS-DIS-SAQUES        PIC ZZZ.ZZZ.ZZZ.ZZZ,99-.
            05  WS-DIS-TRANSF        PIC ZZZ.ZZZ.ZZZ.ZZZ,99-.
@@ -126,21 +119,16 @@
            05  WS-CAB-LINHA2        PIC X(80).
            05  WS-CAB-DATA          PIC X(10).
 
-      *----------------------------------------------------------------
        LINKAGE SECTION.
        01  LS-RETORNO.
            05  LS-CODIGO            PIC 9(4).
            05  LS-MENSAGEM          PIC X(100).
 
-      *----------------------------------------------------------------
        PROCEDURE DIVISION USING LS-RETORNO.
 
-      *================================================================
        0000-PRINCIPAL SECTION.
-      *================================================================
        0000-INICIO.
            OPEN INPUT ARQCONTAS ARQTRANS
-      *    EXTEND preserva relatorio anterior; fallback OUTPUT se nao existe
            OPEN EXTEND ARQRELATORIO
            IF FS-REL = '35'
                OPEN OUTPUT ARQRELATORIO
@@ -152,9 +140,7 @@
            MOVE 0 TO LS-CODIGO
            GOBACK.
 
-      *================================================================
        1000-MENU-REP SECTION.
-      *================================================================
        1000-INICIO.
            DISPLAY '======================================='
            DISPLAY '          RELATORIOS'
@@ -183,9 +169,7 @@
                WHEN OTHER DISPLAY 'OPCAO INVALIDA'
            END-EVALUATE.
 
-      *================================================================
        2000-BALANCETE SECTION.
-      *================================================================
        2000-INICIO.
            DISPLAY 'GERANDO BALANCETE GERAL...'
            PERFORM 2100-IMPRIMIR-CABECALHO
@@ -261,25 +245,23 @@
                   WS-DIS-SALDO-CP DELIMITED SIZE
                   INTO REG-REL
            WRITE REG-REL
+           MOVE WS-TOT-CONTAS-ATIVAS TO WS-DIS-CONTAS-ATIVAS
+           MOVE WS-TOT-CONTAS-BLOQ TO WS-DIS-CONTAS-BLOQ
            STRING 'CONTAS ATIVAS: ' DELIMITED SIZE
-                  WS-TOT-CONTAS-ATIVAS DELIMITED SIZE
+                  WS-DIS-CONTAS-ATIVAS DELIMITED SIZE
                   ' BLOQUEADAS: ' DELIMITED SIZE
-                  WS-TOT-CONTAS-BLOQ DELIMITED SIZE
+                  WS-DIS-CONTAS-BLOQ DELIMITED SIZE
                   INTO REG-REL
            WRITE REG-REL
            DISPLAY 'BALANCETE GERADO EM BANKREP.TXT'.
 
-      *================================================================
        3000-RESUMO-CONTAS SECTION.
-      *================================================================
        3000-INICIO.
            DISPLAY 'RESUMO DE CONTAS POR TIPO'
            DISPLAY 'Correntes: ' WS-TOT-CONTAS-CC
            DISPLAY 'Poupancas: ' WS-TOT-CONTAS-CP.
 
-      *================================================================
        4000-MOVIMENTACAO-DIARIA SECTION.
-      *================================================================
        4000-INICIO.
            DISPLAY 'MOVIMENTACAO DIARIA'
            MOVE FUNCTION CURRENT-DATE(1:8) TO WS-CAB-DATA
@@ -321,9 +303,7 @@
            DISPLAY 'Saques:     R$ ' WS-DIS-SAQUES
            DISPLAY 'Transf.:    R$ ' WS-DIS-TRANSF.
 
-      *================================================================
        5000-SALDOS-NEGATIVOS SECTION.
-      *================================================================
        5000-INICIO.
            DISPLAY 'CONTAS COM SALDO NEGATIVO'
            MOVE ZEROS TO REG-CONTA-NUM
@@ -341,28 +321,20 @@
                END-IF
            END-PERFORM.
 
-      *================================================================
        6000-TOP-SALDOS SECTION.
-      *================================================================
        6000-INICIO.
            DISPLAY 'TOP 10 MAIORES SALDOS'
            DISPLAY '(Implementacao com algoritmo de ordenacao)'.
 
-      *================================================================
        7000-INADIMPLENCIA SECTION.
-      *================================================================
        7000-INICIO.
            DISPLAY 'RELATORIO DE INADIMPLENCIA'
            DISPLAY 'Contas com limite utilizado > 80%'.
 
-      *================================================================
        8000-DRE SECTION.
-      *================================================================
        8000-INICIO.
-      *    Zera acumuladores DRE
            MOVE ZEROS TO WS-DRE-REC-TAR WS-DRE-REC-TED WS-DRE-REC-DOC
            MOVE ZEROS TO WS-DRE-REC-REN  WS-DRE-CTR-TED WS-DRE-CTR-DOC
-      *    Varre BANKTRAN.DAT acumulando receitas reais
            MOVE ZEROS TO REG-TRANS-ID
            START ARQTRANS KEY >= REG-TRANS-ID
            PERFORM UNTIL FS-EOF-TRANS
@@ -384,16 +356,13 @@
                    END-EVALUATE
                END-IF
            END-PERFORM
-      *    Calcula totais
            COMPUTE WS-DRE-RECEITA-BRUTA =
                WS-DRE-REC-TAR + WS-DRE-REC-TED +
                WS-DRE-REC-DOC + WS-DRE-REC-REN
-      *    Despesas operacionais estimadas em 40% da receita bruta
            COMPUTE WS-DRE-DESPESA ROUNDED =
                WS-DRE-RECEITA-BRUTA * 0,40
            COMPUTE WS-DRE-RESULTADO =
                WS-DRE-RECEITA-BRUTA - WS-DRE-DESPESA
-      *    Exibe DRE
            MOVE WS-DRE-REC-TAR TO WS-DRE-DIS-TAR
            MOVE WS-DRE-REC-TED TO WS-DRE-DIS-TED
            MOVE WS-DRE-REC-DOC TO WS-DRE-DIS-DOC
@@ -421,9 +390,7 @@
                    WS-DRE-DIS-RES
            DISPLAY '========================================'.
 
-      *================================================================
        9000-RELATORIO-BCB SECTION.
-      *================================================================
        9000-INICIO.
            DISPLAY '========================================'
            DISPLAY ' SCR - SIST. INF. DE CREDITO BCB'
@@ -447,7 +414,5 @@
            DISPLAY ' Fin do Relatorio BCB'
            DISPLAY '========================================'.
 
-      *================================================================
        9999-FIM.
-      *================================================================
            EXIT PROGRAM.

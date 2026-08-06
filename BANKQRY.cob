@@ -1,6 +1,3 @@
-      *===============================================================
-      * BANKQRY.COB - Modulo de Consultas e Extratos
-      *===============================================================
        IDENTIFICATION DIVISION.
        PROGRAM-ID. BANKQRY.
 
@@ -161,7 +158,6 @@
        4000-EXTRATO-RAPIDO.
            DISPLAY 'Numero da conta: '
            ACCEPT WS-CONS-CONTA
-      *    Calcular data de corte: hoje - 30 dias
            MOVE FUNCTION CURRENT-DATE(1:8) TO WS-DATA-HOJE
            COMPUTE WS-DT-INT =
                FUNCTION INTEGER-OF-DATE(WS-DATA-HOJE) - 30
