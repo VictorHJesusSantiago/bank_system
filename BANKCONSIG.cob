@@ -1,7 +1,3 @@
-      *================================================================
-      * BANKCONSIG.COB - Credito Consignado (Desconto em Folha)
-      * Sistema Bancario COBOL
-      *================================================================
        IDENTIFICATION DIVISION.
        PROGRAM-ID. BANKCONSIG.
 
@@ -16,6 +12,10 @@
                ACCESS MODE IS DYNAMIC
                RECORD KEY IS CONSIG-ID
                FILE STATUS IS FS-CONSIG.
+
+           SELECT ARQBRIDGE ASSIGN TO WS-BR-OUTFILE
+               ORGANIZATION IS LINE SEQUENTIAL
+               FILE STATUS IS FS-BRIDGE.
 
        DATA DIVISION.
        FILE SECTION.
@@ -32,6 +32,9 @@
            05  CONSIG-DT-CONTRATO    PIC 9(8).
            05  CONSIG-STATUS         PIC X(1).
 
+       FD  ARQBRIDGE.
+       01  REG-BRIDGE                PIC X(200).
+
        WORKING-STORAGE SECTION.
        COPY BANKDATA.
 
@@ -40,10 +43,30 @@
                88  FS-CONSIG-OK      VALUE '00'.
                88  FS-CONSIG-EOF     VALUE '10'.
                88  FS-CONSIG-NFD     VALUE '23'.
+           05  FS-BRIDGE             PIC XX.
+               88  FS-BRIDGE-OK      VALUE '00'.
+               88  FS-BRIDGE-EOF     VALUE '10'.
            05  WS-OPCAO              PIC X(2).
            05  WS-CONTINUAR          PIC X VALUE 'S'.
                88  CONSIG-PARAR      VALUE 'N'.
            05  WS-CONSIG-SEQ         PIC 9(12) VALUE ZEROS.
+
+       01  WS-BRIDGE.
+           05  WS-BR-OUTFILE          PIC X(40).
+           05  WS-BR-CMD              PIC X(250).
+           05  WS-BR-CONTA-E          PIC Z(9)9.
+           05  WS-BR-ID-E             PIC Z(11)9.
+           05  WS-BR-KIND             PIC X(30).
+           05  WS-BR-VALOR            PIC S9(11)V99 COMP-3.
+           05  WS-BR-VALOR-INT-N      PIC 9(11).
+           05  WS-BR-VALOR-INT-E      PIC Z(10)9.
+           05  WS-BR-VALOR-DEC        PIC 99.
+           05  WS-BR-VALOR-STR        PIC X(20).
+           05  WS-BR-LINE             PIC X(200).
+           05  WS-BR-KEY              PIC X(30).
+           05  WS-BR-VAL              PIC X(160).
+           05  WS-BR-OK               PIC 9 VALUE 0.
+           05  WS-BR-ERROR            PIC X(150) VALUE SPACES.
 
        01  WS-CONSIG-CALC.
            05  WS-CONSIG-CONTA-NUM   PIC 9(10).
@@ -83,9 +106,7 @@
                MOVE ZEROS TO WS-CONSIG-SEQ
            END-IF.
 
-      *================================================================
        1000-MENU SECTION.
-      *================================================================
        1000-INICIO.
            DISPLAY '========================================'
            DISPLAY '       CREDITO CONSIGNADO'
@@ -110,14 +131,11 @@
                WHEN OTHER DISPLAY 'OPCAO INVALIDA'
            END-EVALUATE.
 
-      *================================================================
        2000-MARGEM SECTION.
-      *================================================================
        2000-INICIO.
            DISPLAY '--- MARGEM CONSIGNAVEL ---'
            DISPLAY 'Renda mensal / beneficio (R$): '
            ACCEPT WS-CONSIG-RENDA
-      *    Margem legal: 35% da renda (consignado) - utiliza-se 30% base
            COMPUTE WS-CONSIG-MARGEM ROUNDED =
                WS-CONSIG-RENDA * 0,30
            MOVE WS-CONSIG-MARGEM TO WS-DIS
@@ -128,9 +146,7 @@
            DISPLAY '========================================'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        3000-SIMULAR SECTION.
-      *================================================================
        3000-INICIO.
            DISPLAY '--- SIMULAR CONSIGNADO ---'
            DISPLAY 'Convenio (INSS/SERVIDOR/CLT/MILITAR): '
@@ -157,9 +173,7 @@
            DISPLAY '========================================'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        4000-CONTRATAR SECTION.
-      *================================================================
        4000-INICIO.
            DISPLAY '--- CONTRATAR CONSIGNADO ---'
            DISPLAY 'Conta: '
@@ -191,19 +205,25 @@
            MOVE ZEROS TO CONSIG-PARC-PAGAS
            MOVE FUNCTION CURRENT-DATE(1:8) TO CONSIG-DT-CONTRATO
            MOVE 'A' TO CONSIG-STATUS
+           MOVE 'PAYROLL_LOAN' TO WS-BR-KIND
+           MOVE CONSIG-VALOR TO WS-BR-VALOR
+           PERFORM 9750-MOVIMENTAR-RAZAO
+           IF WS-BR-OK NOT = 1
+               DISPLAY 'FALHA NO RAZAO CENTRAL: ' WS-BR-ERROR
+               MOVE 9998 TO LS-CODIGO
+               EXIT SECTION
+           END-IF
            WRITE REG-CONSIG
            IF FS-CONSIG-OK
-               DISPLAY 'CONSIGNADO CONTRATADO! ID: ' CONSIG-ID
-               DISPLAY ' Credito disponivel em ate 2 dias uteis'
+               DISPLAY 'CONSIGNADO CONTRATADO E CREDITADO! ID: '
+                       CONSIG-ID
                MOVE 0 TO LS-CODIGO
            ELSE
                DISPLAY 'ERRO: ' FS-CONSIG
                MOVE 9999 TO LS-CODIGO
            END-IF.
 
-      *================================================================
        5000-CONSULTAR SECTION.
-      *================================================================
        5000-INICIO.
            DISPLAY 'Conta: '
            ACCEPT WS-CONSIG-CONTA-NUM
@@ -231,9 +251,7 @@
            DISPLAY '========================================'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        6000-PAGAR-PARCELA SECTION.
-      *================================================================
        6000-INICIO.
            DISPLAY 'ID do Contrato: '
            ACCEPT WS-CONSIG-ID-SEL
@@ -260,6 +278,14 @@
            DISPLAY 'Confirmar pagamento (debito em folha)? (S/N): '
            ACCEPT WS-OPCAO
            IF WS-OPCAO = 'S'
+               MOVE 'PAYROLL_LOAN_INSTALLMENT' TO WS-BR-KIND
+               MOVE CONSIG-VALOR-PARC TO WS-BR-VALOR
+               PERFORM 9750-MOVIMENTAR-RAZAO
+               IF WS-BR-OK NOT = 1
+                   DISPLAY 'FALHA NO RAZAO CENTRAL: ' WS-BR-ERROR
+                   MOVE 9998 TO LS-CODIGO
+                   EXIT SECTION
+               END-IF
                ADD 1 TO CONSIG-PARC-PAGAS
                IF CONSIG-PARC-PAGAS >= CONSIG-PARCELAS
                    MOVE 'Q' TO CONSIG-STATUS
@@ -273,9 +299,7 @@
                DISPLAY 'OPERACAO ABORTADA'
            END-IF.
 
-      *================================================================
        7000-QUITAR SECTION.
-      *================================================================
        7000-INICIO.
            DISPLAY 'ID do Contrato: '
            ACCEPT WS-CONSIG-ID-SEL
@@ -301,6 +325,14 @@
            DISPLAY 'Confirmar quitacao a vista? (S/N): '
            ACCEPT WS-OPCAO
            IF WS-OPCAO = 'S'
+               MOVE 'PAYROLL_LOAN_INSTALLMENT' TO WS-BR-KIND
+               MOVE WS-CONSIG-TOTAL TO WS-BR-VALOR
+               PERFORM 9750-MOVIMENTAR-RAZAO
+               IF WS-BR-OK NOT = 1
+                   DISPLAY 'FALHA NO RAZAO CENTRAL: ' WS-BR-ERROR
+                   MOVE 9998 TO LS-CODIGO
+                   EXIT SECTION
+               END-IF
                MOVE CONSIG-PARCELAS TO CONSIG-PARC-PAGAS
                MOVE 'Q' TO CONSIG-STATUS
                REWRITE REG-CONSIG
@@ -310,15 +342,62 @@
                DISPLAY 'OPERACAO ABORTADA'
            END-IF.
 
-      *================================================================
+       9750-MOVIMENTAR-RAZAO.
+           MOVE CONSIG-CONTA TO WS-BR-CONTA-E
+           MOVE CONSIG-ID TO WS-BR-ID-E
+           COMPUTE WS-BR-VALOR-INT-N =
+               FUNCTION INTEGER-PART(WS-BR-VALOR)
+           COMPUTE WS-BR-VALOR-DEC =
+               FUNCTION INTEGER(
+                   (WS-BR-VALOR - WS-BR-VALOR-INT-N) * 100)
+           MOVE WS-BR-VALOR-INT-N TO WS-BR-VALOR-INT-E
+           MOVE SPACES TO WS-BR-VALOR-STR
+           STRING FUNCTION TRIM(WS-BR-VALOR-INT-E) DELIMITED SIZE
+                  '.' DELIMITED SIZE
+                  WS-BR-VALOR-DEC DELIMITED SIZE
+                  INTO WS-BR-VALOR-STR
+           MOVE SPACES TO WS-BR-OUTFILE
+           STRING 'BANKTMPG-' FUNCTION CURRENT-DATE(1:15) '.OUT'
+                  DELIMITED SIZE INTO WS-BR-OUTFILE
+           MOVE SPACES TO WS-BR-CMD
+           STRING 'python3 bank_core_cli.py settle CONSIG '
+                  FUNCTION TRIM(WS-BR-KIND) ' '
+                  FUNCTION TRIM(WS-BR-CONTA-E) ' '
+                  FUNCTION TRIM(WS-BR-VALOR-STR) ' '
+                  FUNCTION CURRENT-DATE(1:15) '-'
+                  FUNCTION TRIM(WS-BR-ID-E)
+                  ' --cobol-out ' FUNCTION TRIM(WS-BR-OUTFILE)
+                  DELIMITED SIZE INTO WS-BR-CMD
+           CALL 'SYSTEM' USING WS-BR-CMD
+           MOVE 0 TO WS-BR-OK
+           MOVE SPACES TO WS-BR-ERROR
+           OPEN INPUT ARQBRIDGE
+           IF FS-BRIDGE-OK
+               PERFORM UNTIL FS-BRIDGE-EOF
+                   READ ARQBRIDGE INTO WS-BR-LINE
+                   IF NOT FS-BRIDGE-EOF
+                       MOVE SPACES TO WS-BR-KEY WS-BR-VAL
+                       UNSTRING WS-BR-LINE DELIMITED BY '='
+                           INTO WS-BR-KEY WS-BR-VAL
+                       IF FUNCTION TRIM(WS-BR-KEY) = 'OK'
+                           IF FUNCTION TRIM(WS-BR-VAL) = '1'
+                               MOVE 1 TO WS-BR-OK
+                           END-IF
+                       END-IF
+                       IF FUNCTION TRIM(WS-BR-KEY) = 'ERROR'
+                           MOVE FUNCTION TRIM(WS-BR-VAL) TO WS-BR-ERROR
+                       END-IF
+                   END-IF
+               END-PERFORM
+               CLOSE ARQBRIDGE
+           END-IF.
+
        9700-CALCULAR-PARCELA.
-      *================================================================
            COMPUTE CONSIG-VALOR-PARC ROUNDED =
                CONSIG-VALOR
                * (CONSIG-TAXA-MES / 100)
-               / (1 - (1 + CONSIG-TAXA-MES / 100) ** (- CONSIG-PARCELAS)).
+               / (1 - (1 + CONSIG-TAXA-MES / 100) **
+                      (- CONSIG-PARCELAS)).
 
-      *================================================================
        9999-FIM.
-      *================================================================
            EXIT PROGRAM.
