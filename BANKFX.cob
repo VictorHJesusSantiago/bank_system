@@ -1,7 +1,3 @@
-      *================================================================
-      * BANKFX.COB - Modulo de Cambio e Moedas Estrangeiras
-      * Sistema Bancario COBOL
-      *================================================================
        IDENTIFICATION DIVISION.
        PROGRAM-ID. BANKFX.
 
@@ -16,6 +12,10 @@
                ACCESS MODE IS DYNAMIC
                RECORD KEY IS FX-ID
                FILE STATUS IS FS-FX.
+
+           SELECT ARQBRIDGE ASSIGN TO WS-BR-OUTFILE
+               ORGANIZATION IS LINE SEQUENTIAL
+               FILE STATUS IS FS-BRIDGE.
 
        DATA DIVISION.
        FILE SECTION.
@@ -32,6 +32,9 @@
            05  FX-DATA               PIC 9(8).
            05  FX-HORA               PIC 9(6).
 
+       FD  ARQBRIDGE.
+       01  REG-BRIDGE                PIC X(200).
+
        WORKING-STORAGE SECTION.
        COPY BANKDATA.
 
@@ -40,6 +43,26 @@
                88  FS-FX-OK          VALUE '00'.
                88  FS-FX-EOF         VALUE '10'.
                88  FS-FX-DUP         VALUE '22'.
+           05  FS-BRIDGE             PIC XX.
+               88  FS-BRIDGE-OK      VALUE '00'.
+               88  FS-BRIDGE-EOF     VALUE '10'.
+
+       01  WS-BRIDGE.
+           05  WS-BR-OUTFILE          PIC X(40).
+           05  WS-BR-CMD              PIC X(250).
+           05  WS-BR-CONTA-E          PIC Z(9)9.
+           05  WS-BR-KIND             PIC X(24).
+           05  WS-BR-PAYLOAD          PIC X(40) VALUE SPACES.
+           05  WS-BR-VALOR            PIC S9(13)V99 COMP-3.
+           05  WS-BR-VALOR-INT-N      PIC 9(11).
+           05  WS-BR-VALOR-INT-E      PIC Z(10)9.
+           05  WS-BR-VALOR-DEC        PIC 99.
+           05  WS-BR-VALOR-STR        PIC X(20).
+           05  WS-BR-LINE             PIC X(200).
+           05  WS-BR-KEY              PIC X(30).
+           05  WS-BR-VAL              PIC X(160).
+           05  WS-BR-OK               PIC 9 VALUE 0.
+           05  WS-BR-ERROR            PIC X(150) VALUE SPACES.
            05  WS-OPCAO              PIC X(2).
            05  WS-CONTINUAR          PIC X VALUE 'S'.
                88  FX-CONTINUAR      VALUE 'S'.
@@ -47,18 +70,18 @@
            05  WS-FX-ID-BASE         PIC 9(15).
 
        01  WS-COTACOES.
-           05  WS-USD-COMPRA         PIC 9(5)V9(6) COMP-3 VALUE 5,121000.
-           05  WS-USD-VENDA          PIC 9(5)V9(6) COMP-3 VALUE 5,187000.
-           05  WS-EUR-COMPRA         PIC 9(5)V9(6) COMP-3 VALUE 5,542000.
-           05  WS-EUR-VENDA          PIC 9(5)V9(6) COMP-3 VALUE 5,625000.
-           05  WS-GBP-COMPRA         PIC 9(5)V9(6) COMP-3 VALUE 6,432000.
-           05  WS-GBP-VENDA          PIC 9(5)V9(6) COMP-3 VALUE 6,521000.
-           05  WS-JPY-COMPRA         PIC 9(5)V9(6) COMP-3 VALUE 0,033400.
-           05  WS-JPY-VENDA          PIC 9(5)V9(6) COMP-3 VALUE 0,033900.
-           05  WS-ARS-COMPRA         PIC 9(5)V9(6) COMP-3 VALUE 0,005800.
-           05  WS-ARS-VENDA          PIC 9(5)V9(6) COMP-3 VALUE 0,006200.
-           05  WS-CHF-COMPRA         PIC 9(5)V9(6) COMP-3 VALUE 5,751000.
-           05  WS-CHF-VENDA          PIC 9(5)V9(6) COMP-3 VALUE 5,840000.
+           05  WS-USD-COMPRA         PIC 9(5)V9(6) COMP-3 VALUE 5,121.
+           05  WS-USD-VENDA          PIC 9(5)V9(6) COMP-3 VALUE 5,187.
+           05  WS-EUR-COMPRA         PIC 9(5)V9(6) COMP-3 VALUE 5,542.
+           05  WS-EUR-VENDA          PIC 9(5)V9(6) COMP-3 VALUE 5,625.
+           05  WS-GBP-COMPRA         PIC 9(5)V9(6) COMP-3 VALUE 6,432.
+           05  WS-GBP-VENDA          PIC 9(5)V9(6) COMP-3 VALUE 6,521.
+           05  WS-JPY-COMPRA         PIC 9(5)V9(6) COMP-3 VALUE 0,0334.
+           05  WS-JPY-VENDA          PIC 9(5)V9(6) COMP-3 VALUE 0,0339.
+           05  WS-ARS-COMPRA         PIC 9(5)V9(6) COMP-3 VALUE 0,0058.
+           05  WS-ARS-VENDA          PIC 9(5)V9(6) COMP-3 VALUE 0,0062.
+           05  WS-CHF-COMPRA         PIC 9(5)V9(6) COMP-3 VALUE 5,751.
+           05  WS-CHF-VENDA          PIC 9(5)V9(6) COMP-3 VALUE 5,84.
 
        01  WS-FX-CALC.
            05  WS-FX-MOEDA-SEL       PIC X(3).
@@ -94,9 +117,7 @@
            MOVE 0 TO LS-CODIGO
            GOBACK.
 
-      *================================================================
        1000-MENU SECTION.
-      *================================================================
        1000-INICIO.
            DISPLAY '========================================'
            DISPLAY '         CAMBIO E MOEDAS'
@@ -119,9 +140,7 @@
                WHEN OTHER DISPLAY 'OPCAO INVALIDA'
            END-EVALUATE.
 
-      *================================================================
        2000-COMPRAR-MOEDA SECTION.
-      *================================================================
        2000-INICIO.
            DISPLAY '--- COMPRA DE MOEDA ESTRANGEIRA ---'
            DISPLAY 'Conta debito: '
@@ -136,7 +155,6 @@
            ACCEPT WS-FX-VALOR-MED
            COMPUTE WS-FX-VALOR-BRL =
                WS-FX-VALOR-MED * WS-FX-COTACAO-US
-      *    IOF: 1,1% sobre compra fisica
            COMPUTE WS-FX-IOF ROUNDED =
                WS-FX-VALOR-BRL * 0,011
            COMPUTE WS-FX-TOTAL = WS-FX-VALOR-BRL + WS-FX-IOF
@@ -153,6 +171,16 @@
            DISPLAY 'Confirmar? (S/N): '
            ACCEPT WS-OPCAO
            IF WS-OPCAO = 'S'
+               MOVE 'FX_BUY' TO WS-BR-KIND
+               MOVE SPACES TO WS-BR-PAYLOAD
+               MOVE WS-FX-CONTA-NUM TO WS-BR-CONTA-E
+               MOVE WS-FX-TOTAL TO WS-BR-VALOR
+               PERFORM 9850-MOVIMENTAR-RAZAO
+               IF WS-BR-OK NOT = 1
+                   DISPLAY 'FALHA NO RAZAO CENTRAL: ' WS-BR-ERROR
+                   MOVE 9998 TO LS-CODIGO
+                   EXIT SECTION
+               END-IF
                PERFORM 2200-GRAVAR-OPERACAO-FX
                DISPLAY 'COMPRA REALIZADA COM SUCESSO!'
                MOVE 0 TO LS-CODIGO
@@ -191,9 +219,7 @@
                DISPLAY 'AVISO: ERRO AO GRAVAR HISTORICO FX: ' FS-FX
            END-IF.
 
-      *================================================================
        3000-VENDER-MOEDA SECTION.
-      *================================================================
        3000-INICIO.
            DISPLAY '--- VENDA DE MOEDA ESTRANGEIRA ---'
            DISPLAY 'Conta credito: '
@@ -208,7 +234,6 @@
            ACCEPT WS-FX-VALOR-MED
            COMPUTE WS-FX-VALOR-BRL =
                WS-FX-VALOR-MED * WS-FX-COTACAO-US
-      *    IOF: 0,38% sobre venda
            COMPUTE WS-FX-IOF ROUNDED =
                WS-FX-VALOR-BRL * 0,0038
            COMPUTE WS-FX-TOTAL = WS-FX-VALOR-BRL - WS-FX-IOF
@@ -225,6 +250,17 @@
            DISPLAY 'Confirmar? (S/N): '
            ACCEPT WS-OPCAO
            IF WS-OPCAO = 'S'
+               MOVE 'FX_SELL' TO WS-BR-KIND
+               STRING '"{\"direction\":\"CREDIT\"}"' DELIMITED SIZE
+                      INTO WS-BR-PAYLOAD
+               MOVE WS-FX-CONTA-NUM TO WS-BR-CONTA-E
+               MOVE WS-FX-TOTAL TO WS-BR-VALOR
+               PERFORM 9850-MOVIMENTAR-RAZAO
+               IF WS-BR-OK NOT = 1
+                   DISPLAY 'FALHA NO RAZAO CENTRAL: ' WS-BR-ERROR
+                   MOVE 9998 TO LS-CODIGO
+                   EXIT SECTION
+               END-IF
                MOVE 'V' TO FX-OPERACAO
                PERFORM 2200-GRAVAR-OPERACAO-FX
                DISPLAY 'VENDA REALIZADA COM SUCESSO!'
@@ -247,9 +283,7 @@
                    MOVE 1 TO LS-CODIGO
            END-EVALUATE.
 
-      *================================================================
        4000-COTACOES SECTION.
-      *================================================================
        4000-INICIO.
            MOVE WS-USD-COMPRA TO WS-FX-DIS-COT
            DISPLAY '========================================'
@@ -287,9 +321,7 @@
            DISPLAY ' IOF Transferencia: 0,38%'
            DISPLAY '========================================'.
 
-      *================================================================
        5000-SWIFT SECTION.
-      *================================================================
        5000-INICIO.
            DISPLAY '--- TRANSFERENCIA INTERNACIONAL SWIFT ---'
            DISPLAY 'Conta debito: '
@@ -308,7 +340,6 @@
            ACCEPT WS-OPCAO
            COMPUTE WS-FX-VALOR-BRL =
                WS-FX-VALOR-MED * WS-FX-COTACAO-US
-      *    IOF: 0,38% para transferencias internacionais
            COMPUTE WS-FX-IOF ROUNDED =
                WS-FX-VALOR-BRL * 0,0038
            COMPUTE WS-FX-TOTAL = WS-FX-VALOR-BRL + WS-FX-IOF
@@ -318,6 +349,16 @@
            DISPLAY 'Confirmar? (S/N): '
            ACCEPT WS-OPCAO
            IF WS-OPCAO = 'S'
+               MOVE 'SWIFT_TRANSFER' TO WS-BR-KIND
+               MOVE SPACES TO WS-BR-PAYLOAD
+               MOVE WS-FX-CONTA-NUM TO WS-BR-CONTA-E
+               MOVE WS-FX-TOTAL TO WS-BR-VALOR
+               PERFORM 9850-MOVIMENTAR-RAZAO
+               IF WS-BR-OK NOT = 1
+                   DISPLAY 'FALHA NO RAZAO CENTRAL: ' WS-BR-ERROR
+                   MOVE 9998 TO LS-CODIGO
+                   EXIT SECTION
+               END-IF
                MOVE 'I' TO FX-OPERACAO
                PERFORM 2200-GRAVAR-OPERACAO-FX
                DISPLAY 'SWIFT ENVIADO! Protocolo: ' FX-ID
@@ -326,9 +367,7 @@
                DISPLAY 'OPERACAO CANCELADA'
            END-IF.
 
-      *================================================================
        6000-HISTORICO SECTION.
-      *================================================================
        6000-INICIO.
            DISPLAY 'Conta para consulta: '
            ACCEPT WS-FX-CONTA-NUM
@@ -354,7 +393,63 @@
            DISPLAY '========================================'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
+       9850-MOVIMENTAR-RAZAO.
+           COMPUTE WS-BR-VALOR-INT-N =
+               FUNCTION INTEGER-PART(WS-BR-VALOR)
+           COMPUTE WS-BR-VALOR-DEC =
+               FUNCTION INTEGER(
+                   (WS-BR-VALOR - WS-BR-VALOR-INT-N) * 100)
+           MOVE WS-BR-VALOR-INT-N TO WS-BR-VALOR-INT-E
+           MOVE SPACES TO WS-BR-VALOR-STR
+           STRING FUNCTION TRIM(WS-BR-VALOR-INT-E) DELIMITED SIZE
+                  '.' DELIMITED SIZE
+                  WS-BR-VALOR-DEC DELIMITED SIZE
+                  INTO WS-BR-VALOR-STR
+           MOVE SPACES TO WS-BR-OUTFILE
+           STRING 'BANKTMPX-' FUNCTION CURRENT-DATE(1:15) '.OUT'
+                  DELIMITED SIZE INTO WS-BR-OUTFILE
+           MOVE SPACES TO WS-BR-CMD
+           IF WS-BR-PAYLOAD = SPACES
+               STRING 'python3 bank_core_cli.py settle FX '
+                      FUNCTION TRIM(WS-BR-KIND) ' '
+                      FUNCTION TRIM(WS-BR-CONTA-E) ' '
+                      FUNCTION TRIM(WS-BR-VALOR-STR) ' '
+                      FUNCTION CURRENT-DATE(1:15)
+                      ' --cobol-out ' FUNCTION TRIM(WS-BR-OUTFILE)
+                      DELIMITED SIZE INTO WS-BR-CMD
+           ELSE
+               STRING 'python3 bank_core_cli.py settle FX '
+                      FUNCTION TRIM(WS-BR-KIND) ' '
+                      FUNCTION TRIM(WS-BR-CONTA-E) ' '
+                      FUNCTION TRIM(WS-BR-VALOR-STR) ' '
+                      FUNCTION CURRENT-DATE(1:15)
+                      ' --payload ' FUNCTION TRIM(WS-BR-PAYLOAD)
+                      ' --cobol-out ' FUNCTION TRIM(WS-BR-OUTFILE)
+                      DELIMITED SIZE INTO WS-BR-CMD
+           END-IF
+           CALL 'SYSTEM' USING WS-BR-CMD
+           MOVE 0 TO WS-BR-OK
+           MOVE SPACES TO WS-BR-ERROR
+           OPEN INPUT ARQBRIDGE
+           IF FS-BRIDGE-OK
+               PERFORM UNTIL FS-BRIDGE-EOF
+                   READ ARQBRIDGE INTO WS-BR-LINE
+                   IF NOT FS-BRIDGE-EOF
+                       MOVE SPACES TO WS-BR-KEY WS-BR-VAL
+                       UNSTRING WS-BR-LINE DELIMITED BY '='
+                           INTO WS-BR-KEY WS-BR-VAL
+                       IF FUNCTION TRIM(WS-BR-KEY) = 'OK'
+                           IF FUNCTION TRIM(WS-BR-VAL) = '1'
+                               MOVE 1 TO WS-BR-OK
+                           END-IF
+                       END-IF
+                       IF FUNCTION TRIM(WS-BR-KEY) = 'ERROR'
+                           MOVE FUNCTION TRIM(WS-BR-VAL) TO WS-BR-ERROR
+                       END-IF
+                   END-IF
+               END-PERFORM
+               CLOSE ARQBRIDGE
+           END-IF.
+
        9999-FIM.
-      *================================================================
            EXIT PROGRAM.

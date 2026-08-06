@@ -1,7 +1,3 @@
-      *================================================================
-      * BANKFGTS.COB - FGTS (Fundo de Garantia por Tempo de Servico)
-      * Sistema Bancario COBOL
-      *================================================================
        IDENTIFICATION DIVISION.
        PROGRAM-ID. BANKFGTS.
 
@@ -16,6 +12,10 @@
                ACCESS MODE IS DYNAMIC
                RECORD KEY IS FGTS-ID
                FILE STATUS IS FS-FGTS.
+
+           SELECT ARQBRIDGE ASSIGN TO WS-BR-OUTFILE
+               ORGANIZATION IS LINE SEQUENTIAL
+               FILE STATUS IS FS-BRIDGE.
 
        DATA DIVISION.
        FILE SECTION.
@@ -34,6 +34,9 @@
            05  FGTS-STATUS           PIC X(1).
            05  FGTS-SAQUES-EXTRA     PIC 9(4).
 
+       FD  ARQBRIDGE.
+       01  REG-BRIDGE                PIC X(200).
+
        WORKING-STORAGE SECTION.
        COPY BANKDATA.
 
@@ -42,10 +45,28 @@
                88  FS-FGTS-OK        VALUE '00'.
                88  FS-FGTS-EOF       VALUE '10'.
                88  FS-FGTS-NFD       VALUE '23'.
+           05  FS-BRIDGE             PIC XX.
+               88  FS-BRIDGE-OK      VALUE '00'.
+               88  FS-BRIDGE-EOF     VALUE '10'.
            05  WS-OPCAO              PIC X(2).
            05  WS-CONTINUAR          PIC X VALUE 'S'.
                88  FGTS-PARAR        VALUE 'N'.
            05  WS-FGTS-SEQ           PIC 9(12) VALUE ZEROS.
+
+       01  WS-BRIDGE.
+           05  WS-BR-OUTFILE          PIC X(40).
+           05  WS-BR-CMD              PIC X(250).
+           05  WS-BR-CONTA-E          PIC Z(9)9.
+           05  WS-BR-ID-E             PIC Z(11)9.
+           05  WS-BR-VALOR-INT-N      PIC 9(11).
+           05  WS-BR-VALOR-INT-E      PIC Z(10)9.
+           05  WS-BR-VALOR-DEC        PIC 99.
+           05  WS-BR-VALOR-STR        PIC X(20).
+           05  WS-BR-LINE             PIC X(200).
+           05  WS-BR-KEY              PIC X(30).
+           05  WS-BR-VAL              PIC X(160).
+           05  WS-BR-OK               PIC 9 VALUE 0.
+           05  WS-BR-ERROR            PIC X(150) VALUE SPACES.
 
        01  WS-FGTS-CALC.
            05  WS-FGTS-CONTA-NUM     PIC 9(10).
@@ -88,9 +109,7 @@
                MOVE ZEROS TO WS-FGTS-SEQ
            END-IF.
 
-      *================================================================
        1000-MENU SECTION.
-      *================================================================
        1000-INICIO.
            DISPLAY '========================================'
            DISPLAY '    FGTS - FUNDO DE GARANTIA'
@@ -115,9 +134,7 @@
                WHEN OTHER DISPLAY 'OPCAO INVALIDA'
            END-EVALUATE.
 
-      *================================================================
        2000-VINCULAR SECTION.
-      *================================================================
        2000-INICIO.
            DISPLAY '--- VINCULAR CONTA FGTS ---'
            DISPLAY 'Conta bancaria: '
@@ -154,9 +171,7 @@
                MOVE 9999 TO LS-CODIGO
            END-IF.
 
-      *================================================================
        3000-CONSULTAR-SALDO SECTION.
-      *================================================================
        3000-INICIO.
            DISPLAY 'ID FGTS ou Conta: '
            ACCEPT WS-FGTS-ID-SEL
@@ -178,9 +193,7 @@
            DISPLAY '========================================'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        4000-SAQUE-ANIVERSARIO SECTION.
-      *================================================================
        4000-INICIO.
            DISPLAY 'ID FGTS: '
            ACCEPT WS-FGTS-ID-SEL
@@ -196,7 +209,6 @@
                MOVE 4 TO LS-CODIGO
                EXIT SECTION
            END-IF
-      *    Percentual por faixa de saldo (tabela FGTS)
            EVALUATE TRUE
                WHEN FGTS-SALDO <= 500,00
                    MOVE 50,00 TO WS-FGTS-PERC
@@ -217,18 +229,71 @@
            DISPLAY 'Confirmar? (S/N): '
            ACCEPT WS-OPCAO
            IF WS-OPCAO = 'S'
+               PERFORM 4100-CREDITAR-RAZAO
+               IF WS-BR-OK NOT = 1
+                   DISPLAY 'FALHA NO RAZAO CENTRAL: ' WS-BR-ERROR
+                   MOVE 9998 TO LS-CODIGO
+                   EXIT SECTION
+               END-IF
                SUBTRACT WS-FGTS-SAQUE FROM FGTS-SALDO
                ADD 1 TO FGTS-SAQUES-EXTRA
                REWRITE REG-FGTS
-               DISPLAY 'SAQUE REALIZADO! Credito em 1 dia util'
+               DISPLAY 'SAQUE CREDITADO EM CONTA COM SUCESSO'
                MOVE 0 TO LS-CODIGO
            ELSE
                DISPLAY 'CANCELADO'
            END-IF.
 
-      *================================================================
+       4100-CREDITAR-RAZAO.
+           MOVE FGTS-CONTA TO WS-BR-CONTA-E
+           MOVE FGTS-ID TO WS-BR-ID-E
+           COMPUTE WS-BR-VALOR-INT-N =
+               FUNCTION INTEGER-PART(WS-FGTS-SAQUE)
+           COMPUTE WS-BR-VALOR-DEC =
+               FUNCTION INTEGER(
+                   (WS-FGTS-SAQUE - WS-BR-VALOR-INT-N) * 100)
+           MOVE WS-BR-VALOR-INT-N TO WS-BR-VALOR-INT-E
+           MOVE SPACES TO WS-BR-VALOR-STR
+           STRING FUNCTION TRIM(WS-BR-VALOR-INT-E) DELIMITED SIZE
+                  '.' DELIMITED SIZE
+                  WS-BR-VALOR-DEC DELIMITED SIZE
+                  INTO WS-BR-VALOR-STR
+           MOVE SPACES TO WS-BR-OUTFILE
+           STRING 'BANKTMPF-' FGTS-ID '.OUT' DELIMITED SIZE
+               INTO WS-BR-OUTFILE
+           MOVE SPACES TO WS-BR-CMD
+           STRING 'python3 bank_core_cli.py settle FGTS '
+                  'FGTS_WITHDRAWAL '
+                  FUNCTION TRIM(WS-BR-CONTA-E) ' '
+                  FUNCTION TRIM(WS-BR-VALOR-STR) ' '
+                  FUNCTION TRIM(WS-BR-ID-E)
+                  ' --cobol-out ' FUNCTION TRIM(WS-BR-OUTFILE)
+                  DELIMITED SIZE INTO WS-BR-CMD
+           CALL 'SYSTEM' USING WS-BR-CMD
+           MOVE 0 TO WS-BR-OK
+           MOVE SPACES TO WS-BR-ERROR
+           OPEN INPUT ARQBRIDGE
+           IF FS-BRIDGE-OK
+               PERFORM UNTIL FS-BRIDGE-EOF
+                   READ ARQBRIDGE INTO WS-BR-LINE
+                   IF NOT FS-BRIDGE-EOF
+                       MOVE SPACES TO WS-BR-KEY WS-BR-VAL
+                       UNSTRING WS-BR-LINE DELIMITED BY '='
+                           INTO WS-BR-KEY WS-BR-VAL
+                       IF FUNCTION TRIM(WS-BR-KEY) = 'OK'
+                           IF FUNCTION TRIM(WS-BR-VAL) = '1'
+                               MOVE 1 TO WS-BR-OK
+                           END-IF
+                       END-IF
+                       IF FUNCTION TRIM(WS-BR-KEY) = 'ERROR'
+                           MOVE FUNCTION TRIM(WS-BR-VAL) TO WS-BR-ERROR
+                       END-IF
+                   END-IF
+               END-PERFORM
+               CLOSE ARQBRIDGE
+           END-IF.
+
        5000-ANTECIPAR SECTION.
-      *================================================================
        5000-INICIO.
            DISPLAY 'ID FGTS: '
            ACCEPT WS-FGTS-ID-SEL
@@ -250,16 +315,70 @@
            DISPLAY 'Confirmar antecipacao? (S/N): '
            ACCEPT WS-OPCAO
            IF WS-OPCAO = 'S'
-               DISPLAY 'ANTECIPACAO APROVADA!'
-               DISPLAY 'Credito em conta em D+1'
+               PERFORM 5100-CREDITAR-ANTECIP-RAZAO
+               IF WS-BR-OK NOT = 1
+                   DISPLAY 'FALHA NO RAZAO CENTRAL: ' WS-BR-ERROR
+                   MOVE 9998 TO LS-CODIGO
+                   EXIT SECTION
+               END-IF
+               MOVE ZEROS TO FGTS-SALDO
+               REWRITE REG-FGTS
+               DISPLAY 'ANTECIPACAO APROVADA E CREDITADA EM CONTA!'
                MOVE 0 TO LS-CODIGO
            ELSE
                DISPLAY 'CANCELADO'
            END-IF.
 
-      *================================================================
+       5100-CREDITAR-ANTECIP-RAZAO.
+           MOVE FGTS-CONTA TO WS-BR-CONTA-E
+           MOVE FGTS-ID TO WS-BR-ID-E
+           COMPUTE WS-BR-VALOR-INT-N =
+               FUNCTION INTEGER-PART(WS-FGTS-ANTECIP)
+           COMPUTE WS-BR-VALOR-DEC =
+               FUNCTION INTEGER(
+                   (WS-FGTS-ANTECIP - WS-BR-VALOR-INT-N) * 100)
+           MOVE WS-BR-VALOR-INT-N TO WS-BR-VALOR-INT-E
+           MOVE SPACES TO WS-BR-VALOR-STR
+           STRING FUNCTION TRIM(WS-BR-VALOR-INT-E) DELIMITED SIZE
+                  '.' DELIMITED SIZE
+                  WS-BR-VALOR-DEC DELIMITED SIZE
+                  INTO WS-BR-VALOR-STR
+           MOVE SPACES TO WS-BR-OUTFILE
+           STRING 'BANKTMPFA-' FGTS-ID '.OUT' DELIMITED SIZE
+               INTO WS-BR-OUTFILE
+           MOVE SPACES TO WS-BR-CMD
+           STRING 'python3 bank_core_cli.py settle FGTS '
+                  'FGTS_ADVANCE '
+                  FUNCTION TRIM(WS-BR-CONTA-E) ' '
+                  FUNCTION TRIM(WS-BR-VALOR-STR) ' '
+                  FUNCTION TRIM(WS-BR-ID-E)
+                  ' --cobol-out ' FUNCTION TRIM(WS-BR-OUTFILE)
+                  DELIMITED SIZE INTO WS-BR-CMD
+           CALL 'SYSTEM' USING WS-BR-CMD
+           MOVE 0 TO WS-BR-OK
+           MOVE SPACES TO WS-BR-ERROR
+           OPEN INPUT ARQBRIDGE
+           IF FS-BRIDGE-OK
+               PERFORM UNTIL FS-BRIDGE-EOF
+                   READ ARQBRIDGE INTO WS-BR-LINE
+                   IF NOT FS-BRIDGE-EOF
+                       MOVE SPACES TO WS-BR-KEY WS-BR-VAL
+                       UNSTRING WS-BR-LINE DELIMITED BY '='
+                           INTO WS-BR-KEY WS-BR-VAL
+                       IF FUNCTION TRIM(WS-BR-KEY) = 'OK'
+                           IF FUNCTION TRIM(WS-BR-VAL) = '1'
+                               MOVE 1 TO WS-BR-OK
+                           END-IF
+                       END-IF
+                       IF FUNCTION TRIM(WS-BR-KEY) = 'ERROR'
+                           MOVE FUNCTION TRIM(WS-BR-VAL) TO WS-BR-ERROR
+                       END-IF
+                   END-IF
+               END-PERFORM
+               CLOSE ARQBRIDGE
+           END-IF.
+
        6000-SIMULAR SECTION.
-      *================================================================
        6000-INICIO.
            DISPLAY '--- SIMULACAO ANTECIPACAO FGTS ---'
            DISPLAY 'Saldo FGTS (R$): '
@@ -279,9 +398,7 @@
            DISPLAY '========================================'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        7000-EXTRATO SECTION.
-      *================================================================
        7000-INICIO.
            DISPLAY '========================================'
            DISPLAY ' CONTAS FGTS VINCULADAS'
@@ -300,10 +417,7 @@
            DISPLAY '========================================'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        9700-CALCULAR-ANTECIP.
-      *================================================================
-      *    Antecipacao: % do saldo descontando taxa
            EVALUATE TRUE
                WHEN FGTS-SALDO <= 500,00
                    MOVE 50,00 TO WS-FGTS-PERC
@@ -319,7 +433,5 @@
            COMPUTE WS-FGTS-PARC-VAL ROUNDED =
                WS-FGTS-ANTECIP / (WS-FGTS-PARCELAS * 12).
 
-      *================================================================
        9999-FIM.
-      *================================================================
            EXIT PROGRAM.
