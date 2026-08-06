@@ -1,6 +1,3 @@
-      *===============================================================
-      * BANKTRF.COB - Modulo de Transferencias
-      *===============================================================
        IDENTIFICATION DIVISION.
        PROGRAM-ID. BANKTRF.
 
@@ -28,6 +25,10 @@
                ACCESS MODE IS DYNAMIC
                RECORD KEY IS PIX-REC-CHAVE
                FILE STATUS IS FS-PIX.
+
+           SELECT ARQBRIDGE ASSIGN TO WS-BR-OUTFILE
+               ORGANIZATION IS LINE SEQUENTIAL
+               FILE STATUS IS FS-BRIDGE.
 
        DATA DIVISION.
        FILE SECTION.
@@ -68,6 +69,9 @@
            05  PIX-REC-CONTA         PIC 9(10).
            05  PIX-REC-STATUS        PIC X(1).
 
+       FD  ARQBRIDGE.
+       01  REG-BRIDGE                PIC X(200).
+
        WORKING-STORAGE SECTION.
        01  WS-CTRL.
            05  FS-CONTAS             PIC XX.
@@ -80,6 +84,33 @@
                88  FS-PIX-OK         VALUE '00'.
                88  FS-PIX-DUP        VALUE '22'.
                88  FS-PIX-NFD        VALUE '23'.
+           05  FS-BRIDGE             PIC XX.
+               88  FS-BRIDGE-OK      VALUE '00'.
+               88  FS-BRIDGE-EOF     VALUE '10'.
+
+       01  WS-BRIDGE.
+           05  WS-BR-OUTFILE          PIC X(40).
+           05  WS-BR-CMD              PIC X(250).
+           05  WS-BR-VALOR-INT-N      PIC 9(11).
+           05  WS-BR-VALOR-INT-E      PIC Z(10)9.
+           05  WS-BR-VALOR-DEC        PIC 99.
+           05  WS-BR-VALOR-STR        PIC X(20).
+           05  WS-BR-ORG-E            PIC Z(9)9.
+           05  WS-BR-DES-E            PIC Z(9)9.
+           05  WS-BR-LINE             PIC X(200).
+           05  WS-BR-KEY              PIC X(30).
+           05  WS-BR-VAL              PIC X(160).
+           05  WS-BR-OK               PIC 9 VALUE 0.
+           05  WS-BR-TRANS-ID         PIC 9(15) VALUE 0.
+           05  WS-BR-ERROR            PIC X(150) VALUE SPACES.
+           05  WS-BR-SALDO-STR        PIC X(30).
+           05  WS-BR-SALDO-NOVO       PIC S9(13)V99 COMP-3.
+           05  WS-BR-SYNC-CONTA-N     PIC 9(10).
+           05  WS-BR-SYNC-CONTA-E     PIC Z(9)9.
+           05  WS-BR-TAXA-INT-N       PIC 9(5).
+           05  WS-BR-TAXA-INT-E       PIC Z(4)9.
+           05  WS-BR-TAXA-DEC         PIC 99.
+           05  WS-BR-TAXA-STR         PIC X(10).
 
        01  WS-PIX-GEN.
            05  WS-PIX-SEED           PIC 9(8).
@@ -139,7 +170,6 @@
                CLOSE ARQPIX
                OPEN I-O ARQPIX
            END-IF
-      *    ID baseado em timestamp evita colisao entre sessoes
            MOVE FUNCTION CURRENT-DATE(1:8) TO WS-ID-BASE-DT
            MOVE FUNCTION CURRENT-DATE(9:6) TO WS-ID-BASE-HR
            COMPUTE WS-ID =
@@ -210,26 +240,8 @@
                EXIT PARAGRAPH
            END-IF
 
-           SUBTRACT WS-VALOR FROM WS-ORG-SALDO
-           SUBTRACT WS-TAXA FROM WS-ORG-SALDO
-           ADD WS-VALOR TO WS-DES-SALDO
-
-           PERFORM 2300-GRAVAR-ORIGEM
-           IF NOT FS-OK
-               DISPLAY 'ERRO AO DEBITAR ORIGEM: ' FS-CONTAS
-               MOVE 9999 TO LS-CODIGO
-               EXIT PARAGRAPH
-           END-IF
-           PERFORM 2400-GRAVAR-DESTINO
-           IF NOT FS-OK
-               DISPLAY 'ERRO AO CREDITAR DESTINO - REVERTENDO'
-      *        Restaura before-image da origem (saldo original)
-               MOVE WS-ORG-BUF TO REG-CONTA
-               REWRITE REG-CONTA
-               IF NOT FS-OK
-                   DISPLAY 'ATENCAO: FALHA NO ROLLBACK - ' FS-CONTAS
-               END-IF
-               MOVE 9999 TO LS-CODIGO
+           PERFORM 2350-CHAMAR-RAZAO
+           IF LS-CODIGO NOT = 0
                EXIT PARAGRAPH
            END-IF
            PERFORM 2500-GRAVAR-TRANS
@@ -287,7 +299,6 @@
            REWRITE REG-CONTA.
 
        2500-GRAVAR-TRANS.
-      *    Incrementa sequencial dentro do timestamp base (evita colisao)
            ADD 1 TO WS-ID-SEQ
            IF WS-ID-SEQ > 9
                MOVE 0 TO WS-ID-SEQ
@@ -307,7 +318,6 @@
 
        2600-LOCALIZAR-DESTINO-PIX.
            MOVE 'N' TO WS-ACHOU-DEST
-      *    Chave aleatoria: busca direta em BANKPIX.DAT
            IF WS-PIX-TIPO = 'A'
                MOVE WS-PIX-CHAVE TO PIX-REC-CHAVE
                READ ARQPIX KEY IS PIX-REC-CHAVE
@@ -325,7 +335,6 @@
            IF WS-ACHOU-DEST = 'S'
                GO TO 2600-VALIDAR-DESTINO
            END-IF
-      *    Busca por CPF, Email ou Telefone via scan
            MOVE ZEROS TO TRF-CONTA-NUM
            START ARQCONTAS KEY >= TRF-CONTA-NUM
            PERFORM UNTIL FS-EOF OR WS-ACHOU-DEST = 'S'
@@ -356,7 +365,8 @@
                DISPLAY 'CHAVE PIX NAO ENCONTRADA'
                MOVE 2 TO LS-CODIGO
                EXIT PARAGRAPH
-           END-IF
+           END-IF.
+
        2600-VALIDAR-DESTINO.
            MOVE WS-DES-BUF TO REG-CONTA
            IF TRF-CONTA-STATUS NOT = 'A'
@@ -397,24 +407,9 @@
                EXIT PARAGRAPH
            END-IF
 
-           SUBTRACT WS-VALOR FROM WS-ORG-SALDO
-           ADD WS-VALOR TO WS-DES-SALDO
-
-           PERFORM 2300-GRAVAR-ORIGEM
-           IF NOT FS-OK
-               DISPLAY 'ERRO AO DEBITAR ORIGEM PIX: ' FS-CONTAS
-               MOVE 9999 TO LS-CODIGO
-               EXIT PARAGRAPH
-           END-IF
-           PERFORM 2400-GRAVAR-DESTINO
-           IF NOT FS-OK
-               DISPLAY 'ERRO AO CREDITAR DESTINO PIX - REVERTENDO'
-               MOVE WS-ORG-BUF TO REG-CONTA
-               REWRITE REG-CONTA
-               IF NOT FS-OK
-                   DISPLAY 'ATENCAO: FALHA NO ROLLBACK PIX - ' FS-CONTAS
-               END-IF
-               MOVE 9999 TO LS-CODIGO
+           MOVE ZEROS TO WS-TAXA
+           PERFORM 2350-CHAMAR-RAZAO
+           IF LS-CODIGO NOT = 0
                EXIT PARAGRAPH
            END-IF
            PERFORM 2500-GRAVAR-TRANS
@@ -423,6 +418,155 @@
            DISPLAY 'PIX EFETUADO: R$ ' WS-VAL-DISP
            MOVE 0 TO LS-CODIGO.
 
+       2350-CHAMAR-RAZAO.
+           COMPUTE WS-BR-VALOR-INT-N = FUNCTION INTEGER-PART(WS-VALOR)
+           COMPUTE WS-BR-VALOR-DEC =
+               FUNCTION INTEGER((WS-VALOR - WS-BR-VALOR-INT-N) * 100)
+           MOVE WS-BR-VALOR-INT-N TO WS-BR-VALOR-INT-E
+           MOVE SPACES TO WS-BR-VALOR-STR
+           STRING FUNCTION TRIM(WS-BR-VALOR-INT-E) DELIMITED SIZE
+                  '.' DELIMITED SIZE
+                  WS-BR-VALOR-DEC DELIMITED SIZE
+                  INTO WS-BR-VALOR-STR
+
+           COMPUTE WS-BR-TAXA-INT-N = FUNCTION INTEGER-PART(WS-TAXA)
+           COMPUTE WS-BR-TAXA-DEC =
+               FUNCTION INTEGER((WS-TAXA - WS-BR-TAXA-INT-N) * 100)
+           MOVE WS-BR-TAXA-INT-N TO WS-BR-TAXA-INT-E
+           MOVE SPACES TO WS-BR-TAXA-STR
+           STRING FUNCTION TRIM(WS-BR-TAXA-INT-E) DELIMITED SIZE
+                  '.' DELIMITED SIZE
+                  WS-BR-TAXA-DEC DELIMITED SIZE
+                  INTO WS-BR-TAXA-STR
+
+           MOVE WS-ORG-NUM TO WS-BR-ORG-E
+           MOVE WS-DES-NUM TO WS-BR-DES-E
+
+           MOVE SPACES TO WS-BR-OUTFILE
+           STRING 'BANKTMP-' WS-ID '.OUT' DELIMITED SIZE
+               INTO WS-BR-OUTFILE
+
+           MOVE SPACES TO WS-BR-CMD
+           STRING 'python3 bank_core_cli.py transfer '
+                  FUNCTION TRIM(WS-BR-ORG-E) ' '
+                  FUNCTION TRIM(WS-BR-DES-E) ' '
+                  FUNCTION TRIM(WS-BR-VALOR-STR) ' '
+                  WS-ID
+                  ' --fee ' FUNCTION TRIM(WS-BR-TAXA-STR)
+                  ' --cobol-out ' FUNCTION TRIM(WS-BR-OUTFILE)
+                  DELIMITED SIZE INTO WS-BR-CMD
+
+           CALL 'SYSTEM' USING WS-BR-CMD
+           PERFORM 2360-LER-RESULTADO-BRIDGE
+
+           EVALUATE TRUE
+               WHEN RETURN-CODE = 0 AND WS-BR-OK = 1
+                   MOVE 0 TO LS-CODIGO
+                   PERFORM 2900-SINCRONIZAR-SALDO
+               WHEN RETURN-CODE = 2
+                   DISPLAY 'RAZAO REJEITOU A OPERACAO: ' WS-BR-ERROR
+                   MOVE 9998 TO LS-CODIGO
+               WHEN RETURN-CODE = 3
+                   DISPLAY 'RAZAO NEGOU AUTORIZACAO: ' WS-BR-ERROR
+                   MOVE 9997 TO LS-CODIGO
+               WHEN OTHER
+                   DISPLAY 'ERRO FATAL NA CHAMADA AO RAZAO ('
+                       RETURN-CODE '): ' WS-BR-ERROR
+                   MOVE 9999 TO LS-CODIGO
+           END-EVALUATE.
+
+       2360-LER-RESULTADO-BRIDGE.
+           MOVE 0 TO WS-BR-OK
+           MOVE 0 TO WS-BR-TRANS-ID
+           MOVE SPACES TO WS-BR-ERROR
+           OPEN INPUT ARQBRIDGE
+           IF FS-BRIDGE-OK
+               PERFORM UNTIL FS-BRIDGE-EOF
+                   READ ARQBRIDGE INTO WS-BR-LINE
+                   IF NOT FS-BRIDGE-EOF
+                       PERFORM 2370-PROCESSAR-LINHA-BRIDGE
+                   END-IF
+               END-PERFORM
+               CLOSE ARQBRIDGE
+           END-IF.
+
+       2370-PROCESSAR-LINHA-BRIDGE.
+           MOVE SPACES TO WS-BR-KEY WS-BR-VAL
+           UNSTRING WS-BR-LINE DELIMITED BY '='
+               INTO WS-BR-KEY WS-BR-VAL
+           EVALUATE FUNCTION TRIM(WS-BR-KEY)
+               WHEN 'OK'
+                   IF FUNCTION TRIM(WS-BR-VAL) = '1'
+                       MOVE 1 TO WS-BR-OK
+                   END-IF
+               WHEN 'TRANSACTION_ID'
+                   IF WS-BR-VAL NOT = SPACES
+                       MOVE FUNCTION NUMVAL(FUNCTION TRIM(WS-BR-VAL))
+                           TO WS-BR-TRANS-ID
+                   END-IF
+               WHEN 'ERROR'
+                   MOVE FUNCTION TRIM(WS-BR-VAL) TO WS-BR-ERROR
+               WHEN OTHER
+                   CONTINUE
+           END-EVALUATE.
+
+       2900-SINCRONIZAR-SALDO.
+           MOVE WS-ORG-NUM TO WS-BR-SYNC-CONTA-N
+           PERFORM 2910-BUSCAR-SALDO-RAZAO
+           IF WS-BR-OK = 1
+               MOVE WS-ORG-BUF TO REG-CONTA
+               MOVE WS-BR-SALDO-NOVO TO TRF-CONTA-SALDO
+               MOVE FUNCTION CURRENT-DATE(1:8) TO
+                   TRF-CONTA-DT-ATUALIZACAO
+               REWRITE REG-CONTA
+           END-IF
+
+           MOVE WS-DES-NUM TO WS-BR-SYNC-CONTA-N
+           PERFORM 2910-BUSCAR-SALDO-RAZAO
+           IF WS-BR-OK = 1
+               MOVE WS-DES-BUF TO REG-CONTA
+               MOVE WS-BR-SALDO-NOVO TO TRF-CONTA-SALDO
+               MOVE FUNCTION CURRENT-DATE(1:8) TO
+                   TRF-CONTA-DT-ATUALIZACAO
+               REWRITE REG-CONTA
+           END-IF.
+
+       2910-BUSCAR-SALDO-RAZAO.
+           MOVE WS-BR-SYNC-CONTA-N TO WS-BR-SYNC-CONTA-E
+           MOVE SPACES TO WS-BR-OUTFILE
+           STRING 'BANKTMPS-' WS-BR-SYNC-CONTA-N '.OUT' DELIMITED SIZE
+               INTO WS-BR-OUTFILE
+           MOVE SPACES TO WS-BR-CMD
+           STRING 'python3 bank_core_cli.py account '
+                  FUNCTION TRIM(WS-BR-SYNC-CONTA-E)
+                  ' --cobol-out ' FUNCTION TRIM(WS-BR-OUTFILE)
+                  DELIMITED SIZE INTO WS-BR-CMD
+           CALL 'SYSTEM' USING WS-BR-CMD
+           MOVE 0 TO WS-BR-OK
+           IF RETURN-CODE = 0
+               MOVE SPACES TO WS-BR-SALDO-STR
+               OPEN INPUT ARQBRIDGE
+               IF FS-BRIDGE-OK
+                   PERFORM UNTIL FS-BRIDGE-EOF
+                       READ ARQBRIDGE INTO WS-BR-LINE
+                       IF NOT FS-BRIDGE-EOF
+                           MOVE SPACES TO WS-BR-KEY WS-BR-VAL
+                           UNSTRING WS-BR-LINE DELIMITED BY '='
+                               INTO WS-BR-KEY WS-BR-VAL
+                           IF FUNCTION TRIM(WS-BR-KEY) =
+                              'LEDGER_BALANCE'
+                               MOVE FUNCTION TRIM(WS-BR-VAL)
+                                   TO WS-BR-SALDO-STR
+                               COMPUTE WS-BR-SALDO-NOVO =
+                                   FUNCTION NUMVAL(WS-BR-SALDO-STR)
+                               MOVE 1 TO WS-BR-OK
+                           END-IF
+                       END-IF
+                   END-PERFORM
+                   CLOSE ARQBRIDGE
+               END-IF
+           END-IF.
+
        2800-CADASTRAR-CHAVE-PIX.
            DISPLAY 'Conta para cadastrar chave PIX: '
            ACCEPT WS-ORG-NUM
@@ -430,7 +574,6 @@
            IF LS-CODIGO NOT = 0
                EXIT PARAGRAPH
            END-IF
-      *    Gera chave aleatoria: timestamp + 2 numeros pseudoaleatorios
            MOVE FUNCTION CURRENT-DATE(1:14) TO WS-PIX-TS
            MOVE FUNCTION CURRENT-DATE(1:8) TO WS-PIX-SEED
            COMPUTE WS-PIX-RN1 = FUNCTION INTEGER(

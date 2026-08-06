@@ -1,7 +1,3 @@
-      *================================================================
-      * BANKTAX.COB - Informe de Rendimentos / Declaracao IR
-      * Sistema Bancario COBOL
-      *================================================================
        IDENTIFICATION DIVISION.
        PROGRAM-ID. BANKTAX.
 
@@ -92,9 +88,7 @@
            MOVE 0 TO LS-CODIGO
            GOBACK.
 
-      *================================================================
        1000-MENU SECTION.
-      *================================================================
        1000-INICIO.
            DISPLAY '========================================'
            DISPLAY '  INFORME DE RENDIMENTOS - IMPOSTO DE RENDA'
@@ -117,9 +111,7 @@
                WHEN OTHER DISPLAY 'OPCAO INVALIDA'
            END-EVALUATE.
 
-      *================================================================
        2000-INFORME-COMPLETO SECTION.
-      *================================================================
        2000-INICIO.
            DISPLAY 'Numero da conta: '
            ACCEPT WS-TAX-CONTA
@@ -152,9 +144,7 @@
            DISPLAY '   e Nao Tributaveis, codigo 12'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        3000-POR-CATEGORIA SECTION.
-      *================================================================
        3000-INICIO.
            DISPLAY 'Conta: '
            ACCEPT WS-TAX-CONTA
@@ -174,9 +164,7 @@
            DISPLAY '========================================'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        4000-IRRF SECTION.
-      *================================================================
        4000-INICIO.
            DISPLAY 'Conta: '
            ACCEPT WS-TAX-CONTA
@@ -200,9 +188,7 @@
            DISPLAY '========================================'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        5000-SALDO-3112 SECTION.
-      *================================================================
        5000-INICIO.
            DISPLAY 'Conta: '
            ACCEPT WS-TAX-CONTA
@@ -226,9 +212,7 @@
            DISPLAY '========================================'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        6000-MOVIMENTACOES SECTION.
-      *================================================================
        6000-INICIO.
            DISPLAY 'Conta: '
            ACCEPT WS-TAX-CONTA
@@ -263,9 +247,7 @@
            DISPLAY '========================================'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        9700-VARRER-TRANSACOES.
-      *================================================================
            MOVE ZEROS TO WS-TAX-REC-REN WS-TAX-REC-TAR
                          WS-TAX-REC-JUR WS-TAX-CTR
            MOVE WS-TAX-ANO TO WS-TAX-ANO-X
@@ -293,7 +275,5 @@
            COMPUTE WS-TAX-IRRF =
                (WS-TAX-REC-REN + WS-TAX-REC-JUR) * 0,15.
 
-      *================================================================
        9999-FIM.
-      *================================================================
            EXIT PROGRAM.
