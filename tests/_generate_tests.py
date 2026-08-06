@@ -19,13 +19,13 @@ CATEGORIES = [
     (os.path.join("acceptance", "regulatory"), "check_acceptance_regulatory", "acceptance_regulatory"),
 ]
 
-TEMPLATE = '''import pytest
+TEMPLATE = """import pytest
 
 
 @pytest.mark.{marker}
 def test_{prefix}_{modname}({fixture}):
     {fixture}("{MODULE}")
-'''
+"""
 
 
 def main():
