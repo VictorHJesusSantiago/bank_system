@@ -1,7 +1,3 @@
-      *================================================================
-      * BANKSCORE.COB - Score de Credito (Analise e Pontuacao)
-      * Sistema Bancario COBOL
-      *================================================================
        IDENTIFICATION DIVISION.
        PROGRAM-ID. BANKSCORE.
 
@@ -69,9 +65,7 @@
            MOVE 0 TO LS-CODIGO
            GOBACK.
 
-      *================================================================
        1000-MENU SECTION.
-      *================================================================
        1000-INICIO.
            DISPLAY '========================================'
            DISPLAY '       SCORE DE CREDITO'
@@ -94,9 +88,7 @@
                WHEN OTHER DISPLAY 'OPCAO INVALIDA'
            END-EVALUATE.
 
-      *================================================================
        2000-CONSULTAR SECTION.
-      *================================================================
        2000-INICIO.
            DISPLAY 'Conta: '
            ACCEPT WS-SCORE-CONTA-NUM
@@ -126,9 +118,7 @@
            DISPLAY '========================================'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        3000-CALCULAR SECTION.
-      *================================================================
        3000-INICIO.
            DISPLAY '--- CALCULAR / ATUALIZAR SCORE ---'
            DISPLAY 'Conta: '
@@ -143,15 +133,16 @@
            ACCEPT SCORE-FATOR-RELACION
            DISPLAY 'Nivel de endividamento atual (0-100): '
            ACCEPT SCORE-FATOR-ENDIVID
-      *    Pontuacao por renda (faixas)
            EVALUATE TRUE
-               WHEN WS-SCORE-RENDA >= 10000,00 MOVE 250 TO SCORE-FATOR-RENDA
-               WHEN WS-SCORE-RENDA >= 5000,00  MOVE 200 TO SCORE-FATOR-RENDA
-               WHEN WS-SCORE-RENDA >= 2000,00  MOVE 150 TO SCORE-FATOR-RENDA
-               WHEN OTHER                      MOVE 100 TO SCORE-FATOR-RENDA
+               WHEN WS-SCORE-RENDA >= 10000,00
+                   MOVE 250 TO SCORE-FATOR-RENDA
+               WHEN WS-SCORE-RENDA >= 5000,00
+                   MOVE 200 TO SCORE-FATOR-RENDA
+               WHEN WS-SCORE-RENDA >= 2000,00
+                   MOVE 150 TO SCORE-FATOR-RENDA
+               WHEN OTHER
+                   MOVE 100 TO SCORE-FATOR-RENDA
            END-EVALUATE
-      *    Composicao do score (pesos): renda 25%, pontualidade 35%,
-      *    relacionamento 15% (capado em 60 meses), endividamento 25% (inverso)
            COMPUTE SCORE-VALOR =
                SCORE-FATOR-RENDA
                + (SCORE-FATOR-PONTUAL * 3,5)
@@ -178,9 +169,7 @@
                    ' (Faixa ' SCORE-FAIXA ')'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        4000-DETALHAR SECTION.
-      *================================================================
        4000-INICIO.
            DISPLAY 'Conta: '
            ACCEPT WS-SCORE-CONTA-NUM
@@ -203,9 +192,7 @@
            DISPLAY '========================================'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        5000-SIMULAR-IMPACTO SECTION.
-      *================================================================
        5000-INICIO.
            DISPLAY 'Conta: '
            ACCEPT WS-SCORE-CONTA-NUM
@@ -218,7 +205,6 @@
            END-IF
            DISPLAY 'Valor da nova divida/emprestimo pretendido (R$): '
            ACCEPT WS-SCORE-DIVIDA-NOVA
-      *    Impacto estimado: reduz score proporcionalmente ao valor
            COMPUTE WS-SCORE-IMPACTO =
                (WS-SCORE-DIVIDA-NOVA / 1000) * 5
            IF WS-SCORE-IMPACTO > 150
@@ -237,9 +223,7 @@
            DISPLAY '========================================'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        6000-DICAS SECTION.
-      *================================================================
        6000-INICIO.
            DISPLAY '========================================'
            DISPLAY ' DICAS PARA MELHORAR SEU SCORE'
@@ -253,7 +237,5 @@
            DISPLAY '========================================'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        9999-FIM.
-      *================================================================
            EXIT PROGRAM.

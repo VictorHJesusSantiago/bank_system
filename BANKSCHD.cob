@@ -1,8 +1,3 @@
-      *===============================================================
-      * BANKSCHD.COB - Modulo de Agendamentos
-      * Sistema Bancario COBOL
-      * Versao: 1.0
-      *===============================================================
        IDENTIFICATION DIVISION.
        PROGRAM-ID. BANKSCHD.
 
