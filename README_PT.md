@@ -242,6 +242,83 @@ flowchart LR
 
 </details>
 
+## 🧱 Núcleo transacional e segurança
+
+O legado COBOL é complementado por `bank_core.py`, que mantém a fonte de
+verdade financeira em `BANKCORE.db` usando SQLite em modo WAL, `synchronous =
+FULL` e transações `BEGIN IMMEDIATE`.
+
+Recursos implementados:
+
+- razão de partidas dobradas e plano de contas;
+- valores exclusivamente em centavos, sem `float`;
+- idempotência, UUID global, rollback e recuperação pelo journal;
+- saldos contábil, disponível, bloqueado e projetado;
+- reservas, captura, liberação, compensação futura e estornos parciais;
+- histórico de saldo e auditoria encadeados por SHA-256;
+- reconciliação, fechamento diário/mensal, integridade, `REINDEX` e backup;
+- liquidação dos módulos satélite e agendamentos recorrentes;
+- Argon2id, bloqueio progressivo, sessões, TOTP, códigos de recuperação;
+- RBAC, titularidade/procuração, papéis PJ e autorização por quatro olhos;
+- outbox local para simular e-mail, SMS e notificações sem serviços externos.
+
+`bank_advanced.py` acrescenta:
+
+- cofre AES-256-GCM, rotação de chaves e backups criptografados testáveis;
+- tokenização de PAN, cartão virtual rotativo sem persistência de CVV e chaves
+  PIX criptográficas;
+- mascaramento de CPF/CNPJ, cartão, telefone e e-mail;
+- rate limit, favorecido em quarentena, dispositivos confiáveis, blocklist,
+  regras antifraude, modo rua, código de coerção, casos e contestações;
+- cadastro único KYC, PII/documentos criptografados, validação CPF/CNPJ,
+  prova de vida sandbox, beneficiário final, consentimentos, timeline e SLA;
+- contas conjuntas, de menor, universitárias, básicas, pré-pagas, PJ,
+  subcontas e multimoeda, pacotes, limites, bloqueios e encerramento;
+- busca de extratos, OFX, máquina de estados, metadados, anexos criptografados,
+  comprovantes e lotes PJ com aprovação.
+
+`bank_pix.py` implementa o sandbox PIX integrado ao razão:
+
+- ciclo de vida de chaves CPF/CNPJ/e-mail/telefone/EVP, portabilidade e posse;
+- confirmação de recebedor, limites diurno/noturno/favorecido e contatos;
+- payload EMV com CRC16, Copia e Cola e QR estático/dinâmico;
+- cobrança aberta/fixa, vencimento, juros, multa e desconto;
+- transferência, aproximação demonstrativa, E2E ID e comprovante;
+- devolução total/parcial, solicitação, disputa e bloqueio cautelar;
+- webhooks assinados, conciliação e histórico persistente.
+
+`bank_openfinance.py` implementa o sandbox Open Finance:
+
+- servidor HTTP local e aplicação testável sem socket;
+- clientes de API, autenticação, escopos e rate limit;
+- consentimento com autenticação, confirmação, validade, revogação e histórico;
+- compartilhamento de cadastro, contas, extratos, cartões, crédito,
+  investimentos, câmbio, previdência e seguros;
+- importação simulada, agregador e visão financeira multibanco;
+- iniciação idempotente de pagamento e encaminhamento de crédito;
+- certificados Ed25519, assinatura/verificação e logs com correlation ID;
+- OpenAPI 3.1, health/readiness e dados sintéticos determinísticos.
+
+`bank_platform.py` acrescenta serviços operacionais:
+
+- categorização, divisão de compras, orçamentos, metas e saúde financeira;
+- notificações persistentes, preferências, templates e suporte com SLA;
+- inventário de dados, requisições LGPD, exportação, legal hold e incidentes;
+- políticas e casos de compliance, detecção de fracionamento e protocolos;
+- dashboards contábeis reais, configurações e relatórios assinados por digest.
+
+Instalação e validação:
+
+```bash
+make core-deps
+make core-test
+python3 bank_core_cli.py init
+```
+
+A CLI JSON `bank_core_cli.py` é a ponte estável para automações e módulos
+COBOL. Execute `python3 bank_core_cli.py --help` para consultar as operações.
+O `BANKMAIN` exige login pelo `bank_security_console.py` antes de exibir o menu.
+
 ## 🛠️ Stack Tecnológico
 
 <details>

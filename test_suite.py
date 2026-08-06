@@ -7,20 +7,21 @@ Requires Linux/WSL2 (uses pty). Each test group is independent.
 
 import os
 import re
-import sys
 import time
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import List, Optional, Tuple
 
-# ─── infrastructure (mirrors acceptance_regression.py) ──────────────────────
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 BANKMAIN = os.path.join(ROOT, "bin", "bankmain")
 LIBPATH = os.path.join(ROOT, "bin")
 
 try:
-    import pty, select, subprocess
+    import pty
+    import select
+    import subprocess
+
     _HAS_PTY = True
 except ImportError:
     _HAS_PTY = False
@@ -35,8 +36,13 @@ def run_session(inputs: List[str], timeout: float = 30.0, delay: float = 0.07) -
     env["COB_LIBRARY_PATH"] = LIBPATH
     master_fd, slave_fd = pty.openpty()
     proc = subprocess.Popen(
-        [BANKMAIN], cwd=ROOT, stdin=slave_fd, stdout=slave_fd,
-        stderr=slave_fd, env=env, close_fds=True,
+        [BANKMAIN],
+        cwd=ROOT,
+        stdin=slave_fd,
+        stdout=slave_fd,
+        stderr=slave_fd,
+        env=env,
+        close_fds=True,
     )
     os.close(slave_fd)
     chunks: List[str] = []
@@ -72,7 +78,7 @@ def run_session(inputs: List[str], timeout: float = 30.0, delay: float = 0.07) -
     return "".join(chunks)
 
 
-# ─── test framework ──────────────────────────────────────────────────────────
+
 
 @dataclass
 class TestResult:
@@ -85,7 +91,9 @@ class TestResult:
 _results: List[TestResult] = []
 
 
-def check(name: str, output: str, expected: List[str], not_expected: Optional[List[str]] = None) -> TestResult:
+def check(
+    name: str, output: str, expected: List[str], not_expected: Optional[List[str]] = None
+) -> TestResult:
     missing = [t for t in expected if t not in output]
     bad = [t for t in (not_expected or []) if t in output]
     passed = not missing and not bad
@@ -105,7 +113,7 @@ def check(name: str, output: str, expected: List[str], not_expected: Optional[Li
     return r
 
 
-# ─── helpers ─────────────────────────────────────────────────────────────────
+
 
 def _today_prefix() -> str:
     """Account number prefix = YYYYMMDD."""
@@ -132,9 +140,8 @@ def _make_barcode_invalid_dv() -> str:
     return barcode[:-1] + wrong
 
 
-# ─── seed accounts ───────────────────────────────────────────────────────────
 
-_ACCOUNTS: List[Tuple[str, str, str, str]] = []   # (num, cpf, email, phone)
+_ACCOUNTS: List[Tuple[str, str, str, str]] = []
 _CPF_A = "52998224725"
 _CPF_B = "11144477735"
 _CPF_C = "12345678909"
@@ -143,16 +150,36 @@ _CPF_C = "12345678909"
 def _seed_accounts() -> None:
     """Ensure three QA accounts exist, returning their numbers."""
     global _ACCOUNTS
-    # Create accounts
     run_session(
-        ["1",
-         "01", "QA ALICE", _CPF_A, "CC", "0001", "alice@qa.com", "11900000001",
-         "01", "QA BOB",   _CPF_B, "CC", "0001", "bob@qa.com",   "11900000002",
-         "01", "QA CAROL", _CPF_C, "CP", "0001", "carol@qa.com", "11900000003",
-         "00", "0"],
-        timeout=60, delay=0.09,
+        [
+            "1",
+            "01",
+            "QA ALICE",
+            _CPF_A,
+            "CC",
+            "0001",
+            "alice@qa.com",
+            "11900000001",
+            "01",
+            "QA BOB",
+            _CPF_B,
+            "CC",
+            "0001",
+            "bob@qa.com",
+            "11900000002",
+            "01",
+            "QA CAROL",
+            _CPF_C,
+            "CP",
+            "0001",
+            "carol@qa.com",
+            "11900000003",
+            "00",
+            "0",
+        ],
+        timeout=60,
+        delay=0.09,
     )
-    # Discover by brute-force probing (same strategy as acceptance_regression.py)
     prefix = _today_prefix()
     seq = ["1"]
     candidates = [str(int(prefix) * 100 + i) for i in range(50)]
@@ -178,43 +205,51 @@ def _seed_accounts() -> None:
         print(f"  [WARN] Only {len(_ACCOUNTS)} accounts found after seed.")
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# TEST GROUPS
-# ═══════════════════════════════════════════════════════════════════════════════
+
 
 def test_cpf_validation() -> None:
     print("\n── CPF Validation ─────────────────────────────────────────")
 
-    # Valid CPF → account opens
     out = run_session(
         ["1", "01", "CPF VALID", "52998224725", "CC", "0001", "v@qa.com", "11900000099", "00", "0"]
     )
     check("Valid CPF accepted", out, ["CONTA ABERTA COM SUCESSO"])
 
-    # All-same digits (111...1) must be rejected
     out = run_session(
         ["1", "01", "CPF SAME", "11111111111", "CC", "0001", "x@qa.com", "11900000098", "00", "0"]
     )
     check("All-same digits CPF rejected", out, ["CPF INVALIDO"], not_expected=["CONTA ABERTA COM SUCESSO"])
 
-    # All-zeros CPF
     out = run_session(
         ["1", "01", "CPF ZERO", "00000000000", "CC", "0001", "x@qa.com", "11900000097", "00", "0"]
     )
     check("All-zeros CPF rejected", out, ["CPF INVALIDO"])
 
-    # Incorrect check digits (11144477736 — last digit wrong)
     out = run_session(
         ["1", "01", "CPF BAD DV", "11144477736", "CC", "0001", "x@qa.com", "11900000096", "00", "0"]
     )
     check("Invalid 2nd check digit rejected", out, ["CPF INVALIDO"])
 
-    # Correct CPF after incorrect one in same session
     out = run_session(
-        ["1",
-         "01", "CPF WRONG", "11111111111", "CC", "0001", "x@qa.com", "11900000095",  # rejected
-         "01", "CPF RIGHT", "11144477735", "CC", "0001", "r@qa.com", "11900000094",  # accepted
-         "00", "0"]
+        [
+            "1",
+            "01",
+            "CPF WRONG",
+            "11111111111",
+            "CC",
+            "0001",
+            "x@qa.com",
+            "11900000095",
+            "01",
+            "CPF RIGHT",
+            "11144477735",
+            "CC",
+            "0001",
+            "r@qa.com",
+            "11900000094",
+            "00",
+            "0",
+        ]
     )
     check("Good CPF succeeds after rejected CPF in same session", out, ["CONTA ABERTA COM SUCESSO"])
 
@@ -222,16 +257,30 @@ def test_cpf_validation() -> None:
 def test_account_management() -> None:
     print("\n── Account Management ─────────────────────────────────────")
 
-    # Confirm success screen is absent when WRITE fails due to dup num in same session
     out = run_session(
-        ["1",
-         "01", "DUP CPF TEST", "52998224725", "CC", "0001", "d1@qa.com", "11900000093",
-         "01", "DUP CPF TEST", "52998224725", "CC", "0001", "d2@qa.com", "11900000092",
-         "00", "0"],
-        timeout=40, delay=0.09,
+        [
+            "1",
+            "01",
+            "DUP CPF TEST",
+            "52998224725",
+            "CC",
+            "0001",
+            "d1@qa.com",
+            "11900000093",
+            "01",
+            "DUP CPF TEST",
+            "52998224725",
+            "CC",
+            "0001",
+            "d2@qa.com",
+            "11900000092",
+            "00",
+            "0",
+        ],
+        timeout=40,
+        delay=0.09,
     )
-    check("Duplicate account write shows warning, not double success",
-          out, ["ATENCAO: CPF ja possui conta"])
+    check("Duplicate account write shows warning, not double success", out, ["ATENCAO: CPF ja possui conta"])
 
     if not _ACCOUNTS:
         print("  [SKIP] No seed accounts — skipping remaining account tests")
@@ -239,25 +288,19 @@ def test_account_management() -> None:
 
     num = _ACCOUNTS[0][0]
 
-    # Lock account
     out = run_session(["1", "04", num, "00", "0"])
     check("Account lock", out, ["CONTA BLOQUEADA"])
 
-    # Unlock account
     out = run_session(["1", "04", num, "00", "0"])
     check("Account unlock", out, ["CONTA DESBLOQUEADA"])
 
-    # Search by CPF
     out = run_session(["1", "07", _ACCOUNTS[0][1], "00", "0"])
     check("Search account by CPF", out, ["DADOS DA CONTA"])
 
-    # Close account with balance should fail (seed has 0 balance if no deposits yet)
-    # First deposit to give it a balance, then try to close
     out = run_session(["2", "01", num, "100,00", "00", "0"])
     out_close = run_session(["1", "05", num, "00", "0"])
     check("Close account with positive balance blocked", out_close, ["CONTA POSSUI SALDO"])
 
-    # Maintenance fee respects limit (account with near-limit balance)
     out = run_session(["1", "08", "00", "0"])
     check("Apply maintenance fees completes", out, ["TARIFAS APLICADAS"])
 
@@ -265,7 +308,8 @@ def test_account_management() -> None:
 def test_deposits() -> None:
     print("\n── Deposits ───────────────────────────────────────────────")
     if not _ACCOUNTS:
-        print("  [SKIP]"); return
+        print("  [SKIP]")
+        return
     num = _ACCOUNTS[0][0]
 
     out = run_session(["2", "01", num, "500,00", "00", "0"])
@@ -277,7 +321,6 @@ def test_deposits() -> None:
     out = run_session(["2", "01", num, "-50,00", "00", "0"])
     check("Negative deposit rejected", out, ["VALOR INVALIDO"])
 
-    # Audit record written (depositing and checking via extrato)
     out_ext = run_session(["2", "08", num, "00", "0"])
     check("Deposit appears in 30-day statement", out_ext, ["DEP"])
 
@@ -285,10 +328,10 @@ def test_deposits() -> None:
 def test_withdrawals() -> None:
     print("\n── Withdrawals ────────────────────────────────────────────")
     if not _ACCOUNTS:
-        print("  [SKIP]"); return
+        print("  [SKIP]")
+        return
     num = _ACCOUNTS[0][0]
 
-    # Ensure balance
     run_session(["2", "01", num, "1000,00", "00", "0"])
 
     out = run_session(["2", "02", num, "100,00", "00", "0"])
@@ -307,30 +350,25 @@ def test_withdrawals() -> None:
 def test_ted_doc() -> None:
     print("\n── TED / DOC Transfers ────────────────────────────────────")
     if len(_ACCOUNTS) < 2:
-        print("  [SKIP]"); return
+        print("  [SKIP]")
+        return
     src, dst = _ACCOUNTS[0][0], _ACCOUNTS[1][0]
 
-    # Top up
     run_session(["2", "01", src, "2000,00", "00", "0"])
 
-    # TED success, type logged correctly
     out = run_session(["2", "03", src, dst, "10,00", "S", "00", "0"])
     check("TED transfer succeeds", out, ["TED REALIZADO"])
 
-    # DOC success with correct type (not TED)
     out = run_session(["2", "04", src, dst, "5,00", "S", "00", "0"])
     check("DOC transfer succeeds", out, ["DOC REALIZADO"])
     check("DOC NOT logged as TED", out, [], not_expected=["TED REALIZADO"])
 
-    # Confirm = N cancels
     out = run_session(["2", "03", src, dst, "10,00", "N", "00", "0"])
     check("TED cancelled when confirm=N", out, ["OPERACAO CANCELADA"])
 
-    # Insufficient balance including fee
     out = run_session(["2", "03", src, dst, "99999,00", "S", "00", "0"])
     check("TED rejected when balance < amount+fee", out, ["SALDO INSUFICIENTE"])
 
-    # Non-existent destination
     out = run_session(["2", "03", src, "0000000001", "10,00", "S", "00", "0"])
     check("TED to non-existent account rejected", out, ["CONTA DESTINO NAO ENCONTRADA"])
 
@@ -338,33 +376,28 @@ def test_ted_doc() -> None:
 def test_pix() -> None:
     print("\n── PIX ────────────────────────────────────────────────────")
     if len(_ACCOUNTS) < 2:
-        print("  [SKIP]"); return
+        print("  [SKIP]")
+        return
     src, dst_cpf = _ACCOUNTS[0][0], _ACCOUNTS[1][1]
 
     run_session(["2", "01", src, "1000,00", "00", "0"])
 
-    # PIX succeeds (BANKTRAN module, CPF key)
     out = run_session(["2", "05", src, dst_cpf, "5,00", "00", "0"])
     check("PIX succeeds via BANKTRAN", out, ["PIX ENVIADO COM SUCESSO"])
 
-    # PIX audit type is PIX, not TED
     out_ext = run_session(["2", "08", src, "00", "0"])
     check("PIX logged with type PIX", out_ext, ["PIX"])
 
-    # PIX zero fee: try with amount that would fail if fee were 14.90
-    run_session(["2", "01", src, "20,00", "00", "0"])  # give exactly 20
+    run_session(["2", "01", src, "20,00", "00", "0"])
     out = run_session(["2", "05", src, dst_cpf, "20,00", "00", "0"])
     check("PIX uses zero fee (no R$14.90 deducted)", out, ["PIX ENVIADO COM SUCESSO"])
 
-    # PIX with insufficient balance
     out = run_session(["2", "05", src, dst_cpf, "99999,00", "00", "0"])
     check("PIX with insufficient balance rejected", out, ["SALDO INSUFICIENTE"])
 
-    # PIX to non-existent CPF
     out = run_session(["2", "05", src, "99999999999", "5,00", "00", "0"])
     check("PIX to unknown CPF rejected", out, ["CPF DESTINO NAO ENCONTRADO"])
 
-    # PIX via BANKTRF module (multi-key) — email key
     if _ACCOUNTS[1][2] and "@" in _ACCOUNTS[1][2]:
         src2 = _ACCOUNTS[0][0]
         run_session(["2", "01", src2, "100,00", "00", "0"])
@@ -375,7 +408,8 @@ def test_pix() -> None:
 def test_bill_payment() -> None:
     print("\n── Bill Payment ───────────────────────────────────────────")
     if not _ACCOUNTS:
-        print("  [SKIP]"); return
+        print("  [SKIP]")
+        return
     num = _ACCOUNTS[0][0]
     run_session(["2", "01", num, "500,00", "00", "0"])
 
@@ -383,23 +417,18 @@ def test_bill_payment() -> None:
     invalid_bc = _make_barcode_invalid_dv()
     short_bc = "12345"
 
-    # Valid barcode via BANKPAY (menu 5)
     out = run_session(["5", "01", num, valid_bc, "3,00", "00", "0"])
     check("Bill payment with valid barcode succeeds", out, ["BOLETO PAGO"])
 
-    # Invalid check digit
     out = run_session(["5", "01", num, invalid_bc, "3,00", "00", "0"])
     check("Bill payment with invalid DV rejected", out, ["REPROVADO NO DV"])
 
-    # Too short barcode
     out = run_session(["5", "01", num, short_bc, "3,00", "00", "0"])
     check("Bill payment with short barcode rejected", out, ["44 DIGITOS"])
 
-    # Insufficient balance
     out = run_session(["5", "01", num, valid_bc, "99999,00", "00", "0"])
     check("Bill payment insufficient balance rejected", out, ["SALDO"])
 
-    # BANKTRAN boleto path (menu 2 → 06) also creates audit record
     out = run_session(["2", "06", valid_bc, num, "2,00", "00", "0"])
     check("Bill payment via BANKTRAN creates audit record", out, ["BOLETO PAGO COM SUCESSO"])
     out_ext = run_session(["2", "08", num, "00", "0"])
@@ -409,14 +438,14 @@ def test_bill_payment() -> None:
 def test_statement_filter() -> None:
     print("\n── 30-Day Statement Filter ────────────────────────────────")
     if not _ACCOUNTS:
-        print("  [SKIP]"); return
+        print("  [SKIP]")
+        return
     num = _ACCOUNTS[0][0]
 
     out = run_session(["2", "08", num, "00", "0"])
     check("Statement shows date range header", out, ["EXTRATO ULTIMOS 30 DIAS"])
     check("Statement shows De: ... Ate: ... dates", out, ["De:", "Ate:"])
 
-    # BANKQRY extrato also filters
     out = run_session(["3", "03", num, "00", "0"])
     check("BANKQRY extrato shows 30-day header", out, ["EXTRATO ULTIMOS 30 DIAS"])
 
@@ -424,32 +453,34 @@ def test_statement_filter() -> None:
 def test_reversal() -> None:
     print("\n── Transaction Reversal (Estorno) ─────────────────────────")
     if not _ACCOUNTS:
-        print("  [SKIP]"); return
+        print("  [SKIP]")
+        return
     num = _ACCOUNTS[0][0]
 
     run_session(["2", "01", num, "200,00", "00", "0"])
 
-    # Find a valid transaction ID from the statement
     out_ext = run_session(["2", "08", num, "00", "0"])
-    # IDs are 15-digit numbers in the output
-    id_matches = re.findall(r'\b(\d{14,15})\b', out_ext)
+    id_matches = re.findall(r"\b(\d{14,15})\b", out_ext)
     if not id_matches:
         print("  [SKIP] No transaction IDs found in statement")
         return
     trans_id = id_matches[0]
 
-    # Reverse a valid (status E) transaction
     out = run_session(["2", "09", trans_id, "00", "0"])
-    check("Reversal of settled transaction succeeds", out,
-          ["TRANSACAO ESTORNADA", "TRANSACAO NAO ENCONTRADA"],
-          not_expected=["ERRO"])
+    check(
+        "Reversal of settled transaction succeeds",
+        out,
+        ["TRANSACAO ESTORNADA", "TRANSACAO NAO ENCONTRADA"],
+        not_expected=["ERRO"],
+    )
 
-    # Try to reverse the same transaction again (now status X)
     out2 = run_session(["2", "09", trans_id, "00", "0"])
-    check("Re-reversal of already-reversed transaction blocked", out2,
-          ["NAO PODE SER ESTORNADA", "NAO ENCONTRADA"])
+    check(
+        "Re-reversal of already-reversed transaction blocked",
+        out2,
+        ["NAO PODE SER ESTORNADA", "NAO ENCONTRADA"],
+    )
 
-    # Non-existent ID
     out3 = run_session(["2", "09", "999999999999999", "00", "0"])
     check("Reversal of non-existent transaction blocked", out3, ["NAO ENCONTRADA"])
 
@@ -457,28 +488,22 @@ def test_reversal() -> None:
 def test_investments() -> None:
     print("\n── Investments (CDB / LCI) ────────────────────────────────")
 
-    # CDB below minimum (R$ 999)
     out = run_session(["6", "01", "999,00", "180", "N", "00", "0"])
     check("CDB below R$1000 minimum rejected", out, ["VALOR ABAIXO DO MINIMO"])
 
-    # CDB with valid amount — 180 days → 22.5% IR
     out = run_session(["6", "01", "1000,00", "180", "S", "00", "0"])
     check("CDB R$1000 / 180 days shows IR 22,5%", out, ["22,50"])
     check("CDB shows gross and net value", out, ["Valor Bruto Futuro", "Valor Liquido"])
 
-    # CDB > 720 days → 15% IR
     out = run_session(["6", "01", "1000,00", "721", "N", "00", "0"])
     check("CDB > 720 days shows IR 15%", out, ["15,00"])
 
-    # LCI below minimum (R$ 4999)
     out = run_session(["6", "02", "4999,00", "00", "0"])
     check("LCI below R$5000 minimum rejected", out, ["VALOR ABAIXO DO MINIMO"])
 
-    # LCI valid → tax-exempt
     out = run_session(["6", "02", "5000,00", "00", "0"])
     check("LCI R$5000 accepted as tax-exempt", out, ["SEM IR", "LCI"])
 
-    # Simulator uses same CDB calculation
     out = run_session(["6", "08", "1000,00", "252", "00", "0"])
     check("Investment simulator runs successfully", out, ["Resultado liquido"])
 
@@ -490,16 +515,41 @@ def test_crm() -> None:
     cpf = ("9" + seed)[-11:]
 
     out = run_session(
-        ["7",
-         "01", cli_id, "CRM TEST USER", cpf, "RG123",
-         "19900115", "M", "SO", "DESENVOLVEDOR", "8000,00", "M",
-         "rua teste", "100", "SP", "01310100",
-         "02", cli_id,
-         "03", cli_id, "upd@qa.com", "11988880000", "COORDENADOR", "9500,00", "A",
-         "04", cli_id,
-         "02", cli_id,
-         "00", "0"],
-        timeout=80, delay=0.06,
+        [
+            "7",
+            "01",
+            cli_id,
+            "CRM TEST USER",
+            cpf,
+            "RG123",
+            "19900115",
+            "M",
+            "SO",
+            "DESENVOLVEDOR",
+            "8000,00",
+            "M",
+            "rua teste",
+            "100",
+            "SP",
+            "01310100",
+            "02",
+            cli_id,
+            "03",
+            cli_id,
+            "upd@qa.com",
+            "11988880000",
+            "COORDENADOR",
+            "9500,00",
+            "A",
+            "04",
+            cli_id,
+            "02",
+            cli_id,
+            "00",
+            "0",
+        ],
+        timeout=80,
+        delay=0.06,
     )
     check("CRM: customer created", out, ["CLIENTE CADASTRADO"])
     check("CRM: customer queried", out, ["CRM TEST USER"])
@@ -507,11 +557,27 @@ def test_crm() -> None:
     check("CRM: customer deactivated", out, ["CLIENTE INATIVADO"])
     check("CRM: status shows I after deactivation", out, ["Status: I", "INATIVADO"])
 
-    # Duplicate ID rejected
     out2 = run_session(
-        ["7", "01", cli_id, "DUP", cpf, "RG999",
-         "19900115", "M", "SO", "X", "1000,00", "C",
-         "rua x", "1", "SP", "01000000", "00", "0"],
+        [
+            "7",
+            "01",
+            cli_id,
+            "DUP",
+            cpf,
+            "RG999",
+            "19900115",
+            "M",
+            "SO",
+            "X",
+            "1000,00",
+            "C",
+            "rua x",
+            "1",
+            "SP",
+            "01000000",
+            "00",
+            "0",
+        ],
     )
     check("CRM: duplicate customer ID rejected", out2, ["ID JA EXISTENTE"])
 
@@ -519,26 +585,22 @@ def test_crm() -> None:
 def test_queries() -> None:
     print("\n── Queries ────────────────────────────────────────────────")
     if not _ACCOUNTS:
-        print("  [SKIP]"); return
+        print("  [SKIP]")
+        return
     num, cpf = _ACCOUNTS[0][0], _ACCOUNTS[0][1]
 
-    # Query by number (BANKQRY)
     out = run_session(["3", "01", num, "00", "0"])
     check("BANKQRY: query by account number", out, ["Titular:"])
 
-    # Query by CPF (BANKQRY)
     out = run_session(["3", "02", cpf, "00", "0"])
     check("BANKQRY: query by CPF", out, ["Titular:"])
 
-    # Non-existent account
     out = run_session(["3", "01", "0000000001", "00", "0"])
     check("BANKQRY: non-existent account returns not-found", out, ["NAO ENCONTRADA"])
 
-    # List all accounts (BANKACCT)
     out = run_session(["1", "06", "00", "0"])
     check("BANKACCT: list all accounts shows total", out, ["Total de Contas:"])
 
-    # Balance query (BANKTRAN)
     out = run_session(["2", "07", num, "00", "0"])
     check("BANKTRAN: balance query shows saldo", out, ["SALDO DISPONIVEL"])
 
@@ -555,7 +617,6 @@ def test_reports() -> None:
     out = run_session(["8", "04", "00", "0"])
     check("Negative balances report generates", out, ["CONTAS COM SALDO NEGATIVO"])
 
-    # BANKREP.TXT should be created/extended (file exists after report)
     rep_path = os.path.join(ROOT, "BANKREP.TXT")
     out = run_session(["8", "01", "00", "0"])
     check("Report file exists after balancete", out, ["BALANCETE GERADO"])
@@ -567,42 +628,37 @@ def test_admin() -> None:
     print("\n── Administration ─────────────────────────────────────────")
 
     out = run_session(["9", "01", "00", "0"])
-    check("Admin stats shows account/transaction/customer counts",
-          out, ["Contas:", "Transacoes:", "Clientes:"])
+    check(
+        "Admin stats shows account/transaction/customer counts", out, ["Contas:", "Transacoes:", "Clientes:"]
+    )
 
 
 def test_transfer_module() -> None:
     print("\n── BANKTRF Transfer Module ────────────────────────────────")
     if len(_ACCOUNTS) < 2:
-        print("  [SKIP]"); return
+        print("  [SKIP]")
+        return
     src, dst = _ACCOUNTS[0][0], _ACCOUNTS[1][0]
     run_session(["2", "01", src, "500,00", "00", "0"])
 
-    # TED via BANKTRF (menu 4 → 01)
     out = run_session(["4", "01", src, dst, "10,00", "00", "0"])
     check("BANKTRF TED transfer succeeds", out, ["TED EFETUADA"])
 
-    # DOC via BANKTRF (menu 4 → 02)
     out = run_session(["4", "02", src, dst, "5,00", "00", "0"])
     check("BANKTRF DOC transfer succeeds", out, ["DOC EFETUADA"])
     check("BANKTRF DOC not logged as TED", out, [], not_expected=["TED EFETUADA"])
 
-    # PIX via BANKTRF by CPF key (menu 4 → 03 → C)
     out = run_session(["4", "03", src, "C", _ACCOUNTS[1][1], "5,00", "00", "0"])
     check("BANKTRF PIX by CPF succeeds", out, ["PIX EFETUADO"])
 
-    # PIX to non-existent CPF key
     out = run_session(["4", "03", src, "C", "99999999999", "5,00", "00", "0"])
     check("BANKTRF PIX to unknown CPF key rejected", out, ["NAO ENCONTRADA"])
 
-    # Insufficient balance in BANKTRF
     out = run_session(["4", "01", src, dst, "99999,00", "00", "0"])
     check("BANKTRF TED insufficient balance rejected", out, ["INSUFICIENTE"])
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# RUNNER
-# ═══════════════════════════════════════════════════════════════════════════════
+
 
 def main() -> int:
     if os.name == "nt":
@@ -620,7 +676,6 @@ def main() -> int:
     _seed_accounts()
     print(f"  Accounts available: {len(_ACCOUNTS)}")
 
-    # Run all test groups
     test_cpf_validation()
     test_account_management()
     test_deposits()
@@ -637,7 +692,6 @@ def main() -> int:
     test_admin()
     test_transfer_module()
 
-    # Summary
     passed = sum(1 for r in _results if r.passed)
     total = len(_results)
     failed = [r for r in _results if not r.passed]
