@@ -1,7 +1,3 @@
-      *================================================================
-      * BANKNOTIF.COB - Notificacoes e Alertas
-      * Sistema Bancario COBOL
-      *================================================================
        IDENTIFICATION DIVISION.
        PROGRAM-ID. BANKNOTIF.
 
@@ -73,9 +69,7 @@
            MOVE 0 TO LS-CODIGO
            GOBACK.
 
-      *================================================================
        1000-MENU SECTION.
-      *================================================================
        1000-INICIO.
            DISPLAY '========================================'
            DISPLAY '      NOTIFICACOES E ALERTAS'
@@ -98,9 +92,7 @@
                WHEN OTHER DISPLAY 'OPCAO INVALIDA'
            END-EVALUATE.
 
-      *================================================================
        2000-CONFIGURAR SECTION.
-      *================================================================
        2000-INICIO.
            DISPLAY '--- CONFIGURAR ALERTAS ---'
            DISPLAY 'Numero da conta: '
@@ -144,9 +136,7 @@
            DISPLAY 'ALERTAS CONFIGURADOS COM SUCESSO!'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        3000-CONSULTAR SECTION.
-      *================================================================
        3000-INICIO.
            DISPLAY 'Numero da conta: '
            ACCEPT WS-NOTIF-CONTA-NUM
@@ -181,9 +171,7 @@
            DISPLAY '========================================'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        4000-ATIVAR-DESATIVAR SECTION.
-      *================================================================
        4000-INICIO.
            DISPLAY 'Numero da conta: '
            ACCEPT WS-NOTIF-CONTA-NUM
@@ -205,9 +193,7 @@
            END-IF
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        5000-TESTAR SECTION.
-      *================================================================
        5000-INICIO.
            DISPLAY 'Numero da conta: '
            ACCEPT WS-NOTIF-CONTA-NUM
@@ -236,9 +222,7 @@
            DISPLAY ' Notificacao de teste enviada!'
            MOVE 0 TO LS-CODIGO.
 
-      *================================================================
        6000-DESATIVAR-TUDO SECTION.
-      *================================================================
        6000-INICIO.
            DISPLAY 'Numero da conta: '
            ACCEPT WS-NOTIF-CONTA-NUM
@@ -264,7 +248,5 @@
                DISPLAY 'OPERACAO CANCELADA'
            END-IF.
 
-      *================================================================
        9999-FIM.
-      *================================================================
            EXIT PROGRAM.

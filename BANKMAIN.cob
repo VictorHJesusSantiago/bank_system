@@ -1,13 +1,6 @@
-      *================================================================
-      * BANKMAIN.COB - Programa Principal / Orquestrador
-      * Sistema Bancário COBOL - Ponto de Entrada
-      * Padrão: Service Orchestrator Pattern
-      * Versão: 2.0
-      *================================================================
        IDENTIFICATION DIVISION.
        PROGRAM-ID. BANKMAIN.
 
-      *----------------------------------------------------------------
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
        SOURCE-COMPUTER. IBM-MAINFRAME.
@@ -45,7 +38,6 @@
                ORGANIZATION IS LINE SEQUENTIAL
                FILE STATUS IS FS-LOCK.
 
-      *----------------------------------------------------------------
        DATA DIVISION.
        FILE SECTION.
        FD  ARQCONTAS.
@@ -108,7 +100,6 @@
        FD  ARQLCK.
        01  REG-LOCK                 PIC X(20).
 
-      *----------------------------------------------------------------
        WORKING-STORAGE SECTION.
        COPY BANKDATA.
 
@@ -138,6 +129,7 @@
            05  WS-AMBIENTE          PIC X(10) VALUE 'PRODUCAO'.
            05  WS-SESSION-ID        PIC X(32).
            05  WS-USUARIO-ID        PIC X(20).
+           05  WS-AUTH-COMMAND      PIC X(80).
 
        01  WS-DATETIME.
            05  WS-DATA-ATUAL        PIC 9(8).
@@ -155,22 +147,24 @@
            05  WS-MET-THROUGHPUT    PIC 9(8) COMP-3.
            05  WS-MET-DISPONIB      PIC 9(3)V99 COMP-3.
 
-      *----------------------------------------------------------------
        PROCEDURE DIVISION.
 
-      *================================================================
        0000-PRINCIPAL SECTION.
-      *================================================================
        0000-INICIO.
            PERFORM 1000-INICIALIZAR
            PERFORM 2000-PROCESSAR UNTIL CONTINUAR-NAO
            PERFORM 9000-FINALIZAR
            STOP RUN.
 
-      *================================================================
        1000-INICIALIZAR SECTION.
-      *================================================================
        1000-INICIO.
+           MOVE 'python3 bank_security_console.py login'
+             TO WS-AUTH-COMMAND
+           CALL 'SYSTEM' USING WS-AUTH-COMMAND
+           IF RETURN-CODE NOT = 0
+               DISPLAY 'ERRO: autenticacao obrigatoria falhou.'
+               STOP RUN
+           END-IF
            PERFORM 1100-ABRIR-ARQUIVOS
            PERFORM 1200-INICIALIZAR-SESSION
            PERFORM 1300-VERIFICAR-INTEGRIDADE
@@ -178,7 +172,6 @@
            EXIT SECTION.
 
        1100-ABRIR-ARQUIVOS.
-      *    Verifica lock de instancia unica
            OPEN INPUT ARQLCK
            IF FS-LOCK = '00'
                CLOSE ARQLCK
@@ -190,7 +183,6 @@
            MOVE FUNCTION CURRENT-DATE(1:14) TO REG-LOCK
            WRITE REG-LOCK
            CLOSE ARQLCK
-      *    Log de auditoria
            OPEN EXTEND ARQLOG
            IF FS-LOG = '35'
                OPEN OUTPUT ARQLOG
@@ -224,9 +216,7 @@
        1400-CARREGAR-CONFIGURACOES.
            CONTINUE.
 
-      *================================================================
        2000-PROCESSAR SECTION.
-      *================================================================
        2000-INICIO.
            PERFORM 2100-EXIBIR-MENU
            PERFORM 2200-LER-OPCAO
@@ -303,57 +293,83 @@
                    CALL 'BANKREP' USING WS-RETORNO
                WHEN '9'
                    CALL 'BANKADM' USING WS-RETORNO
-               WHEN 'A' 'a'
+               WHEN 'A'
+               WHEN 'a'
                    CALL 'BANKLOAN' USING WS-RETORNO
-               WHEN 'B' 'b'
+               WHEN 'B'
+               WHEN 'b'
                    CALL 'BANKCARD' USING WS-RETORNO
-               WHEN 'C' 'c'
+               WHEN 'C'
+               WHEN 'c'
                    CALL 'BANKSCHD' USING WS-RETORNO
-               WHEN 'D' 'd'
+               WHEN 'D'
+               WHEN 'd'
                    CALL 'BANKAUTH' USING WS-RETORNO
-               WHEN 'E' 'e'
+               WHEN 'E'
+               WHEN 'e'
                    CALL 'BANKFX' USING WS-RETORNO
-               WHEN 'F' 'f'
+               WHEN 'F'
+               WHEN 'f'
                    CALL 'BANKSEG' USING WS-RETORNO
-               WHEN 'G' 'g'
+               WHEN 'G'
+               WHEN 'g'
                    CALL 'BANKCONS' USING WS-RETORNO
-               WHEN 'I' 'i'
+               WHEN 'I'
+               WHEN 'i'
                    CALL 'BANKPREV' USING WS-RETORNO
-               WHEN 'J' 'j'
+               WHEN 'J'
+               WHEN 'j'
                    CALL 'BANKDEB' USING WS-RETORNO
-               WHEN 'K' 'k'
+               WHEN 'K'
+               WHEN 'k'
                    CALL 'BANKCAP' USING WS-RETORNO
-               WHEN 'L' 'l'
+               WHEN 'L'
+               WHEN 'l'
                    CALL 'BANKLIM' USING WS-RETORNO
-               WHEN 'M' 'm'
+               WHEN 'M'
+               WHEN 'm'
                    CALL 'BANKNOTIF' USING WS-RETORNO
-               WHEN 'N' 'n'
+               WHEN 'N'
+               WHEN 'n'
                    CALL 'BANKTAX' USING WS-RETORNO
-               WHEN 'O' 'o'
+               WHEN 'O'
+               WHEN 'o'
                    CALL 'BANKCHQ' USING WS-RETORNO
-               WHEN 'P' 'p'
+               WHEN 'P'
+               WHEN 'p'
                    CALL 'BANKFGTS' USING WS-RETORNO
-               WHEN 'Q' 'q'
+               WHEN 'Q'
+               WHEN 'q'
                    CALL 'BANKCOB' USING WS-RETORNO
-               WHEN 'R' 'r'
+               WHEN 'R'
+               WHEN 'r'
                    CALL 'BANKOVD' USING WS-RETORNO
-               WHEN 'S' 's'
+               WHEN 'S'
+               WHEN 's'
                    CALL 'BANKPOUP' USING WS-RETORNO
-               WHEN 'T' 't'
+               WHEN 'T'
+               WHEN 't'
                    CALL 'BANKCONSIG' USING WS-RETORNO
-               WHEN 'U' 'u'
+               WHEN 'U'
+               WHEN 'u'
                    CALL 'BANKSCORE' USING WS-RETORNO
-               WHEN 'V' 'v'
+               WHEN 'V'
+               WHEN 'v'
                    CALL 'BANKCASHBACK' USING WS-RETORNO
-               WHEN 'W' 'w'
+               WHEN 'W'
+               WHEN 'w'
                    CALL 'BANKRENEG' USING WS-RETORNO
-               WHEN 'X' 'x'
+               WHEN 'X'
+               WHEN 'x'
                    CALL 'BANKPORT' USING WS-RETORNO
-               WHEN 'Y' 'y'
+               WHEN 'Y'
+               WHEN 'y'
                    CALL 'BANKPJ' USING WS-RETORNO
-               WHEN 'Z' 'z'
+               WHEN 'Z'
+               WHEN 'z'
                    CALL 'BANKDOA' USING WS-RETORNO
-               WHEN 'H' 'h'
+               WHEN 'H'
+               WHEN 'h'
                    CALL 'BANKHELP' USING WS-RETORNO
                WHEN '0'
                    MOVE 'N' TO WS-CONTINUAR
@@ -365,13 +381,14 @@
            ADD 1 TO WS-CTR-OPERACOES
            PERFORM 9700-REGISTRAR-LOG.
 
-      *================================================================
        9000-FINALIZAR SECTION.
-      *================================================================
        9000-INICIO.
            PERFORM 9100-FECHAR-ARQUIVOS
            PERFORM 9200-GRAVAR-METRICAS
-           PERFORM 9300-EXIBIR-SUMARIO.
+           PERFORM 9300-EXIBIR-SUMARIO
+           MOVE 'python3 bank_security_console.py logout'
+             TO WS-AUTH-COMMAND
+           CALL 'SYSTEM' USING WS-AUTH-COMMAND.
 
        9100-FECHAR-ARQUIVOS.
            IF WS-LOG-ATIVO = 'S'
